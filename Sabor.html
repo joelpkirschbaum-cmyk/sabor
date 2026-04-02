@@ -38,6 +38,16 @@
      - loadSocialData: maneja errores de friendships y profiles gracefully.
      - acceptRequest/rejectRequest: solo recargan si la operación fue exitosa.
 
+  8. COMMENTS SECTION:
+     - CommentsSection useEffect: cleanup con cancelled flag + error handling.
+     - deleteComment: ahora verifica error antes de remover del estado.
+
+  9. FRIENDPROFILEMODAL: Agregado cancelled flag para prevenir state updates
+     después de unmount (memory leak fix).
+
+  10. MAPA ESTADO VACÍO: MapScreen ahora muestra overlay cuando no hay pines
+      en la zona visible, guiando al usuario a buscar restaurantes.
+
   ═══════════════════════════════════════════════════════════
 -->
 <!DOCTYPE html>
@@ -254,15 +264,18 @@
     const[showAll,setShowAll]=useState(false);
     useEffect(()=>{
       if(!restaurantId)return;
+      let cancelled=false;
       (async()=>{
         setLoading(true);
-        const{data}=await sb.from("comments")
+        const{data,error}=await sb.from("comments")
           .select("id,content,created_at,user_id,profiles(id,username,name,avatar_url)")
           .eq("restaurant_id",restaurantId)
           .order("created_at",{ascending:false});
-        setComments(data||[]);
+        if(cancelled)return;
+        if(!error)setComments(data||[]);
         setLoading(false);
       })();
+      return()=>{cancelled=true;};
     },[restaurantId]);
     const sendComment=async()=>{
       if(!text.trim()||!currentUser||sending)return;
@@ -277,8 +290,8 @@
       setSending(false);
     };
     const deleteComment=async(cid)=>{
-      await sb.from("comments").delete().eq("id",cid);
-      setComments(prev=>prev.filter(c=>c.id!==cid));
+      const{error}=await sb.from("comments").delete().eq("id",cid);
+      if(!error)setComments(prev=>prev.filter(c=>c.id!==cid));
     };
     const shown=(showAll||!previewMode)?comments:comments.slice(0,2);
     const hasMore=previewMode&&!showAll&&comments.length>2;
@@ -1482,6 +1495,12 @@
           <button onClick={()=>{const c=leaflet.current?.getCenter();if(c)setSearchPos({lat:c.lat,lng:c.lng});}} style={{position:"absolute",top:10,left:"50%",transform:"translateX(-50%)",background:"#141414",border:"1px solid #333",borderRadius:20,padding:"6px 14px",color:loadingGoogle?"#3b82f6":"#ccc",fontSize:11,fontWeight:600,cursor:"pointer",zIndex:800,boxShadow:"0 2px 12px rgba(0,0,0,0.7)",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:5,transition:"color 0.2s"}}>
             {loadingGoogle?"⏳ Buscando…":"🔍 Buscar restaurantes aquí"}
           </button>
+          {/* Empty state overlay */}
+          {!loadingGoogle&&totalCount===0&&(
+            <div style={{position:"absolute",bottom:16,left:"50%",transform:"translateX(-50%)",background:"rgba(20,20,20,0.92)",backdropFilter:"blur(10px)",borderRadius:14,padding:"14px 20px",zIndex:800,textAlign:"center",border:"1px solid #2a2a2a",boxShadow:"0 4px 20px rgba(0,0,0,0.5)",maxWidth:260}}>
+              <p style={{margin:0,fontSize:13,color:"#888",lineHeight:1.5}}>📍 No hay pines en esta zona. Mueve el mapa y toca <strong style={{color:"#ccc"}}>"Buscar aquí"</strong> para descubrir restaurantes.</p>
+            </div>
+          )}
           {/* FAB */}
           <button onClick={()=>{setSheetOpen(v=>!v);setSelected(null);setSelectedGoogle(null);}} style={{position:"absolute",bottom:12,right:12,width:44,height:44,borderRadius:"50%",background:"#f97316",border:"none",color:"#fff",fontSize:18,cursor:"pointer",boxShadow:"0 4px 16px rgba(249,115,22,0.5)",zIndex:800,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>
             {sheetOpen?"✕":"≡"}
@@ -1682,18 +1701,21 @@
 
     useEffect(()=>{
       if(!friendId)return;
+      let cancelled=false;
       (async()=>{
         setLoading(true);
         const[profRes,restRes]=await Promise.all([
           sb.from("profiles").select("id,username,name,bio,avatar_url").eq("id",friendId).single(),
           sb.from("restaurants").select("id,name,rating,emoji,cover_photo,neighborhood,cuisine,place_id,visited_at,created_at,notes").eq("user_id",friendId).eq("is_public",true).order("created_at",{ascending:false})
         ]);
+        if(cancelled)return;
         setFriendProfile(profRes.data);
         const fRests=(restRes.data||[]).map(r=>({...r,photo:r.cover_photo,date:r.visited_at||r.created_at?.split("T")[0]}));
         setFriendRestaurants(fRests);
         setMatchData(calcMatchScore(myRestaurants,fRests));
         setLoading(false);
       })();
+      return()=>{cancelled=true;};
     },[friendId]);
 
     const fp=friendProfile;

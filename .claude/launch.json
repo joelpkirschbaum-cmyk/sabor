@@ -3,9 +3,9 @@
   "configurations": [
     {
       "name": "sabor",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["server.js"],
-      "port": 8080
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "3456", "-s", "."],
+      "port": 3456
     }
   ]
 }
