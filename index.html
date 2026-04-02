@@ -420,7 +420,7 @@
             </div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
               <div style={{display:"flex",alignItems:"center",gap:10}}>
-                <Stars rating={r.rating} size={20}/>
+                {r.rating?<Stars rating={r.rating} size={20}/>:<span style={{color:"#555",fontSize:11}}>Sin calificar</span>}
                 {r.eloScore!==undefined&&(
                   <div style={{background:"#f97316",borderRadius:10,padding:"4px 11px",display:"flex",alignItems:"center",gap:5}}>
                     <span style={{fontSize:20,fontWeight:900,color:"#fff",letterSpacing:"-0.5px",lineHeight:1}}>{r.eloScore.toFixed(1)}</span>
@@ -564,7 +564,7 @@
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:6}}>
                 <h3 style={{margin:0,fontSize:"15px",fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</h3>
                 <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
-                  <Stars rating={r.rating} size={12}/>
+                  {r.rating?<Stars rating={r.rating} size={12}/>:<span style={{color:"#555",fontSize:11}}>Sin calificar</span>}
                   {r.eloScore!==undefined&&<span style={{fontSize:10,fontWeight:800,padding:"2px 6px",borderRadius:"999px",background:"#f97316",color:"#fff",letterSpacing:"-0.2px",lineHeight:1.4}}>{r.eloScore.toFixed(1)}</span>}
                   <button onClick={e=>{e.stopPropagation();onEdit(r);}} style={{background:"none",border:"none",color:"#444",fontSize:14,cursor:"pointer",padding:"2px 4px",lineHeight:1}}
                     onMouseEnter={e=>e.currentTarget.style.color="#f97316"} onMouseLeave={e=>e.currentTarget.style.color="#444"}>✏️</button>
@@ -1524,7 +1524,7 @@
                     <p style={{margin:"1px 0 0",fontSize:10,color:isG?"#3b82f688":"#555",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{isG?(GTYPE_ES[item.primaryType]||item.primaryType):`${item.neighborhood} · ${item.cuisine}`}</p>
                   </div>
                   <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:2,flexShrink:0}}>
-                    {isG?<span style={{fontSize:11,fontWeight:700,color:"#fbbf24"}}>{item.rating?`★ ${item.rating.toFixed(1)}`:"—"}</span>:<Stars rating={item.rating} size={10}/>}
+                    {isG?<span style={{fontSize:11,fontWeight:700,color:"#fbbf24"}}>{item.rating?`★ ${item.rating.toFixed(1)}`:"—"}</span>:(item.rating?<Stars rating={item.rating} size={10}/>:<span style={{color:"#555",fontSize:11}}>Sin calificar</span>)}
                     {item._dist!=null&&<span style={{fontSize:10,fontWeight:700,color:item._dist<1000?"#f97316":"#666"}}>{fmtDist(item._dist)}</span>}
                   </div>
                 </div>
@@ -1544,7 +1544,7 @@
                 <div style={{display:"flex",gap:5,marginTop:4,flexWrap:"wrap"}}><Badge label={selected.neighborhood} color="#777"/><Badge label={selected.cuisine} color={CUISINE_COLORS[selected.cuisine]||"#f97316"}/></div>
               </div>
               <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4}}>
-                <Stars rating={selected.rating} size={13}/>
+                {selected.rating?<Stars rating={selected.rating} size={13}/>:<span style={{color:"#555",fontSize:11}}>Sin calificar</span>}
                 {userPos&&(()=>{const[la,lo]=getCoords(selected);return<span style={{fontSize:11,color:"#f97316"}}>{fmtDist(haversineM(userPos.lat,userPos.lng,la,lo))}</span>;})()}
                 <span style={{fontSize:11,color:"#f97316"}}>Ver →</span>
               </div>
