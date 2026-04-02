@@ -416,6 +416,7 @@
                   <Badge label={r.neighborhood} color="#777"/>
                   <Badge label={r.cuisine} color={cc}/>
                 </div>
+                {r.featured_dish&&<p style={{margin:"6px 0 0",fontSize:"13px",color:"#999"}}>🍽️ {r.featured_dish}</p>}
               </div>
             </div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -563,6 +564,7 @@
             <div style={{flex:1,minWidth:0}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:6}}>
                 <h3 style={{margin:0,fontSize:"15px",fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</h3>
+              {r.featured_dish&&<p style={{margin:"2px 0 0",fontSize:"11px",color:"#888",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>🍽️ {r.featured_dish}</p>}
                 <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
                   {r.rating?<Stars rating={r.rating} size={12}/>:<span style={{color:"#555",fontSize:11}}>Sin calificar</span>}
                   {r.eloScore!==undefined&&<span style={{fontSize:10,fontWeight:800,padding:"2px 6px",borderRadius:"999px",background:"#f97316",color:"#fff",letterSpacing:"-0.2px",lineHeight:1.4}}>{r.eloScore.toFixed(1)}</span>}
@@ -595,7 +597,7 @@
     const isEdit=!!initial;
     const[form,setForm]=useState(()=>{
       if(initial)return{...initial,lists:initial.lists||getAutoLists(initial)};
-      const base={emoji:"🍽️",name:"",neighborhood:"Miraflores",cuisine:"Cevichería",rating:0,notes:"",notes_photo:null,date:new Date().toISOString().split("T")[0],photo:null,dishes:[],lists:["restaurants"],went_with:[]};
+      const base={emoji:"🍽️",name:"",neighborhood:"Miraflores",cuisine:"Cevichería",rating:0,notes:"",notes_photo:null,date:new Date().toISOString().split("T")[0],photo:null,dishes:[],lists:["restaurants"],went_with:[],featured_dish:""};
       if(prefillData)return{...base,name:prefillData.name||"",lat:prefillData.lat,lng:prefillData.lng,place_id:prefillData.place_id,cuisine:GTYPE_TO_CUISINE[prefillData.primaryType]||"Cevichería",lists:getAutoLists(prefillData)};
       return base;
     });
@@ -674,7 +676,7 @@
           }catch{}
         }
         const displayName=place.displayName?.text||place.displayName||"";
-        setForm(f=>{const u={...f,name:displayName||f.name,neighborhood:matchedNeighborhood,photo};if(lat&&lng){u.lat=lat;u.lng=lng;}return u;});
+        setForm(f=>{const u={...f,name:displayName||f.name,neighborhood:matchedNeighborhood,photo,place_id:placeId||f.place_id};if(lat&&lng){u.lat=lat;u.lng=lng;}return u;});
         setPlaceSearch("");setErr("");setPlaceFilled(true);setFilledPlaceName(displayName||"Restaurante");
       }catch(e){console.warn("Place detail error:",e);}
       setLoadingPlace(false);
@@ -753,7 +755,7 @@
               </div>
               {(!placeFilled||isEdit)&&<div style={{flex:1}}><label style={lbl}>NOMBRE *</label><input value={form.name} onChange={e=>{set("name",e.target.value);setErr("");}} placeholder="Ej: La Picantería" style={inp} autoFocus={isEdit}/></div>}
             </div>
-            <div><label style={lbl}>FOTO PORTADA</label><PhotoPicker value={form.photo} onChange={v=>set("photo",v)}/></div>
+            {form.photo&&<div><label style={lbl}>FOTO DE GOOGLE</label><div style={{borderRadius:"12px",overflow:"hidden",height:110}}><img src={form.photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/></div></div>}
             {(!placeFilled||isEdit)&&<div><label style={lbl}>DISTRITO</label><select value={form.neighborhood} onChange={e=>set("neighborhood",e.target.value)} style={inp}>{NEIGHBORHOODS.map(n=><option key={n} value={n}>{n}</option>)}</select></div>}
             <div><label style={lbl}>TIPO DE COCINA</label><select value={form.cuisine} onChange={e=>set("cuisine",e.target.value)} style={inp}>{CUISINES.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
             <div>
@@ -765,6 +767,7 @@
             </div>
             <div><label style={lbl}>FECHA DE VISITA</label><input type="date" value={form.date} onChange={e=>set("date",e.target.value)} style={{...inp,colorScheme:"dark"}}/></div>
             <div><label style={lbl}>NOTAS DE CAMPO</label><textarea value={form.notes} onChange={e=>set("notes",e.target.value)} placeholder="¿Qué pediste? ¿Qué te sorprendió? ¿Volverías?" rows={4} style={{...inp,resize:"none",lineHeight:1.6}}/></div>
+            <div><label style={lbl}>PLATO DESTACADO</label><input value={form.featured_dish||""} onChange={e=>set("featured_dish",e.target.value)} placeholder="¿Qué pediste? Ej: Ceviche mixto" style={inp}/></div>
             {friendsList.length>0&&(
               <div>
                 <label style={lbl}>¿FUISTE CON ALGUIEN?</label>
@@ -2519,7 +2522,7 @@
       const isNew=modal==="add"||(modal&&modal._mapPrefill===true);
       let newId=null;
       if(user){
-        const dbRec={name:r.name,neighborhood:r.neighborhood,cuisine:r.cuisine,rating:r.rating,notes:r.notes||"",emoji:r.emoji,cover_photo:r.photo||null,lat:r.lat||null,lng:r.lng||null,place_id:r.place_id||null,is_public:true,visited_at:r.date||null};
+        const dbRec={name:r.name,neighborhood:r.neighborhood,cuisine:r.cuisine,rating:r.rating,notes:r.notes||"",emoji:r.emoji,cover_photo:r.photo||null,lat:r.lat||null,lng:r.lng||null,place_id:r.place_id||null,is_public:true,visited_at:r.date||null,featured_dish:r.featured_dish||null};
         if(isNew){
           dbRec.user_id=user.id;
           const{data,error}=await sb.from("restaurants").insert(dbRec).select().single();
