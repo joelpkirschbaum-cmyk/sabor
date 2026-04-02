@@ -75,7 +75,7 @@
     ::-webkit-scrollbar{width:4px;}
     ::-webkit-scrollbar-track{background:transparent;}
     ::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:2px;}
-    input,select,textarea,button{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+    input,select,textarea,button{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16px!important;}
     input:focus,select:focus,textarea:focus{outline:2px solid #f97316 !important;outline-offset:0;}
     option{background:#1a1a1a;color:#fff;}
     .leaflet-container{background:#1a1a1a !important;}
@@ -1292,7 +1292,6 @@
           </div>
           {place.rating&&<div style={{textAlign:"right",flexShrink:0}}>
             <p style={{margin:0,fontSize:15,fontWeight:800,color:"#fbbf24"}}>★ {place.rating.toFixed(1)}</p>
-            <p style={{margin:0,fontSize:9,color:"#444",letterSpacing:"0.05em"}}>GOOGLE</p>
           </div>}
         </div>
 
@@ -1942,8 +1941,8 @@
             <input ref={avatarRef} type="file" accept="image/*" style={{display:"none"}} onChange={handleAvatarChange}/>
           </div>
           <div style={{flex:1,minWidth:0}}>
-            <h2 style={{margin:0,fontSize:"20px",fontWeight:800,color:"#fff"}}>{profile?.name||"Investigador"}</h2>
-            <p style={{margin:"2px 0 0",fontSize:13,color:"#f97316"}}>{profile?.handle||"@investigador"}</p>
+            <h2 style={{margin:0,fontSize:"20px",fontWeight:800,color:"#fff"}}>{profile?.name||"Usuario"}</h2>
+            <p style={{margin:"2px 0 0",fontSize:13,color:"#f97316"}}>{profile?.handle||"@usuario"}</p>
             {profile?.bio&&<p style={{margin:"4px 0 0",fontSize:12,color:"#666",lineHeight:1.4,overflow:"hidden",textOverflow:"ellipsis",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{profile.bio}</p>}
           </div>
         </div>
@@ -2319,7 +2318,7 @@
   }
   function BottomNav({active,onChange,commentBadge}){
     return(
-      <div style={{position:"absolute",bottom:0,left:0,right:0,height:72,background:"rgba(7,7,7,0.9)",backdropFilter:"blur(22px)",WebkitBackdropFilter:"blur(22px)",borderTop:"1px solid rgba(255,255,255,0.05)",display:"flex",alignItems:"center",justifyContent:"space-around",zIndex:50,paddingBottom:4}}>
+      <div style={{position:"fixed",bottom:0,left:0,right:0,height:72,background:"rgba(7,7,7,0.9)",backdropFilter:"blur(22px)",WebkitBackdropFilter:"blur(22px)",borderTop:"1px solid rgba(255,255,255,0.05)",display:"flex",alignItems:"center",justifyContent:"space-around",zIndex:50,paddingBottom:4}}>
         <NavTab icon="📓" label="Bitácora" active={active==="bitacora"} onClick={()=>onChange("bitacora")}/>
         <NavTab icon="🗺️" label="Mapa" active={active==="map"} onClick={()=>onChange("map")}/>
         <NavTab icon="✨" label="Feed" active={active==="feed"} onClick={()=>onChange("feed")}/>
@@ -2417,8 +2416,8 @@
     // ── helpers Supabase ──
     const loadProfile=async(userId)=>{
       const{data}=await sb.from("profiles").select("*").eq("id",userId).single();
-      if(data) setProfile({name:data.name||"Investigador",handle:"@"+(data.username||"investigador"),bio:data.bio||""});
-      else setProfile({name:"Investigador",handle:"@investigador",bio:""});
+      if(data) setProfile({name:data.name||"Usuario",handle:"@"+(data.username||"usuario"),bio:data.bio||""});
+      else setProfile({name:"Usuario",handle:"@usuario",bio:""});
     };
 
     const loadRestaurants=async(userId)=>{
@@ -2520,7 +2519,7 @@
       const isNew=modal==="add"||(modal&&modal._mapPrefill===true);
       let newId=null;
       if(user){
-        const dbRec={name:r.name,neighborhood:r.neighborhood,cuisine:r.cuisine,rating:r.rating,notes:r.notes||"",emoji:r.emoji,cover_photo:r.photo||null,notes_photo:r.notes_photo||null,lat:r.lat||null,lng:r.lng||null,place_id:r.place_id||null,is_public:true,visited_at:r.date||null,went_with:r.went_with||[]};
+        const dbRec={name:r.name,neighborhood:r.neighborhood,cuisine:r.cuisine,rating:r.rating,notes:r.notes||"",emoji:r.emoji,cover_photo:r.photo||null,lat:r.lat||null,lng:r.lng||null,place_id:r.place_id||null,is_public:true,visited_at:r.date||null};
         if(isNew){
           dbRec.user_id=user.id;
           const{data,error}=await sb.from("restaurants").insert(dbRec).select().single();
