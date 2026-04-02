@@ -1,0 +1,2656 @@
+<!--
+  ═══ AUDITORÍA DE BUGS Y UX POLISH — 2 abril 2026 ═══
+
+  1. WENT_WITH BUG (CRÍTICO): Se eliminó la concatenación de "Fui con" al campo notes
+     que causaba duplicación cada vez que se editaba. Ahora went_with se guarda como
+     campo JSON separado en Supabase.
+
+  2. MANEJO DE ERRORES SUPABASE: Todos los CRUD (handleSave, handleDelete, handleAddDish,
+     handleDeleteDish) ahora capturan errores y muestran toast rojo al usuario.
+     loadSocialData, acceptRequest, rejectRequest, loadFeed — todos con error handling.
+     Toast component soporta type="error" con estilo visual diferenciado (rojo, 3.5s).
+
+  3. RACE CONDITIONS / MEMORY LEAKS: Cleanup con cancelled flag en:
+     - FeedScreen.loadFeed + comments useEffect
+     - AddEditModal friends useEffect
+     - ProfileScreen match scores useEffect
+     - FriendProfileModal ya tenía cleanup (verificado)
+     - GooglePlaceModal y PlacePhotoImg ya tenían cleanup (verificado)
+
+  4. ESCAPE KEY: Todos los modales ahora se cierran con Escape:
+     AddDishModal, AddEditModal, CreateListModal, ListActionModal,
+     FriendSearchModal, FriendProfileModal, GooglePlaceModal.
+
+  5. VALIDACIÓN DE FORMULARIOS:
+     - Onboarding: username validado (alfanumérico + underscore, mín 3 chars)
+       con mensajes inline en español.
+     - AddEditModal: botón Guardar/Registrar muestra "Guardando…" y se deshabilita
+       durante el save (previene doble-click).
+
+  6. ESTADOS VACÍOS:
+     - ProfileScreen: lista de amigos vacía muestra CTA "Buscar amigos" con emoji
+       e instrucción clara (antes no mostraba nada).
+     - FeedScreen: sin amigos, sin posts — ya tenían estados vacíos (verificado).
+     - BitacoraScreen: sin restaurantes — ya tenía estado vacío (verificado).
+
+  7. ERROR FEEDBACK EN SOCIAL:
+     - FriendSearchModal.addFriend: muestra error inline si falla la solicitud.
+     - loadSocialData: maneja errores de friendships y profiles gracefully.
+     - acceptRequest/rejectRequest: solo recargan si la operación fue exitosa.
+
+  ═══════════════════════════════════════════════════════════
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#ff6b35" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Sabor" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <title>Sabor — Bitácora Gastronómica de Lima</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#050505;}
+    ::-webkit-scrollbar{width:4px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:2px;}
+    input,select,textarea,button{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+    input:focus,select:focus,textarea:focus{outline:2px solid #f97316 !important;outline-offset:0;}
+    option{background:#1a1a1a;color:#fff;}
+    .leaflet-container{background:#1a1a1a !important;}
+    .sabor-pin{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 3px 10px rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.25);}
+    .sabor-pin-inner{transform:rotate(45deg);font-size:16px;line-height:1;}
+    .leaflet-control-zoom{border:1px solid #333 !important;}
+    .leaflet-control-zoom a{background:#1a1a1a !important;color:#fff !important;border-color:#333 !important;}
+    .leaflet-control-zoom a:hover{background:#2a2a2a !important;}
+    .leaflet-control-attribution{background:rgba(10,10,10,0.7) !important;color:#333 !important;font-size:9px !important;}
+    .leaflet-control-attribution a{color:#555 !important;}
+    @keyframes userPinPulse{0%{transform:scale(1);opacity:0.7;}100%{transform:scale(2.8);opacity:0;}}
+    .user-loc-pin{position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center;}
+    .user-loc-pulse{position:absolute;width:40px;height:40px;border-radius:50%;background:rgba(249,115,22,0.35);animation:userPinPulse 1.6s ease-out infinite;}
+    .user-loc-dot{width:14px;height:14px;border-radius:50%;background:#f97316;border:3px solid #fff;box-shadow:0 2px 10px rgba(249,115,22,0.7);position:relative;z-index:1;}
+    .sabor-cluster{width:40px;height:40px;border-radius:50%;background:#f97316;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;border:3px solid rgba(255,255,255,0.3);box-shadow:0 3px 14px rgba(249,115,22,0.55);}
+    .leaflet-tooltip{background:#1a1a1a !important;border:1px solid #333 !important;color:#fff !important;font-size:11px !important;font-weight:600 !important;padding:4px 8px !important;border-radius:8px !important;box-shadow:0 4px 12px rgba(0,0,0,0.5) !important;}
+    .leaflet-tooltip::before{border-top-color:#333 !important;}
+    .marker-cluster-small,.marker-cluster-medium,.marker-cluster-large{background:transparent !important;}
+    .marker-cluster-small div,.marker-cluster-medium div,.marker-cluster-large div{background:transparent !important;}
+    .google-pin{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#0f172a;border:2px solid #3b82f6;box-shadow:0 2px 10px rgba(59,130,246,0.45);}
+    .google-pin-inner{font-size:13px;line-height:1;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes slideInRight{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
+    @keyframes slideInUp{from{opacity:0;transform:translateY(100%);}to{opacity:1;transform:translateY(0);}}
+    .fade-up{animation:fadeUp 0.6s ease both;}
+    .fade-up-2{animation:fadeUp 0.6s ease 0.15s both;}
+    .fade-up-3{animation:fadeUp 0.6s ease 0.3s both;}
+    .fade-up-4{animation:fadeUp 0.6s ease 0.45s both;}
+    .slide-in{animation:slideInRight 0.3s ease both;}
+    .slide-up{animation:slideInUp 0.35s ease both;}
+    .places-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,0.7);max-height:220px;overflow-y:auto;}
+    .places-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;gap:10;}
+    .places-item:last-child{border-bottom:none;}
+    .places-item:hover{background:#2a2a2a;}
+    .places-icon{font-size:15px;flex-shrink:0;}
+    .places-text{font-size:13px;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .places-sub{font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    @media(max-width:440px){
+      .phone-outer{align-items:flex-start!important;}
+      .phone-frame{width:100%!important;height:100vh!important;height:100dvh!important;border-radius:0!important;box-shadow:none!important;border:none!important;}
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { useState, useEffect, useRef } = React;
+
+  // ── Supabase ───────────────────────────────────────────────────────────────
+  const SUPABASE_URL  = 'https://qogyremzusekrcdzlyto.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFvZ3lyZW16dXNla3JjZHpseXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5OTA3ODMsImV4cCI6MjA5MDU2Njc4M30._NDPkDhPiTbIHYReujKafxeNsqTUfBtMPHtyAmqKot0';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ── Constants ──────────────────────────────────────────────────────────────
+  const SAMPLE_RESTAURANTS = [
+    {id:1,emoji:"🌿",name:"Central",neighborhood:"Miraflores",cuisine:"Contemporánea / Fusión",rating:5,notes:"Una experiencia gastronómica única. El mejor restaurante del mundo. Cada plato es un viaje por los ecosistemas del Perú.",date:"2024-12-01",photo:null,dishes:[],eloScore:5.0,eloComparisons:0},
+    {id:2,emoji:"🍣",name:"Maido",neighborhood:"Miraflores",cuisine:"Nikkei",rating:5,notes:"La fusión japonesa-peruana elevada a su máxima expresión. Mitsuharu Tsumura es un genio.",date:"2024-11-15",photo:null,dishes:[],eloScore:5.0,eloComparisons:0},
+    {id:3,emoji:"🐟",name:"La Mar",neighborhood:"Miraflores",cuisine:"Cevichería",rating:4,notes:"El mejor ceviche clásico de Lima. El leche de tigre es incomparable. Siempre con fila.",date:"2024-10-08",photo:null,dishes:[],eloScore:5.0,eloComparisons:0},
+    {id:4,emoji:"🥘",name:"Isolina",neighborhood:"Barranco",cuisine:"Criolla",rating:4,notes:"Como comer en casa de la abuela, pero elevado. El seco de cabrito es impresionante.",date:"2024-09-30",photo:null,dishes:[],eloScore:5.0,eloComparisons:0},
+    {id:5,emoji:"🔥",name:"Kjolle",neighborhood:"Miraflores",cuisine:"Contemporánea / Fusión",rating:5,notes:"Pía León es una genio. Ingredientes amazónicos que nunca había probado. Menú sorpresa espectacular.",date:"2024-08-22",photo:null,dishes:[],eloScore:5.0,eloComparisons:0},
+  ];
+
+  const NEIGHBORHOODS=["Barranco","Callao","Centro","Chorrillos","Jesús María","La Molina","Lince","Magdalena","Miraflores","Pueblo Libre","San Borja","San Isidro","San Miguel","Surco","Surquillo"];
+  const CUISINES=["Cevichería","Nikkei","Chifa","Criolla","Picantería","Parrilla","Sanguchería / Cafetería","Mariscos","Japonesa","Italiana","Mexicana","Contemporánea / Fusión","Bar","Panadería"];
+  const CUISINE_EMOJIS={"Cevichería":"🍋","Nikkei":"🍱","Chifa":"🍜","Criolla":"🍲","Picantería":"🌶️","Parrilla":"🥩","Sanguchería / Cafetería":"🥖","Mariscos":"🦞","Japonesa":"🍣","Italiana":"🍕","Mexicana":"🌮","Contemporánea / Fusión":"✨","Bar":"🍺","Panadería":"🥐"};
+  const EMOJIS=["🍽️","🐟","🍣","🥘","🌿","🔥","⭐","🍷","🦞","🥩","🌊","🍜","🫕","🧆","🥗","🍋","🦑","🥂","🧀","🌶️"];
+  const CUISINE_COLORS={"Cevichería":"#06b6d4","Nikkei":"#8b5cf6","Chifa":"#f97316","Criolla":"#f59e0b","Picantería":"#ef4444","Parrilla":"#dc2626","Sanguchería / Cafetería":"#d97706","Mariscos":"#14b8a6","Japonesa":"#ec4899","Italiana":"#3b82f6","Mexicana":"#84cc16","Contemporánea / Fusión":"#10b981","Bar":"#a855f7","Panadería":"#92400e"};
+  const NEIGHBORHOOD_COORDS={"Miraflores":[-12.1219,-77.0281],"Barranco":[-12.1489,-77.0219],"San Isidro":[-12.0975,-77.0376],"Surquillo":[-12.1099,-77.0241],"Magdalena":[-12.0903,-77.0700],"Chorrillos":[-12.1773,-77.0154],"Lince":[-12.0825,-77.0361],"San Borja":[-12.1038,-77.0004],"La Molina":[-12.0848,-76.9484],"San Miguel":[-12.0774,-77.0920]};
+  const DEFAULT_LISTS=[{id:"all",name:"Todos",emoji:"🗂️",color:"#f97316",isDefault:true},{id:"restaurants",name:"Restaurantes",emoji:"🍽️",color:"#f97316",isDefault:true},{id:"cafes",name:"Cafés",emoji:"☕",color:"#d97706",isDefault:true},{id:"bares",name:"Bares",emoji:"🍺",color:"#3b82f6",isDefault:true},{id:"panaderias",name:"Panaderías",emoji:"🥐",color:"#92400e",isDefault:true}];
+  function getAutoLists(r){const t=(r.primaryType||"").toLowerCase(),n=(r.name||"").toLowerCase();if(t==="cafe"||n.includes("café")||n.includes("cafe"))return["cafes"];if(t==="bar")return["bares"];if(t==="bakery"||n.includes("panadería"))return["panaderias"];return["restaurants"];}
+  function saveListsData(id,lists){try{const m=JSON.parse(localStorage.getItem("sabor_lists_data")||"{}");m[String(id)]=lists;localStorage.setItem("sabor_lists_data",JSON.stringify(m));}catch{}}
+  function getListsData(){try{return JSON.parse(localStorage.getItem("sabor_lists_data")||"{}");}catch{return{};}}
+
+  function getCoords(r){if(r.lat&&r.lng)return[r.lat,r.lng];const b=NEIGHBORHOOD_COORDS[r.neighborhood]||[-12.1219,-77.0281];return[b[0]+((r.id*137)%200-100)/100000,b[1]+((r.id*97)%200-100)/100000];}
+  function formatDate(s){return new Date(s+"T12:00:00").toLocaleDateString("es-PE",{day:"numeric",month:"short",year:"numeric"});}
+  function timeAgo(s){
+    const d=new Date(s+"T12:00:00"),now=new Date(),diff=Math.floor((now-d)/86400000);
+    if(diff===0)return"Hoy";if(diff===1)return"Ayer";if(diff<7)return`Hace ${diff} días`;
+    if(diff<30){const w=Math.floor(diff/7);return`Hace ${w} ${w===1?"semana":"semanas"}`;}
+    if(diff<365){const m=Math.floor(diff/30);return`Hace ${m} ${m===1?"mes":"meses"}`;}
+    const y=Math.floor(diff/365);return`Hace ${y} ${y===1?"año":"años"}`;
+  }
+  function timeAgoComment(isoStr){
+    const d=new Date(isoStr),now=new Date(),ms=now-d,min=Math.floor(ms/60000);
+    if(min<1)return"ahora";if(min<60)return`hace ${min}m`;
+    const h=Math.floor(min/60);if(h<24)return`hace ${h}h`;
+    const dd=Math.floor(h/24);if(dd===1)return"ayer";if(dd<7)return`hace ${dd}d`;
+    if(dd<30){const w=Math.floor(dd/7);return`hace ${w} sem`;}
+    const mo=Math.floor(dd/30);return`hace ${mo} ${mo===1?"mes":"meses"}`;
+  }
+  function resizeImage(file,maxPx=1000,q=0.78){
+    return new Promise(resolve=>{
+      const r=new FileReader();
+      r.onload=e=>{const img=new Image();img.onload=()=>{const s=Math.min(1,maxPx/Math.max(img.width,img.height));const w=Math.round(img.width*s),h=Math.round(img.height*s);const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);resolve(c.toDataURL("image/jpeg",q));};img.src=e.target.result;};
+      r.readAsDataURL(file);
+    });
+  }
+
+  // ── ELO helpers ────────────────────────────────────────────────────────────
+  function calcElo(winnerScore,loserScore){
+    const K=0.5,pWin=1/(1+Math.pow(10,(loserScore-winnerScore)/4)),delta=K*(1-pWin);
+    return{winner:+Math.min(9.9,Math.max(0.1,winnerScore+delta)).toFixed(1),loser:+Math.min(9.9,Math.max(0.1,loserScore-delta)).toFixed(1)};}
+  function getEloData(){try{return JSON.parse(localStorage.getItem("sabor_elo_data")||"{}");}catch{return{};}}
+  function saveEloData(restaurants){try{const d={};restaurants.forEach(r=>{if(r.eloScore!==undefined)d[String(r.id)]={eloScore:r.eloScore,eloComparisons:r.eloComparisons||0};});localStorage.setItem("sabor_elo_data",JSON.stringify(d));}catch{}}
+
+  // ── Match Score ─────────────────────────────────────────────────────────────
+  function calcMatchScore(myRestaurants, friendRestaurants){
+    const friendMap={};
+    friendRestaurants.forEach(r=>{
+      if(r.place_id)friendMap["pid:"+r.place_id]=r;
+      if(r.name&&r.neighborhood)friendMap["nn:"+(r.name||"").toLowerCase().trim()+"||"+(r.neighborhood||"").toLowerCase().trim()]=r;
+    });
+    const common=[];
+    myRestaurants.forEach(r=>{
+      let match=null;
+      if(r.place_id&&friendMap["pid:"+r.place_id])match=friendMap["pid:"+r.place_id];
+      else{
+        const key="nn:"+(r.name||"").toLowerCase().trim()+"||"+(r.neighborhood||"").toLowerCase().trim();
+        if(friendMap[key])match=friendMap[key];
+      }
+      if(match&&r.rating>0&&match.rating>0)common.push({mine:r,theirs:match,diff:Math.abs(r.rating-match.rating)});
+    });
+    if(common.length===0)return{score:null,common,confidence:"none"};
+    const avgDiff=common.reduce((s,c)=>s+c.diff,0)/common.length;
+    const score=Math.max(0,Math.min(100,Math.round(100-avgDiff*20)));
+    const confidence=common.length>=3?"high":common.length>=1?"low":"none";
+    return{score,common:common.sort((a,b)=>b.diff-a.diff),confidence};
+  }
+  function matchEmoji(score){if(score>85)return"🔥";if(score>70)return"❤️";if(score>55)return"👍";return"🤷";}
+
+  function MatchBadge({score,confidence,size="small"}){
+    if(score===null||score===undefined)return null;
+    const em=matchEmoji(score);
+    const color=score>85?"#f97316":score>70?"#ef4444":score>55?"#fbbf24":"#666";
+    if(size==="large")return(
+      <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:"16px 20px",background:"rgba(249,115,22,0.08)",borderRadius:16,border:"1px solid rgba(249,115,22,0.2)"}}>
+        <span style={{fontSize:36}}>{em}</span>
+        <span style={{fontSize:32,fontWeight:900,color,letterSpacing:"-1px"}}>{score}%</span>
+        <span style={{fontSize:11,fontWeight:700,color:"#555",letterSpacing:"0.08em"}}>MATCH SCORE</span>
+        {confidence==="low"&&<span style={{fontSize:9,padding:"2px 8px",borderRadius:"999px",background:"#fbbf2418",color:"#fbbf24",border:"1px solid #fbbf2433"}}>Pocos datos</span>}
+      </div>
+    );
+    return(
+      <span style={{display:"inline-flex",alignItems:"center",gap:3,fontSize:10,fontWeight:700,padding:"2px 7px",borderRadius:"999px",background:color+"18",color,border:`1px solid ${color}33`,whiteSpace:"nowrap"}}>
+        {em} {score}%
+      </span>
+    );
+  }
+
+  // ── Shared UI ──────────────────────────────────────────────────────────────
+  function Stars({rating,interactive=false,onChange,size=16}){
+    const[hover,setHover]=useState(0);
+    return(<div style={{display:"flex",gap:"1px"}}>{[1,2,3,4,5].map(i=>(<span key={i} onClick={()=>interactive&&onChange&&onChange(i)} onMouseEnter={()=>interactive&&setHover(i)} onMouseLeave={()=>interactive&&setHover(0)} style={{cursor:interactive?"pointer":"default",fontSize:`${size}px`,color:i<=(interactive?hover||rating:rating)?"#fbbf24":"#2a2a2a",userSelect:"none",lineHeight:1,transition:"color 0.1s"}}>★</span>))}</div>);
+  }
+  function Badge({label,color}){return<span style={{fontSize:"11px",fontWeight:600,padding:"2px 8px",borderRadius:"999px",background:(color||"#f97316")+"22",color:color||"#f97316",letterSpacing:"0.02em",whiteSpace:"nowrap"}}>{label}</span>;}
+
+  // ── Photo Upload Button ────────────────────────────────────────────────────
+  function PhotoPicker({value,onChange,height=110}){
+    const ref=useRef();const[loading,setLoading]=useState(false);
+    const handle=async e=>{const f=e.target.files[0];if(!f)return;setLoading(true);onChange(await resizeImage(f));setLoading(false);};
+    return value?(
+      <div style={{position:"relative",borderRadius:"12px",overflow:"hidden",height}}>
+        <img src={value} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+        <button onClick={()=>onChange(null)} style={{position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.75)",border:"none",color:"#fff",borderRadius:"50%",width:26,height:26,cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+      </div>
+    ):(
+      <button onClick={()=>ref.current.click()} disabled={loading} style={{width:"100%",background:"#1a1a1a",border:"1px dashed #333",borderRadius:"12px",padding:"18px",color:"#555",fontSize:"13px",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:6}}>
+        <span style={{fontSize:"22px"}}>📷</span><span>{loading?"Procesando...":"Toca para agregar foto"}</span>
+        <input ref={ref} type="file" accept="image/*" style={{display:"none"}} onChange={handle}/>
+      </button>
+    );
+  }
+
+  // ── Toast / Snackbar ──────────────────────────────────────────────────────
+  function Toast({message,visible,type}){
+    const isErr=type==="error";
+    return(<div style={{position:"absolute",top:62,left:"50%",transform:visible?"translateX(-50%) translateY(0)":"translateX(-50%) translateY(-12px)",background:isErr?"#2a1010":"#1e1e1e",border:isErr?"1px solid #ef4444":"1px solid #333",borderRadius:"99px",padding:"9px 20px",fontSize:"13px",fontWeight:600,color:isErr?"#ef4444":"#fff",zIndex:9999,whiteSpace:"nowrap",boxShadow:"0 6px 24px rgba(0,0,0,0.7)",display:"flex",alignItems:"center",gap:8,pointerEvents:"none",transition:"opacity 0.25s ease, transform 0.25s ease",opacity:visible?1:0}}>{message}</div>);
+  }
+
+  // ── Comments Section ───────────────────────────────────────────────────────
+  function CommentsSection({restaurantId,currentUser,isOwner,previewMode}){
+    const[comments,setComments]=useState([]);
+    const[loading,setLoading]=useState(true);
+    const[text,setText]=useState("");
+    const[sending,setSending]=useState(false);
+    const[showAll,setShowAll]=useState(false);
+    useEffect(()=>{
+      if(!restaurantId)return;
+      (async()=>{
+        setLoading(true);
+        const{data}=await sb.from("comments")
+          .select("id,content,created_at,user_id,profiles(id,username,name,avatar_url)")
+          .eq("restaurant_id",restaurantId)
+          .order("created_at",{ascending:false});
+        setComments(data||[]);
+        setLoading(false);
+      })();
+    },[restaurantId]);
+    const sendComment=async()=>{
+      if(!text.trim()||!currentUser||sending)return;
+      setSending(true);
+      const content=text.trim();
+      const optimistic={id:"temp-"+Date.now(),content,created_at:new Date().toISOString(),user_id:currentUser.id,profiles:{id:currentUser.id,username:"tú",name:"Tú",avatar_url:null}};
+      setComments(prev=>[optimistic,...prev]);
+      setText("");
+      const{data,error}=await sb.from("comments").insert({restaurant_id:restaurantId,user_id:currentUser.id,content}).select("id,content,created_at,user_id,profiles(id,username,name,avatar_url)").single();
+      if(!error&&data)setComments(prev=>prev.map(c=>c.id===optimistic.id?data:c));
+      else if(error)setComments(prev=>prev.filter(c=>c.id!==optimistic.id));
+      setSending(false);
+    };
+    const deleteComment=async(cid)=>{
+      await sb.from("comments").delete().eq("id",cid);
+      setComments(prev=>prev.filter(c=>c.id!==cid));
+    };
+    const shown=(showAll||!previewMode)?comments:comments.slice(0,2);
+    const hasMore=previewMode&&!showAll&&comments.length>2;
+    if(loading)return<p style={{fontSize:11,color:"#555",padding:"8px 0",margin:0}}>Cargando comentarios…</p>;
+    return(
+      <div>
+        {comments.length===0&&<p style={{fontSize:12,color:"#444",padding:"4px 0",margin:0}}>{currentUser?"Sé el primero en comentar":"Sin comentarios aún"}</p>}
+        {shown.map(c=>{
+          const prof=c.profiles||{};
+          const canDelete=currentUser&&(c.user_id===currentUser.id||isOwner);
+          return(
+            <div key={c.id} style={{display:"flex",gap:8,padding:"7px 0",borderBottom:"1px solid #1a1a1a"}}>
+              <div style={{width:26,height:26,borderRadius:"50%",background:"linear-gradient(135deg,#f97316,#fbbf24)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,flexShrink:0,overflow:"hidden"}}>
+                {prof.avatar_url?<img src={prof.avatar_url} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:"👤"}
+              </div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <span style={{fontSize:11,fontWeight:700,color:"#ccc"}}>@{prof.username||"usuario"}</span>
+                  <span style={{fontSize:9,color:"#444"}}>{timeAgoComment(c.created_at)}</span>
+                  {canDelete&&<button onClick={()=>deleteComment(c.id)} style={{marginLeft:"auto",background:"none",border:"none",color:"#444",fontSize:10,cursor:"pointer",padding:"0 2px",lineHeight:1}} onMouseEnter={e=>e.currentTarget.style.color="#ef4444"} onMouseLeave={e=>e.currentTarget.style.color="#444"}>✕</button>}
+                </div>
+                <p style={{margin:"2px 0 0",fontSize:12,color:"#999",lineHeight:1.4,wordBreak:"break-word"}}>{c.content}</p>
+              </div>
+            </div>
+          );
+        })}
+        {hasMore&&<button onClick={()=>setShowAll(true)} style={{background:"none",border:"none",color:"#f97316",fontSize:11,cursor:"pointer",padding:"6px 0",fontWeight:600}}>Ver todos ({comments.length})</button>}
+        {currentUser&&(
+          <div style={{display:"flex",gap:8,marginTop:8,alignItems:"flex-end"}}>
+            <textarea value={text} onChange={e=>setText(e.target.value.slice(0,280))} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendComment();}}} placeholder="Escribe un comentario…" rows={1} style={{flex:1,background:"#111",border:"1px solid #2a2a2a",borderRadius:10,padding:"8px 10px",color:"#fff",fontSize:12,outline:"none",resize:"none",lineHeight:1.4,minHeight:32,maxHeight:80,fontFamily:"inherit"}}/>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,flexShrink:0}}>
+              <span style={{fontSize:9,color:text.length>260?"#ef4444":"#333"}}>{280-text.length}</span>
+              <button onClick={sendComment} disabled={!text.trim()||sending} style={{width:30,height:30,borderRadius:"50%",background:text.trim()?"#f97316":"#2a2a2a",border:"none",color:"#fff",fontSize:13,cursor:text.trim()?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",transition:"background 0.15s",lineHeight:1}}>↑</button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Add Dish Modal ─────────────────────────────────────────────────────────
+  function AddDishModal({onSave,onClose}){
+    const[name,setName]=useState("");
+    const[rating,setRating]=useState("bueno");
+    const[notes,setNotes]=useState("");
+    const[err,setErr]=useState("");
+    useEffect(()=>{const h=e=>{if(e.key==="Escape")onClose();};document.addEventListener("keydown",h);return()=>document.removeEventListener("keydown",h);},[]);
+    const inp={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"14px",outline:"none",boxSizing:"border-box"};
+    const lbl={display:"block",fontSize:"10px",fontWeight:700,color:"#555",letterSpacing:"0.08em",marginBottom:"6px"};
+    const save=()=>{if(!name.trim()){setErr("Escribe el nombre del plato.");return;}onSave({id:Date.now(),name:name.trim(),rating,notes:notes.trim(),createdAt:new Date().toISOString()});};
+    const RATINGS=[{id:"bueno",icon:"👍",label:"Bueno"},{id:"destacado",icon:"⭐",label:"Destacado"},{id:"imperdible",icon:"🏆",label:"Imperdible"}];
+    return(
+      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.82)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(6px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="slide-up" style={{background:"#111",borderRadius:"24px 24px 0 0",border:"1px solid #222",borderBottom:"none"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 20px 0"}}>
+            <button onClick={onClose} style={{background:"none",border:"none",color:"#777",fontSize:"15px",cursor:"pointer"}}>Cancelar</button>
+            <h2 style={{margin:0,fontSize:"16px",fontWeight:700,color:"#fff"}}>Nuevo Plato</h2>
+            <button onClick={save} style={{background:"#f97316",border:"none",color:"#fff",fontSize:"15px",fontWeight:700,cursor:"pointer",borderRadius:"8px",padding:"6px 16px"}}>Guardar</button>
+          </div>
+          <div style={{display:"flex",justifyContent:"center",padding:"10px 0 0"}}><div style={{width:36,height:4,borderRadius:2,background:"#2a2a2a"}}/></div>
+          <div style={{padding:"16px 20px 44px",display:"flex",flexDirection:"column",gap:14}}>
+            {err&&<div style={{background:"#ef444422",border:"1px solid #ef4444",borderRadius:"8px",padding:"10px 14px",fontSize:"13px",color:"#ef4444"}}>{err}</div>}
+            <div><label style={lbl}>NOMBRE DEL PLATO *</label><input value={name} onChange={e=>{setName(e.target.value);setErr("");}} placeholder="Ej: Ceviche clásico, Lomo saltado…" style={inp} autoFocus/></div>
+            <div>
+              <label style={lbl}>VALORACIÓN</label>
+              <div style={{display:"flex",gap:8}}>
+                {RATINGS.map(opt=>(
+                  <button key={opt.id} onClick={()=>setRating(opt.id)} style={{flex:1,padding:"10px 6px",borderRadius:10,background:rating===opt.id?"#f9731622":"#1a1a1a",border:`1.5px solid ${rating===opt.id?"#f97316":"#2a2a2a"}`,color:rating===opt.id?"#fff":"#666",fontSize:12,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4,transition:"all 0.15s"}}>
+                    <span style={{fontSize:20}}>{opt.icon}</span>
+                    <span style={{fontWeight:rating===opt.id?700:400}}>{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div><label style={lbl}>NOTAS <span style={{color:"#333",fontWeight:400,letterSpacing:0}}>(máx. 100 caracteres)</span></label><input value={notes} onChange={e=>setNotes(e.target.value.slice(0,100))} placeholder="¿Qué lo hace especial?" style={inp}/><p style={{margin:"4px 0 0",fontSize:"10px",color:"#444",textAlign:"right"}}>{notes.length}/100</p></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Detail Screen ──────────────────────────────────────────────────────────
+  function DetailScreen({restaurant:r,onBack,onEdit,onAddDish,onDeleteDish,profile,user}){
+    const[showAddDish,setShowAddDish]=useState(false);
+    const[expandNotes,setExpandNotes]=useState(false);
+    const[deletingDishId,setDeletingDishId]=useState(null);
+    const dishTimerRef=useRef(null);
+    const cc=CUISINE_COLORS[r.cuisine]||"#f97316";
+    const dishes=r.dishes||[];
+    const DISH_RATING_ICONS={bueno:"👍",destacado:"⭐",imperdible:"🏆"};
+
+    return(
+      <div className="slide-in" style={{height:"100%",display:"flex",flexDirection:"column",background:"#0f0f0f"}}>
+        {/* Hero area */}
+        <div style={{position:"relative",flexShrink:0}}>
+          {r.photo?(
+            <div style={{height:"220px",overflow:"hidden"}}>
+              <img src={r.photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+              <div style={{position:"absolute",inset:0,background:"linear-gradient(to bottom,rgba(0,0,0,0.35) 0%,transparent 40%,#0f0f0f 100%)"}}/>
+            </div>
+          ):(
+            <div style={{height:"160px",background:`linear-gradient(135deg,${cc}18,${cc}08)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"64px",borderBottom:"1px solid #1a1a1a"}}>
+              {r.emoji}
+            </div>
+          )}
+          {/* Back + Edit buttons */}
+          <div style={{position:"absolute",top:12,left:12,right:12,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <button onClick={onBack} style={{width:36,height:36,borderRadius:"50%",background:"rgba(0,0,0,0.6)",border:"1px solid rgba(255,255,255,0.1)",color:"#fff",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}}>‹</button>
+            <button onClick={()=>onEdit(r)} style={{padding:"6px 14px",borderRadius:"20px",background:"rgba(0,0,0,0.6)",border:"1px solid rgba(255,255,255,0.15)",color:"#fff",cursor:"pointer",fontSize:12,fontWeight:600,backdropFilter:"blur(6px)",display:"flex",alignItems:"center",gap:5}}>✏️ Editar</button>
+          </div>
+        </div>
+
+        {/* Scrollable content */}
+        <div style={{flex:1,overflowY:"auto",padding:"16px 20px 24px"}}>
+          {/* Restaurant info */}
+          <div style={{marginBottom:"20px"}}>
+            <div style={{display:"flex",alignItems:"flex-start",gap:12,marginBottom:10}}>
+              {!r.photo&&<div style={{width:48,height:48,borderRadius:14,background:"#222",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{r.emoji}</div>}
+              <div style={{flex:1}}>
+                <h1 style={{fontSize:"22px",fontWeight:800,color:"#fff",letterSpacing:"-0.3px",margin:0}}>{r.name}</h1>
+                <div style={{display:"flex",gap:6,marginTop:6,flexWrap:"wrap"}}>
+                  <Badge label={r.neighborhood} color="#777"/>
+                  <Badge label={r.cuisine} color={cc}/>
+                </div>
+              </div>
+            </div>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <Stars rating={r.rating} size={20}/>
+                {r.eloScore!==undefined&&(
+                  <div style={{background:"#f97316",borderRadius:10,padding:"4px 11px",display:"flex",alignItems:"center",gap:5}}>
+                    <span style={{fontSize:20,fontWeight:900,color:"#fff",letterSpacing:"-0.5px",lineHeight:1}}>{r.eloScore.toFixed(1)}</span>
+                    <span style={{fontSize:8,color:"rgba(255,255,255,0.7)",fontWeight:700,letterSpacing:"0.1em",lineHeight:1}}>ELO</span>
+                  </div>
+                )}
+              </div>
+              <span style={{fontSize:"12px",color:"#444"}}>📅 {formatDate(r.date)}</span>
+            </div>
+          </div>
+
+          {/* Notes */}
+          {(r.notes||r.notes_photo)&&(
+            <div style={{background:"#1a1a1a",borderRadius:14,overflow:"hidden",marginBottom:"20px",border:"1px solid #242424"}}>
+              {r.notes_photo&&(
+                <div style={{position:"relative"}}>
+                  <img src={r.notes_photo} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>
+                  <div style={{position:"absolute",inset:0,background:"linear-gradient(to bottom,transparent 55%,rgba(26,26,26,0.95) 100%)"}}/>
+                </div>
+              )}
+              <div style={{padding:"14px 16px"}}>
+                <p style={{fontSize:"10px",fontWeight:700,color:"#555",letterSpacing:"0.1em",marginBottom:8}}>NOTAS DE CAMPO</p>
+                {r.notes&&(
+                  <>
+                    <p style={{fontSize:"14px",color:"#bbb",lineHeight:1.7,display:expandNotes?"block":"-webkit-box",WebkitLineClamp:expandNotes?"unset":4,WebkitBoxOrient:"vertical",overflow:"hidden",cursor:"pointer"}} onClick={()=>setExpandNotes(!expandNotes)}>
+                      "{r.notes}"
+                    </p>
+                    {!expandNotes&&r.notes.length>180&&<button onClick={()=>setExpandNotes(true)} style={{background:"none",border:"none",color:"#f97316",fontSize:"12px",cursor:"pointer",marginTop:4,padding:0}}>Ver más</button>}
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Fui con */}
+          {r.went_with&&r.went_with.length>0&&(
+            <div style={{background:"#1a1a1a",borderRadius:12,padding:"12px 14px",marginBottom:"16px",border:"1px solid #222"}}>
+              <p style={{fontSize:"10px",fontWeight:700,color:"#555",letterSpacing:"0.1em",marginBottom:8}}>FUERON CON</p>
+              <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                {r.went_with.map(w=>(<span key={w.id} style={{fontSize:12,padding:"4px 10px",borderRadius:"999px",background:"#f9731618",color:"#f97316",border:"1px solid #f9731633"}}>@{w.username}</span>))}
+              </div>
+            </div>
+          )}
+
+          {/* Platos destacados */}
+          <div style={{marginBottom:"20px"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+              <div>
+                <p style={{fontSize:"10px",fontWeight:700,color:"#555",letterSpacing:"0.1em",marginBottom:2}}>PLATOS DESTACADOS</p>
+                <p style={{fontSize:"12px",color:"#444"}}>{dishes.length===0?"Ninguno aún":`${dishes.length} registrado${dishes.length!==1?"s":""}`}</p>
+              </div>
+              <button onClick={()=>setShowAddDish(true)} style={{padding:"8px 14px",borderRadius:"20px",background:"#1a1a1a",border:"1px solid #333",color:"#fff",fontSize:"12px",fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
+                ＋ Plato
+              </button>
+            </div>
+            {dishes.length===0?(
+              <div style={{textAlign:"center",padding:"20px",background:"#1a1a1a",borderRadius:12,border:"1px dashed #2a2a2a"}}>
+                <p style={{fontSize:"13px",color:"#444"}}>Mantén presionado un plato para eliminarlo</p>
+              </div>
+            ):(
+              <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:4,scrollbarWidth:"none",msOverflowStyle:"none",WebkitOverflowScrolling:"touch"}}>
+                {dishes.map(dish=>(
+                  <div key={dish.id}
+                    onMouseDown={()=>{dishTimerRef.current=setTimeout(()=>setDeletingDishId(dish.id),600);}}
+                    onMouseUp={()=>clearTimeout(dishTimerRef.current)}
+                    onTouchStart={()=>{dishTimerRef.current=setTimeout(()=>setDeletingDishId(dish.id),600);}}
+                    onTouchEnd={()=>clearTimeout(dishTimerRef.current)}
+                    style={{flexShrink:0,background:deletingDishId===dish.id?"#ef444422":"#1a1a1a",border:`1px solid ${deletingDishId===dish.id?"#ef4444":"#2a2a2a"}`,borderRadius:12,padding:"10px 12px",minWidth:120,maxWidth:160,cursor:"pointer",transition:"all 0.2s",userSelect:"none"}}>
+                    {deletingDishId===dish.id?(
+                      <div style={{display:"flex",flexDirection:"column",gap:6}} onClick={e=>e.stopPropagation()}>
+                        <p style={{margin:0,fontSize:11,color:"#ef4444",fontWeight:700,textAlign:"center"}}>¿Eliminar?</p>
+                        <div style={{display:"flex",gap:4}}>
+                          <button onClick={()=>{onDeleteDish(r.id,dish.id);setDeletingDishId(null);}} style={{flex:1,padding:"4px",borderRadius:6,background:"#ef4444",border:"none",color:"#fff",fontSize:10,cursor:"pointer"}}>Sí</button>
+                          <button onClick={()=>setDeletingDishId(null)} style={{flex:1,padding:"4px",borderRadius:6,background:"#2a2a2a",border:"1px solid #333",color:"#aaa",fontSize:10,cursor:"pointer"}}>No</button>
+                        </div>
+                      </div>
+                    ):(
+                      <>
+                        <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:4}}>
+                          <span style={{fontSize:16}}>{DISH_RATING_ICONS[dish.rating]||"👍"}</span>
+                          <span style={{fontSize:12,fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{dish.name}</span>
+                        </div>
+                        {dish.notes&&<p style={{margin:0,fontSize:11,color:"#666",lineHeight:1.4,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{dish.notes}</p>}
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Comentarios — solo para restaurantes sincronizados (públicos) */}
+          {user&&typeof r.id==="string"&&(
+            <div style={{marginBottom:"20px"}}>
+              <p style={{fontSize:"10px",fontWeight:700,color:"#555",letterSpacing:"0.1em",marginBottom:8}}>COMENTARIOS</p>
+              <div style={{background:"#1a1a1a",borderRadius:14,padding:"12px 16px",border:"1px solid #242424"}}>
+                <CommentsSection restaurantId={r.id} currentUser={user} isOwner={true} previewMode={false}/>
+              </div>
+            </div>
+          )}
+
+        </div>
+
+        {showAddDish&&<AddDishModal onSave={dish=>{onAddDish(r.id,dish);setShowAddDish(false);}} onClose={()=>setShowAddDish(false)}/>}
+      </div>
+    );
+  }
+
+  // ── Restaurant Card (compact, tap to open detail) ──────────────────────────
+  function RestaurantCard({restaurant:r,onOpenDetail,onLongPressStart,onLongPressEnd,isDeleting,onDeleteConfirm,onDeleteCancel,onEdit}){
+    const cc=CUISINE_COLORS[r.cuisine]||"#f97316";
+    return(
+      <div style={{background:"#1a1a1a",borderRadius:16,border:isDeleting?"1px solid #ef4444":"1px solid #242424",position:"relative",overflow:"hidden",cursor:"pointer",transition:"border-color 0.2s"}}
+        onMouseDown={onLongPressStart} onMouseUp={onLongPressEnd}
+        onTouchStart={onLongPressStart} onTouchEnd={onLongPressEnd}
+        onClick={()=>!isDeleting&&onOpenDetail(r)}>
+
+        {isDeleting&&(
+          <div style={{position:"absolute",inset:0,background:"rgba(12,12,12,0.96)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,zIndex:10,borderRadius:16}} onClick={e=>e.stopPropagation()}>
+            <p style={{color:"#fff",fontSize:"14px"}}>¿Eliminar <strong>{r.name}</strong>?</p>
+            <div style={{display:"flex",gap:10}}>
+              <button onClick={onDeleteConfirm} style={{padding:"8px 20px",borderRadius:8,background:"#ef4444",border:"none",color:"#fff",fontSize:13,cursor:"pointer"}}>Eliminar</button>
+              <button onClick={onDeleteCancel} style={{padding:"8px 20px",borderRadius:8,background:"#2a2a2a",border:"1px solid #333",color:"#aaa",fontSize:13,cursor:"pointer"}}>Cancelar</button>
+            </div>
+          </div>
+        )}
+
+        {/* Photo banner if exists */}
+        {r.photo&&(
+          <div style={{height:90,overflow:"hidden",position:"relative"}}>
+            <img src={r.photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+            <div style={{position:"absolute",inset:0,background:"linear-gradient(to bottom,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.85) 100%)"}}/>
+            <span style={{position:"absolute",bottom:7,right:10,fontSize:"10px",color:"rgba(255,255,255,0.65)",fontWeight:500,letterSpacing:"0.02em"}}>{timeAgo(r.date)}</span>
+          </div>
+        )}
+
+        <div style={{padding:"12px 14px"}}>
+          <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
+            <div style={{width:42,height:42,borderRadius:12,background:"#222",display:"flex",alignItems:"center",justifyContent:"center",fontSize:21,flexShrink:0}}>{r.emoji}</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:6}}>
+                <h3 style={{margin:0,fontSize:"15px",fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</h3>
+                <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
+                  <Stars rating={r.rating} size={12}/>
+                  {r.eloScore!==undefined&&<span style={{fontSize:10,fontWeight:800,padding:"2px 6px",borderRadius:"999px",background:"#f97316",color:"#fff",letterSpacing:"-0.2px",lineHeight:1.4}}>{r.eloScore.toFixed(1)}</span>}
+                  <button onClick={e=>{e.stopPropagation();onEdit(r);}} style={{background:"none",border:"none",color:"#444",fontSize:14,cursor:"pointer",padding:"2px 4px",lineHeight:1}}
+                    onMouseEnter={e=>e.currentTarget.style.color="#f97316"} onMouseLeave={e=>e.currentTarget.style.color="#444"}>✏️</button>
+                </div>
+              </div>
+              <div style={{display:"flex",gap:5,marginTop:5,flexWrap:"wrap"}}>
+                <Badge label={r.neighborhood} color="#777"/>
+                <Badge label={r.cuisine} color={cc}/>
+              </div>
+            </div>
+          </div>
+
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:9}}>
+            <span style={{fontSize:"11px",color:"#444"}}>{r.photo?formatDate(r.date):timeAgo(r.date)}</span>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <span style={{fontSize:"11px",color:"#333"}}>mantén para borrar</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Add/Edit Modal ─────────────────────────────────────────────────────────
+  const GTYPE_TO_CUISINE={seafood_restaurant:"Mariscos",sushi_restaurant:"Japonesa",japanese_restaurant:"Japonesa",chinese_restaurant:"Chifa",italian_restaurant:"Italiana",steak_house:"Parrilla",peruvian_restaurant:"Criolla",bar:"Bar",bakery:"Panadería",sandwich_shop:"Sanguchería / Cafetería",cafe:"Sanguchería / Cafetería",mexican_restaurant:"Mexicana"};
+
+  function AddEditModal({initial,prefillData,onSave,onClose,onDelete,allLists,user}){
+    const isEdit=!!initial;
+    const[form,setForm]=useState(()=>{
+      if(initial)return{...initial,lists:initial.lists||getAutoLists(initial)};
+      const base={emoji:"🍽️",name:"",neighborhood:"Miraflores",cuisine:"Cevichería",rating:0,notes:"",notes_photo:null,date:new Date().toISOString().split("T")[0],photo:null,dishes:[],lists:["restaurants"],went_with:[]};
+      if(prefillData)return{...base,name:prefillData.name||"",lat:prefillData.lat,lng:prefillData.lng,place_id:prefillData.place_id,cuisine:GTYPE_TO_CUISINE[prefillData.primaryType]||"Cevichería",lists:getAutoLists(prefillData)};
+      return base;
+    });
+    const[confirmDelete,setConfirmDelete]=useState(false);
+    const[friendsList,setFriendsList]=useState([]);
+    useEffect(()=>{
+      if(!user)return;
+      let cancelled=false;
+      (async()=>{
+        const{data:fs}=await sb.from("friendships").select("requester_id,addressee_id")
+          .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`).eq("status","accepted");
+        if(cancelled)return;
+        const ids=(fs||[]).map(f=>f.requester_id===user.id?f.addressee_id:f.requester_id);
+        if(ids.length>0){const{data:profiles}=await sb.from("profiles").select("id,username,name").in("id",ids);if(!cancelled)setFriendsList(profiles||[]);}
+      })();
+      return()=>{cancelled=true;};
+    },[user]);
+    const[showEmoji,setShowEmoji]=useState(false);
+    const[err,setErr]=useState("");
+    const[saving,setSaving]=useState(false);
+    useEffect(()=>{const h=e=>{if(e.key==="Escape")onClose();};document.addEventListener("keydown",h);return()=>document.removeEventListener("keydown",h);},[]);
+    const[placeSearch,setPlaceSearch]=useState("");
+    const[placeSuggestions,setPlaceSuggestions]=useState([]);
+    const[showSuggestions,setShowSuggestions]=useState(false);
+    const[loadingPlace,setLoadingPlace]=useState(false);
+    const debounceRef=useRef(null);
+    const[placeFilled,setPlaceFilled]=useState(!!(prefillData?.name));
+    const[filledPlaceName,setFilledPlaceName]=useState(prefillData?.name||"");
+    const set=(k,v)=>setForm(f=>({...f,[k]:v}));
+    const save=async()=>{if(!form.name.trim()){setErr("El nombre es obligatorio.");return;}if(!form.rating){setErr("Elige una calificación.");return;}setSaving(true);await onSave({...form,id:isEdit?form.id:Date.now()});setSaving(false);};
+    const PLACES_KEY="AIzaSyBJz5LMmNFD5rkaoSB8FaVQjj2aMiglRy0";
+    const fetchPlaceSuggestions=async(query)=>{
+      if(!query||query.length<2){setPlaceSuggestions([]);setShowSuggestions(false);return;}
+      try{
+        const res=await fetch("https://places.googleapis.com/v1/places:autocomplete",{
+          method:"POST",
+          headers:{"Content-Type":"application/json","X-Goog-Api-Key":PLACES_KEY},
+          body:JSON.stringify({
+            input:query,
+            locationBias:{circle:{center:{latitude:-12.0464,longitude:-77.0428},radius:30000}},
+            includedPrimaryTypes:["restaurant","cafe","bakery","bar"],
+            languageCode:"es"
+          })
+        });
+        if(!res.ok){const errText=await res.text();console.warn("Places API HTTP",res.status,":",errText);setPlaceSuggestions([]);setShowSuggestions(false);return;}
+        const data=await res.json();
+        const suggestions=data.suggestions||[];
+        setPlaceSuggestions(suggestions);
+        setShowSuggestions(suggestions.length>0);
+      }catch(e){console.warn("Places API error:",e);setPlaceSuggestions([]);setShowSuggestions(false);}
+    };
+    useEffect(()=>{
+      clearTimeout(debounceRef.current);
+      if(!placeSearch||placeSearch.length<2){setPlaceSuggestions([]);setShowSuggestions(false);return;}
+      debounceRef.current=setTimeout(()=>fetchPlaceSuggestions(placeSearch),350);
+      return()=>clearTimeout(debounceRef.current);
+    },[placeSearch]);
+    const selectPlace=async(suggestion)=>{
+      setShowSuggestions(false);setLoadingPlace(true);
+      try{
+        const placeId=suggestion.placePrediction?.placeId;
+        if(!placeId)throw new Error("No placeId");
+        const res=await fetch(`https://places.googleapis.com/v1/places/${placeId}?fields=displayName,formattedAddress,location,photos,addressComponents&key=${PLACES_KEY}`);
+        const place=await res.json();
+        const ac=place.addressComponents||[];
+        const distComp=ac.find(c=>c.types&&(c.types.includes("locality")||c.types.includes("sublocality_level_1")||c.types.includes("administrative_area_level_3")));
+        const detectedDist=distComp?.longText||"";
+        const matchedNeighborhood=NEIGHBORHOODS.find(n=>n.toLowerCase()===detectedDist.toLowerCase())||form.neighborhood;
+        const lat=place.location?.latitude;
+        const lng=place.location?.longitude;
+        let photo=form.photo;
+        if(!photo&&place.photos&&place.photos.length>0){
+          try{
+            const photoName=place.photos[0].name;
+            photo=`https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=800&key=${PLACES_KEY}`;
+          }catch{}
+        }
+        const displayName=place.displayName?.text||place.displayName||"";
+        setForm(f=>{const u={...f,name:displayName||f.name,neighborhood:matchedNeighborhood,photo};if(lat&&lng){u.lat=lat;u.lng=lng;}return u;});
+        setPlaceSearch("");setErr("");setPlaceFilled(true);setFilledPlaceName(displayName||"Restaurante");
+      }catch(e){console.warn("Place detail error:",e);}
+      setLoadingPlace(false);
+    };
+    const inp={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"14px",outline:"none",boxSizing:"border-box"};
+    const lbl={display:"block",fontSize:"10px",fontWeight:700,color:"#555",letterSpacing:"0.08em",marginBottom:"6px"};
+    return(
+      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.82)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(6px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="slide-up" style={{background:"#111",borderRadius:"24px 24px 0 0",maxHeight:"92%",display:"flex",flexDirection:"column",border:"1px solid #222",borderBottom:"none"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 20px 0",flexShrink:0}}>
+            <button onClick={onClose} style={{background:"none",border:"none",color:"#777",fontSize:"15px",cursor:"pointer"}}>Cancelar</button>
+            <button onClick={save} disabled={saving} style={{background:saving?"#7c3a13":"#f97316",border:"none",color:"#fff",fontSize:"15px",fontWeight:700,cursor:saving?"not-allowed":"pointer",borderRadius:"8px",padding:"6px 16px",transition:"background 0.2s"}}>{saving?"Guardando…":(isEdit?"Guardar":"Registrar")}</button>
+          </div>
+          <div style={{display:"flex",justifyContent:"center",padding:"10px 0 0"}}><div style={{width:36,height:4,borderRadius:2,background:"#2a2a2a"}}/></div>
+          <div style={{overflowY:"auto",padding:"14px 20px 50px",display:"flex",flexDirection:"column",gap:15}}>
+            {!isEdit&&!placeFilled&&(
+              <div style={{position:"relative"}}>
+                <label style={lbl}>🔍 BUSCAR RESTAURANTE EN LIMA</label>
+                <div style={{position:"relative"}}>
+                  <input
+                    value={placeSearch}
+                    onChange={e=>setPlaceSearch(e.target.value)}
+                    onFocus={()=>placeSearch.length>=2&&placeSuggestions.length>0&&setShowSuggestions(true)}
+                    onBlur={()=>setTimeout(()=>setShowSuggestions(false),180)}
+                    placeholder="Escribe el nombre del restaurante…"
+                    style={{...inp,paddingRight:loadingPlace?"36px":"12px"}}
+                    autoFocus
+                  />
+                  {loadingPlace&&<span style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",fontSize:14,color:"#f97316",animation:"spin 1s linear infinite"}}>⏳</span>}
+                </div>
+                {showSuggestions&&placeSuggestions.length>0&&(
+                  <div className="places-dropdown">
+                    {placeSuggestions.map((s,i)=>{
+                      const pred=s.placePrediction;
+                      const main=pred?.structuredFormat?.mainText?.text||pred?.text?.text||"";
+                      const secondary=pred?.structuredFormat?.secondaryText?.text||"";
+                      return(
+                        <div key={i} className="places-item" onMouseDown={()=>selectPlace(s)}>
+                          <span className="places-icon">🍽️</span>
+                          <div style={{flex:1,minWidth:0}}>
+                            <div className="places-text">{main}</div>
+                            {secondary&&<div className="places-sub">{secondary}</div>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {!loadingPlace&&placeSearch.length>0&&placeSuggestions.length===0&&showSuggestions===false&&placeSearch.length>=2&&(
+                  <p style={{fontSize:"11px",color:"#555",marginTop:5}}>No se encontraron resultados. Completa el formulario manualmente.</p>
+                )}
+                <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8}}>
+                  <div style={{flex:1,height:"1px",background:"#2a2a2a"}}/>
+                  <span style={{fontSize:"10px",color:"#444",fontWeight:700,letterSpacing:"0.08em"}}>O COMPLETA MANUALMENTE</span>
+                  <div style={{flex:1,height:"1px",background:"#2a2a2a"}}/>
+                </div>
+              </div>
+            )}
+            {!isEdit&&placeFilled&&(
+              <div style={{background:"#f9731612",border:"1px solid #f9731630",borderRadius:12,padding:"10px 14px",display:"flex",alignItems:"center",gap:10}}>
+                <span style={{fontSize:20}}>📍</span>
+                <div style={{flex:1}}>
+                  <p style={{margin:0,fontSize:13,fontWeight:700,color:"#fff"}}>{filledPlaceName}</p>
+                  <p style={{margin:"2px 0 0",fontSize:11,color:"#f97316"}}>Datos completados desde Google Places</p>
+                </div>
+                <button onClick={()=>{setPlaceFilled(false);setFilledPlaceName("");set("name","");set("neighborhood","Miraflores");}} style={{background:"none",border:"none",color:"#666",fontSize:16,cursor:"pointer",lineHeight:1,padding:"4px"}}>✕</button>
+              </div>
+            )}
+            {err&&<div style={{background:"#ef444422",border:"1px solid #ef4444",borderRadius:"8px",padding:"10px 14px",fontSize:"13px",color:"#ef4444"}}>{err}</div>}
+            <div style={{display:"flex",gap:10,alignItems:"flex-start",position:"relative"}}>
+              <div>
+                <button onClick={()=>setShowEmoji(!showEmoji)} style={{width:54,height:54,borderRadius:14,background:"#1a1a1a",border:"1px solid #2a2a2a",fontSize:25,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>{form.emoji}</button>
+                {showEmoji&&(<div style={{position:"absolute",background:"#1e1e1e",border:"1px solid #2a2a2a",borderRadius:12,padding:10,display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:4,zIndex:200,boxShadow:"0 8px 32px rgba(0,0,0,0.7)",top:58,left:0,width:200}}>
+                  {EMOJIS.map(e=>(<button key={e} onClick={()=>{set("emoji",e);setShowEmoji(false);}} style={{background:form.emoji===e?"#f9731622":"none",border:form.emoji===e?"1px solid #f97316":"1px solid transparent",borderRadius:8,fontSize:20,cursor:"pointer",padding:4,lineHeight:1}}>{e}</button>))}
+                </div>)}
+              </div>
+              {(!placeFilled||isEdit)&&<div style={{flex:1}}><label style={lbl}>NOMBRE *</label><input value={form.name} onChange={e=>{set("name",e.target.value);setErr("");}} placeholder="Ej: La Picantería" style={inp} autoFocus={isEdit}/></div>}
+            </div>
+            <div><label style={lbl}>FOTO PORTADA</label><PhotoPicker value={form.photo} onChange={v=>set("photo",v)}/></div>
+            {(!placeFilled||isEdit)&&<div><label style={lbl}>DISTRITO</label><select value={form.neighborhood} onChange={e=>set("neighborhood",e.target.value)} style={inp}>{NEIGHBORHOODS.map(n=><option key={n} value={n}>{n}</option>)}</select></div>}
+            <div><label style={lbl}>TIPO DE COCINA</label><select value={form.cuisine} onChange={e=>set("cuisine",e.target.value)} style={inp}>{CUISINES.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+            <div>
+              <label style={lbl}>CALIFICACIÓN *</label>
+              <div style={{display:"flex",alignItems:"center",gap:12,marginTop:6}}>
+                <Stars rating={form.rating} interactive onChange={v=>{set("rating",v);setErr("");}} size={32}/>
+                {form.rating>0&&<span style={{fontSize:"13px",color:"#888"}}>{["","Malo","Regular","Bueno","Muy bueno","Excelente"][form.rating]}</span>}
+              </div>
+            </div>
+            <div><label style={lbl}>FECHA DE VISITA</label><input type="date" value={form.date} onChange={e=>set("date",e.target.value)} style={{...inp,colorScheme:"dark"}}/></div>
+            <div><label style={lbl}>NOTAS DE CAMPO</label><textarea value={form.notes} onChange={e=>set("notes",e.target.value)} placeholder="¿Qué pediste? ¿Qué te sorprendió? ¿Volverías?" rows={4} style={{...inp,resize:"none",lineHeight:1.6}}/></div>
+            {friendsList.length>0&&(
+              <div>
+                <label style={lbl}>¿FUISTE CON ALGUIEN?</label>
+                <div style={{display:"flex",flexWrap:"wrap",gap:7,marginTop:2}}>
+                  {friendsList.map(f=>{
+                    const sel=(form.went_with||[]).some(w=>w.id===f.id);
+                    return(
+                      <button key={f.id} onClick={()=>{const cur=form.went_with||[];const next=sel?cur.filter(w=>w.id!==f.id):[...cur,{id:f.id,username:f.username,name:f.name}];set("went_with",next);}} style={{padding:"7px 13px",borderRadius:"999px",background:sel?"#f9731622":"#1a1a1a",border:`1.5px solid ${sel?"#f97316":"#2a2a2a"}`,color:sel?"#fff":"#888",fontSize:12,cursor:"pointer",fontWeight:sel?700:400,transition:"all 0.15s"}}>
+                        @{f.username}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {allLists&&allLists.filter(l=>l.id!=="all").length>0&&(
+              <div>
+                <label style={lbl}>GUARDAR EN LISTA</label>
+                <div style={{display:"flex",flexDirection:"column",gap:7}}>
+                  {allLists.filter(l=>l.id!=="all").map(list=>{
+                    const checked=(form.lists||[]).includes(list.id);
+                    const col=list.color||"#f97316";
+                    return(
+                      <div key={list.id} onClick={()=>{const cur=form.lists||[];set("lists",checked?cur.filter(id=>id!==list.id):[...cur,list.id]);}} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:10,background:checked?col+"12":"#1a1a1a",border:`1px solid ${checked?col+"44":"#2a2a2a"}`,cursor:"pointer",transition:"all 0.15s"}}>
+                        <div style={{width:22,height:22,borderRadius:6,background:checked?col:"#2a2a2a",border:`1px solid ${checked?col:"#444"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:"#fff",flexShrink:0,transition:"all 0.15s"}}>{checked&&"✓"}</div>
+                        <span style={{fontSize:17}}>{list.emoji}</span>
+                        <span style={{fontSize:14,color:checked?"#fff":"#888",fontWeight:checked?600:400,transition:"all 0.15s"}}>{list.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {isEdit&&onDelete&&(
+              <div style={{marginTop:8,paddingTop:16,borderTop:"1px solid #1e1e1e"}}>
+                {!confirmDelete?(
+                  <button onClick={()=>setConfirmDelete(true)} style={{width:"100%",padding:"11px",borderRadius:10,background:"transparent",border:"1px solid #2a2a2a",color:"#555",fontSize:13,cursor:"pointer",transition:"all 0.2s"}}
+                    onMouseEnter={e=>{e.currentTarget.style.borderColor="#ef4444";e.currentTarget.style.color="#ef4444";}}
+                    onMouseLeave={e=>{e.currentTarget.style.borderColor="#2a2a2a";e.currentTarget.style.color="#555";}}>
+                    Eliminar hallazgo
+                  </button>
+                ):(
+                  <div style={{background:"#ef444411",border:"1px solid #ef444433",borderRadius:10,padding:"14px 16px"}}>
+                    <p style={{margin:"0 0 12px",fontSize:13,color:"#ef4444",textAlign:"center"}}>¿Eliminar <strong>{form.name}</strong>? Esta acción no se puede deshacer.</p>
+                    <div style={{display:"flex",gap:8}}>
+                      <button onClick={onDelete} style={{flex:1,padding:"10px",borderRadius:8,background:"#ef4444",border:"none",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Sí, eliminar</button>
+                      <button onClick={()=>setConfirmDelete(false)} style={{flex:1,padding:"10px",borderRadius:8,background:"#2a2a2a",border:"1px solid #333",color:"#aaa",fontSize:13,cursor:"pointer"}}>Cancelar</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Create List Modal ──────────────────────────────────────────────────────
+  function CreateListModal({onSave,onClose}){
+    const[name,setName]=useState("");
+    const[emoji,setEmoji]=useState("📍");
+    const[err,setErr]=useState("");
+    useEffect(()=>{const h=e=>{if(e.key==="Escape")onClose();};document.addEventListener("keydown",h);return()=>document.removeEventListener("keydown",h);},[]);
+    const LIST_EMOJIS=["📍","⭐","🎯","💫","🔖","❤️"];
+    const inp={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"14px",outline:"none",boxSizing:"border-box"};
+    const lbl={display:"block",fontSize:"10px",fontWeight:700,color:"#555",letterSpacing:"0.08em",marginBottom:"6px"};
+    const save=()=>{if(!name.trim()){setErr("Escribe un nombre.");return;}onSave({id:Date.now().toString(),name:name.trim(),emoji,color:"#f97316",createdAt:new Date().toISOString()});};
+    return(
+      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.82)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(6px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="slide-up" style={{background:"#111",borderRadius:"24px 24px 0 0",border:"1px solid #222",borderBottom:"none",padding:"20px 20px 44px"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18}}>
+            <button onClick={onClose} style={{background:"none",border:"none",color:"#777",fontSize:"15px",cursor:"pointer"}}>Cancelar</button>
+            <h2 style={{margin:0,fontSize:"16px",fontWeight:700,color:"#fff"}}>Nueva lista</h2>
+            <button onClick={save} style={{background:"#f97316",border:"none",color:"#fff",fontSize:"15px",fontWeight:700,cursor:"pointer",borderRadius:"8px",padding:"6px 16px"}}>Crear</button>
+          </div>
+          <div style={{display:"flex",justifyContent:"center",gap:8,marginBottom:16}}>
+            {LIST_EMOJIS.map(e=>(<button key={e} onClick={()=>setEmoji(e)} style={{width:46,height:46,borderRadius:12,background:emoji===e?"#f9731622":"#1a1a1a",border:emoji===e?"1px solid #f97316":"1px solid #2a2a2a",fontSize:22,cursor:"pointer"}}>{e}</button>))}
+          </div>
+          {err&&<div style={{background:"#ef444422",border:"1px solid #ef4444",borderRadius:"8px",padding:"8px 12px",fontSize:"13px",color:"#ef4444",marginBottom:12}}>{err}</div>}
+          <div><label style={lbl}>NOMBRE DE LA LISTA</label><input value={name} onChange={e=>{setName(e.target.value);setErr("");}} placeholder="Ej: Brunch favoritos, Cenas románticas…" style={inp} autoFocus/></div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── List Action Modal ──────────────────────────────────────────────────────
+  function ListActionModal({list,onRename,onDelete,onClose}){
+    const[renaming,setRenaming]=useState(false);
+    const[newName,setNewName]=useState(list.name);
+    const[confirmDel,setConfirmDel]=useState(false);
+    useEffect(()=>{const h=e=>{if(e.key==="Escape")onClose();};document.addEventListener("keydown",h);return()=>document.removeEventListener("keydown",h);},[]);
+    const inp={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"14px",outline:"none",boxSizing:"border-box"};
+    return(
+      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.75)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(4px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="slide-up" style={{background:"#111",borderRadius:"24px 24px 0 0",border:"1px solid #222",borderBottom:"none",padding:"20px 20px 44px"}}>
+          <div style={{display:"flex",justifyContent:"center",marginBottom:14}}><div style={{width:40,height:4,borderRadius:2,background:"#2a2a2a"}}/></div>
+          {!renaming&&!confirmDel&&(
+            <>
+              <p style={{textAlign:"center",fontSize:16,fontWeight:700,color:"#fff",marginBottom:20}}>{list.emoji} {list.name}</p>
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                <button onClick={()=>setRenaming(true)} style={{width:"100%",padding:14,borderRadius:10,background:"#1a1a1a",border:"1px solid #2a2a2a",color:"#fff",fontSize:14,cursor:"pointer",textAlign:"left"}}>✏️ Renombrar lista</button>
+                <button onClick={()=>setConfirmDel(true)} style={{width:"100%",padding:14,borderRadius:10,background:"#ef444411",border:"1px solid #ef444433",color:"#ef4444",fontSize:14,cursor:"pointer",textAlign:"left"}}>🗑️ Eliminar lista</button>
+                <button onClick={onClose} style={{width:"100%",padding:14,borderRadius:10,background:"transparent",border:"1px solid #2a2a2a",color:"#666",fontSize:14,cursor:"pointer"}}>Cancelar</button>
+              </div>
+            </>
+          )}
+          {renaming&&(
+            <>
+              <p style={{fontSize:14,fontWeight:700,color:"#fff",marginBottom:12}}>Renombrar lista</p>
+              <input value={newName} onChange={e=>setNewName(e.target.value)} style={{...inp,marginBottom:12}} autoFocus/>
+              <div style={{display:"flex",gap:8}}>
+                <button onClick={()=>setRenaming(false)} style={{flex:1,padding:12,borderRadius:10,background:"#2a2a2a",border:"1px solid #333",color:"#aaa",fontSize:14,cursor:"pointer"}}>Atrás</button>
+                <button onClick={()=>{if(newName.trim())onRename(newName.trim());}} style={{flex:1,padding:12,borderRadius:10,background:"#f97316",border:"none",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer"}}>Guardar</button>
+              </div>
+            </>
+          )}
+          {confirmDel&&(
+            <>
+              <p style={{textAlign:"center",fontSize:14,color:"#fff",marginBottom:6}}>¿Eliminar <strong>{list.name}</strong>?</p>
+              <p style={{textAlign:"center",fontSize:12,color:"#555",marginBottom:16}}>Los restaurantes no se eliminarán.</p>
+              <div style={{display:"flex",gap:8}}>
+                <button onClick={()=>setConfirmDel(false)} style={{flex:1,padding:12,borderRadius:10,background:"#2a2a2a",border:"1px solid #333",color:"#aaa",fontSize:14,cursor:"pointer"}}>Cancelar</button>
+                <button onClick={onDelete} style={{flex:1,padding:12,borderRadius:10,background:"#ef4444",border:"none",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer"}}>Eliminar</button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── ELO Comparison Screen ──────────────────────────────────────────────────
+  function EloComparisonScreen({restaurants,newRestaurantId,onComplete,onUpdateElo}){
+    const[step,setStep]=useState(0);
+    const[animWinner,setAnimWinner]=useState(null);
+    const[closing,setClosing]=useState(false);
+    const opponentIds=useRef(null);
+    if(!opponentIds.current){
+      const others=restaurants.filter(r=>r.id!==newRestaurantId);
+      const sorted=[...others].sort((a,b)=>{const d=(a.eloComparisons||0)-(b.eloComparisons||0);return d!==0?d:Math.random()-0.5;});
+      opponentIds.current=sorted.slice(0,Math.min(3,sorted.length)).map(r=>r.id);
+    }
+    const maxSteps=opponentIds.current.length;
+    const newR=restaurants.find(r=>r.id===newRestaurantId);
+    const opponent=restaurants.find(r=>r.id===opponentIds.current[step]);
+    const finish=()=>{setClosing(true);setTimeout(onComplete,280);};
+    if(!newR||!opponent){onComplete();return null;}
+    const pick=(winnerId)=>{
+      if(animWinner!=null)return;
+      const loserId=winnerId===newR.id?opponent.id:newR.id;
+      setAnimWinner(winnerId);
+      setTimeout(()=>{
+        onUpdateElo(winnerId,loserId);
+        if(step+1>=maxSteps){setTimeout(()=>{setClosing(true);setTimeout(onComplete,280);},120);}
+        else{setStep(s=>s+1);setAnimWinner(null);}
+      },460);
+    };
+    const EloCard=({r})=>{
+      const isWinner=animWinner===r.id;
+      return(
+        <div onClick={()=>pick(r.id)} style={{flex:1,background:"#1a1a1a",borderRadius:20,padding:"22px 14px 20px",display:"flex",flexDirection:"column",alignItems:"center",gap:12,cursor:"pointer",border:`2px solid ${isWinner?"#f97316":"#2a2a2a"}`,transform:isWinner?"scale(1.05)":"scale(1)",transition:"transform 0.22s ease,border-color 0.22s ease,box-shadow 0.22s ease",boxShadow:isWinner?"0 0 28px rgba(249,115,22,0.4)":"none",userSelect:"none",WebkitUserSelect:"none",WebkitTapHighlightColor:"transparent"}}>
+          <span style={{fontSize:52,lineHeight:1}}>{r.emoji}</span>
+          <p style={{fontSize:15,fontWeight:700,color:"#fff",margin:0,textAlign:"center",lineHeight:1.3}}>{r.name}</p>
+          <p style={{fontSize:12,color:"#555",margin:0}}>{r.neighborhood}</p>
+          <div style={{background:"rgba(249,115,22,0.15)",border:"1px solid rgba(249,115,22,0.3)",borderRadius:"999px",padding:"4px 14px",marginTop:2}}>
+            <span style={{fontSize:16,fontWeight:900,color:"#f97316",letterSpacing:"-0.3px"}}>{(r.eloScore||5.0).toFixed(1)}</span>
+          </div>
+        </div>
+      );
+    };
+    return(
+      <div style={{position:"absolute",inset:0,background:"#0a0a0a",zIndex:200,display:"flex",flexDirection:"column",opacity:closing?0:1,transition:"opacity 0.28s ease"}}>
+        <div style={{padding:"30px 20px 10px",textAlign:"center",flexShrink:0}}>
+          <p style={{fontSize:10,fontWeight:700,color:"rgba(249,115,22,0.55)",letterSpacing:"0.22em",margin:"0 0 8px"}}>DUELO GASTRONÓMICO</p>
+          <h2 style={{fontSize:22,fontWeight:800,color:"#fff",margin:"0 0 6px",letterSpacing:"-0.3px"}}>¿Cuál preferiste?</h2>
+          <p style={{fontSize:12,color:"#555",margin:0}}>Comparación {step+1} de {maxSteps}</p>
+        </div>
+        <div style={{display:"flex",gap:6,padding:"12px 24px 0",flexShrink:0}}>
+          {Array.from({length:maxSteps}).map((_,i)=>(
+            <div key={i} style={{flex:1,height:3,borderRadius:2,background:i<step?"#f97316":i===step?"#f9731688":"#222",transition:"all 0.35s"}}/>
+          ))}
+        </div>
+        <div style={{flex:1,display:"flex",gap:12,padding:"18px 16px 0",alignItems:"stretch",maxHeight:400}}>
+          <EloCard r={newR}/>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,width:28}}>
+            <span style={{fontSize:11,fontWeight:800,color:"#333",letterSpacing:"0.05em"}}>VS</span>
+          </div>
+          <EloCard r={opponent}/>
+        </div>
+        <div style={{textAlign:"center",padding:"20px 20px 28px",flexShrink:0}}>
+          <button onClick={finish} style={{background:"none",border:"none",color:"#2a2a2a",fontSize:11,cursor:"pointer",letterSpacing:"0.04em",padding:"6px 16px"}}>Saltar</button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Explorar Lima ──────────────────────────────────────────────────────────
+  const EXPLORE_KEY="AIzaSyBJz5LMmNFD5rkaoSB8FaVQjj2aMiglRy0";
+  const EXPLORE_SUGGESTIONS=[
+    {label:"Cevicherías 🍋",query:"cevichería Lima"},
+    {label:"Nikkei 🍱",query:"nikkei Lima"},
+    {label:"Chifas 🍜",query:"chifa Lima"},
+    {label:"Brunch ☕",query:"brunch Lima"},
+    {label:"Parrillas 🥩",query:"parrilla Lima"},
+  ];
+
+  function PlacePhotoImg({photoName,fallbackEmoji,style}){
+    const[src,setSrc]=useState(null);
+    const mounted=useRef(true);
+    useEffect(()=>{
+      mounted.current=true;
+      if(!photoName){setSrc(null);return;}
+      (async()=>{
+        try{
+          const res=await fetch(`https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=400&key=${EXPLORE_KEY}&skipHttpRedirect=true`);
+          const data=await res.json();
+          if(mounted.current&&data.photoUri)setSrc(data.photoUri);
+        }catch{}
+      })();
+      return()=>{mounted.current=false;};
+    },[photoName]);
+    if(!src)return(<div style={{...style,display:"flex",alignItems:"center",justifyContent:"center",background:"linear-gradient(135deg,#1a1a1a,#242424)",fontSize:28,flexShrink:0}}>{fallbackEmoji||"🍽️"}</div>);
+    return<img src={src} style={{...style,objectFit:"cover",display:"block"}} loading="lazy"/>;
+  }
+
+  function ExplorarLimaSection({restaurants,onOpenDetail,onPrefillAdd}){
+    const[query,setQuery]=useState("");
+    const[results,setResults]=useState([]);
+    const[loading,setLoading]=useState(false);
+    const[queried,setQueried]=useState(false);
+    const debRef=useRef(null);
+    const placeIds=new Set(restaurants.map(r=>r.place_id).filter(Boolean));
+    const byPlaceId={};restaurants.forEach(r=>{if(r.place_id)byPlaceId[r.place_id]=r;});
+
+    const doSearch=async(q)=>{
+      if(!q.trim()){setResults([]);setQueried(false);return;}
+      setLoading(true);setQueried(true);
+      try{
+        const res=await fetch("https://places.googleapis.com/v1/places:searchText",{
+          method:"POST",
+          headers:{"Content-Type":"application/json","X-Goog-Api-Key":EXPLORE_KEY,"X-Goog-FieldMask":"places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.photos,places.primaryType,places.location"},
+          body:JSON.stringify({textQuery:`${q} Lima Peru`,languageCode:"es",locationBias:{circle:{center:{latitude:-12.0464,longitude:-77.0428},radius:30000.0}},maxResultCount:15})
+        });
+        const data=await res.json();
+        setResults(data.places||[]);
+      }catch(e){console.warn("Explorar search:",e);setResults([]);}
+      setLoading(false);
+    };
+
+    useEffect(()=>{
+      clearTimeout(debRef.current);
+      if(!query.trim()){setResults([]);setQueried(false);return;}
+      debRef.current=setTimeout(()=>doSearch(query),400);
+      return()=>clearTimeout(debRef.current);
+    },[query]);
+
+    const getDistrict=(addr)=>{
+      if(!addr)return"";
+      const parts=addr.split(",");
+      for(let i=1;i<parts.length;i++){
+        const p=parts[i].trim();
+        if(p&&!p.match(/^(Lima|Perú|Peru|\d|Provincia|Región)/i)&&p.length<35)return p;
+      }
+      return parts[1]?.trim()||"";
+    };
+
+    return(
+      <div style={{display:"flex",flexDirection:"column",flex:1,overflow:"hidden"}}>
+        <div style={{padding:"8px 20px 10px",flexShrink:0}}>
+          <div style={{position:"relative"}}>
+            <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:15,pointerEvents:"none"}}>🔍</span>
+            <input value={query} onChange={e=>setQuery(e.target.value)}
+              placeholder="Buscar restaurantes en Lima..."
+              style={{width:"100%",background:"#1a1a1a",border:"1.5px solid #2a2a2a",borderRadius:14,padding:"11px 36px 11px 38px",color:"#fff",fontSize:14,outline:"none",boxSizing:"border-box"}}
+              autoFocus/>
+            {loading&&<span style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",fontSize:13,color:"#f97316"}}>⏳</span>}
+            {!loading&&query&&<button onClick={()=>{setQuery("");setResults([]);setQueried(false);}} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:"#555",fontSize:16,cursor:"pointer",padding:4,lineHeight:1}}>✕</button>}
+          </div>
+        </div>
+        <div style={{flex:1,overflowY:"auto",padding:"4px 20px 24px"}}>
+          {!queried&&!loading&&(
+            <div>
+              <p style={{fontSize:"10px",fontWeight:700,color:"#444",letterSpacing:"0.1em",marginBottom:10}}>SUGERENCIAS</p>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+                {EXPLORE_SUGGESTIONS.map(s=>(
+                  <button key={s.query} onClick={()=>{setQuery(s.label);doSearch(s.query);setQueried(true);}}
+                    style={{padding:"8px 16px",borderRadius:"999px",background:"#1a1a1a",border:"1px solid #2a2a2a",color:"#ccc",fontSize:13,cursor:"pointer",whiteSpace:"nowrap",transition:"all 0.15s"}}
+                    onMouseEnter={e=>{e.currentTarget.style.borderColor="#f97316";e.currentTarget.style.color="#f97316";}}
+                    onMouseLeave={e=>{e.currentTarget.style.borderColor="#2a2a2a";e.currentTarget.style.color="#ccc";}}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {queried&&!loading&&results.length===0&&(
+            <div style={{textAlign:"center",padding:"48px 0"}}>
+              <div style={{fontSize:40,marginBottom:12}}>🍽️</div>
+              <p style={{fontSize:14,color:"#555"}}>Sin resultados para "{query}"</p>
+            </div>
+          )}
+          {results.length>0&&(
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              {results.map(place=>{
+                const name=place.displayName?.text||"";
+                const placeId=place.id;
+                const inBitacora=placeIds.has(placeId);
+                const existingR=byPlaceId[placeId];
+                const photoName=place.photos?.[0]?.name;
+                const emoji=CUISINE_EMOJIS[GTYPE_TO_CUISINE[place.primaryType]||""]||"🍽️";
+                const district=getDistrict(place.formattedAddress);
+                return(
+                  <div key={placeId}
+                    onClick={()=>{if(inBitacora&&existingR){onOpenDetail(existingR);}else{onPrefillAdd({_mapPrefill:true,id:Date.now(),name,lat:place.location?.latitude,lng:place.location?.longitude,place_id:placeId,primaryType:place.primaryType,neighborhood:"",cuisine:"",rating:0,emoji:"🍽️",notes:"",photo:null,date:new Date().toISOString().split("T")[0]});}}}
+                    style={{background:"#1a1a1a",borderRadius:14,border:"1px solid #222",overflow:"hidden",cursor:"pointer",display:"flex",transition:"border-color 0.15s"}}
+                    onMouseEnter={e=>e.currentTarget.style.borderColor="#333"}
+                    onMouseLeave={e=>e.currentTarget.style.borderColor="#222"}>
+                    <div style={{width:80,height:80,flexShrink:0,overflow:"hidden"}}>
+                      <PlacePhotoImg photoName={photoName} fallbackEmoji={emoji} style={{width:"100%",height:"100%"}}/>
+                    </div>
+                    <div style={{flex:1,padding:"10px 12px",minWidth:0,display:"flex",flexDirection:"column",justifyContent:"center",gap:3}}>
+                      <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:6}}>
+                        <h3 style={{margin:0,fontSize:14,fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1,lineHeight:1.3}}>{name}</h3>
+                        {inBitacora&&<span style={{fontSize:9,fontWeight:700,padding:"2px 7px",borderRadius:"999px",background:"#10b98118",color:"#10b981",border:"1px solid #10b98133",flexShrink:0,whiteSpace:"nowrap"}}>✓ En tu bitácora</span>}
+                      </div>
+                      {district&&<p style={{margin:0,fontSize:11,color:"#555",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{district}</p>}
+                      <div style={{display:"flex",alignItems:"center",gap:6,marginTop:1}}>
+                        {place.rating&&(
+                          <div style={{display:"flex",alignItems:"center",gap:3}}>
+                            <span style={{fontSize:10,color:"#666"}}>★</span>
+                            <span style={{fontSize:11,fontWeight:600,color:"#888"}}>{place.rating.toFixed(1)}</span>
+                            {place.userRatingCount&&<span style={{fontSize:10,color:"#555"}}>({place.userRatingCount.toLocaleString()})</span>}
+                          </div>
+                        )}
+                        <span style={{fontSize:10,color:inBitacora?"#10b981":"#f97316",fontWeight:600,marginLeft:"auto"}}>{inBitacora?"Ver detalle →":"＋ Agregar →"}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Bitácora Screen ────────────────────────────────────────────────────────
+  const LIMA_DISTRICTS=["Miraflores","Barranco","San Isidro","Surquillo","Magdalena","San Borja","La Molina","Jesús María","Lince","Pueblo Libre","Centro","Surco","Chorrillos","Callao"];
+
+  function BitacoraScreen({restaurants,onDelete,onAddOpen,onEdit,onOpenDetail,allLists,onCreateList,onDeleteList,onRenameList}){
+    const[bitacoraMode,setBitacoraMode]=useState("mine");
+    const[search,setSearch]=useState("");
+    const[filterCuisine,setFilterCuisine]=useState("");
+    const[filterNeighborhood,setFilterNeighborhood]=useState("");
+    const[filterDistrict,setFilterDistrict]=useState("");
+    const[showFilters,setShowFilters]=useState(false);
+    const[sortByElo,setSortByElo]=useState(false);
+    const[deletingId,setDeletingId]=useState(null);
+    const[activeList,setActiveList]=useState("all");
+    const[showCreateList,setShowCreateList]=useState(false);
+    const[listAction,setListAction]=useState(null);
+    const timer=useRef(null);
+    const listTimerRef=useRef(null);
+    const lists=allLists||DEFAULT_LISTS;
+    const filtered=restaurants.filter(r=>{
+      const q=search.toLowerCase();
+      const m=r.name.toLowerCase().includes(q)||r.neighborhood.toLowerCase().includes(q)||r.cuisine.toLowerCase().includes(q)||(r.notes||"").toLowerCase().includes(q);
+      const inList=activeList==="all"||(r.lists||["restaurants"]).includes(activeList);
+      const inDistrict=!filterDistrict||r.neighborhood===filterDistrict;
+      return m&&inList&&inDistrict&&(!filterCuisine||r.cuisine===filterCuisine)&&(!filterNeighborhood||r.neighborhood===filterNeighborhood);
+    });
+    const af=[filterCuisine,filterNeighborhood].filter(Boolean).length;
+    const selS={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"13px",outline:"none"};
+    const activeListData=lists.find(l=>l.id===activeList)||lists[0];
+    return(
+      <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
+        <div style={{padding:"20px 20px 0",flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
+            <div>
+              <h1 style={{fontSize:"28px",fontWeight:800,color:"#fff",margin:0,letterSpacing:"-0.5px"}}>sabor<span style={{color:"#f97316"}}>.</span></h1>
+              <p style={{fontSize:"12px",color:"#555",margin:"2px 0 0"}}>Bitácora · {restaurants.length} {restaurants.length===1?"hallazgo":"hallazgos"}</p>
+            </div>
+            <button onClick={onAddOpen} style={{width:44,height:44,borderRadius:"50%",background:"#f97316",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,color:"#fff",boxShadow:"0 4px 20px #f9731640",flexShrink:0,transition:"transform 0.12s ease"}} onMouseDown={e=>e.currentTarget.style.transform="scale(0.88)"} onMouseUp={e=>e.currentTarget.style.transform="scale(1)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"} onTouchStart={e=>e.currentTarget.style.transform="scale(0.88)"} onTouchEnd={e=>e.currentTarget.style.transform="scale(1)"}>+</button>
+          </div>
+          <div style={{display:"flex",marginTop:12,background:"#1a1a1a",borderRadius:10,padding:3,border:"1px solid #222"}}>
+            <button onClick={()=>setBitacoraMode("mine")} style={{flex:1,padding:"6px 0",borderRadius:7,background:bitacoraMode==="mine"?"rgba(249,115,22,0.15)":"transparent",border:`1.5px solid ${bitacoraMode==="mine"?"#f97316":"transparent"}`,color:bitacoraMode==="mine"?"#f97316":"#555",fontSize:12,fontWeight:bitacoraMode==="mine"?700:400,cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+              <span>📓</span><span>Mi Bitácora</span>
+            </button>
+            <button onClick={()=>setBitacoraMode("explore")} style={{flex:1,padding:"6px 0",borderRadius:7,background:bitacoraMode==="explore"?"rgba(249,115,22,0.15)":"transparent",border:`1.5px solid ${bitacoraMode==="explore"?"#f97316":"transparent"}`,color:bitacoraMode==="explore"?"#f97316":"#555",fontSize:12,fontWeight:bitacoraMode==="explore"?700:400,cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+              <span>🔍</span><span>Explorar Lima</span>
+            </button>
+          </div>
+          {bitacoraMode==="mine"&&(<>
+          {/* List chips */}
+          <div style={{display:"flex",gap:7,marginTop:14,overflowX:"auto",paddingBottom:4,scrollbarWidth:"none",msOverflowStyle:"none",WebkitOverflowScrolling:"touch"}}>
+            {lists.map(list=>{
+              const isActive=activeList===list.id;
+              const col=list.color||"#f97316";
+              return(
+                <button key={list.id}
+                  onClick={()=>setActiveList(list.id)}
+                  onMouseDown={()=>{if(!list.isDefault){listTimerRef.current=setTimeout(()=>setListAction(list),650);}}}
+                  onMouseUp={()=>clearTimeout(listTimerRef.current)}
+                  onTouchStart={()=>{if(!list.isDefault){listTimerRef.current=setTimeout(()=>setListAction(list),650);}}}
+                  onTouchEnd={()=>clearTimeout(listTimerRef.current)}
+                  style={{padding:"7px 14px",borderRadius:"999px",background:isActive?col+"22":"#1a1a1a",border:`1.5px solid ${isActive?col:"#2a2a2a"}`,color:isActive?col:"#777",fontSize:13,fontWeight:isActive?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,display:"flex",alignItems:"center",gap:5,transition:"all 0.15s",userSelect:"none"}}>
+                  <span style={{fontSize:14}}>{list.emoji}</span>
+                  <span>{list.name}</span>
+                </button>
+              );
+            })}
+            <button onClick={()=>setShowCreateList(true)} style={{padding:"7px 13px",borderRadius:"999px",background:"#1a1a1a",border:"1.5px solid #2a2a2a",color:"#f97316",fontSize:16,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,fontWeight:700,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center"}}>＋</button>
+          </div>
+          {/* District chips */}
+          <div style={{display:"flex",gap:6,marginTop:10,overflowX:"auto",paddingBottom:2,scrollbarWidth:"none",msOverflowStyle:"none",WebkitOverflowScrolling:"touch"}}>
+            <button onClick={()=>setFilterDistrict("")} style={{padding:"5px 12px",borderRadius:"999px",background:!filterDistrict?"rgba(249,115,22,0.15)":"#1a1a1a",border:`1.5px solid ${!filterDistrict?"#f97316":"#2a2a2a"}`,color:!filterDistrict?"#f97316":"#666",fontSize:12,fontWeight:!filterDistrict?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"all 0.15s"}}>Todos</button>
+            {LIMA_DISTRICTS.map(d=>{
+              const active=filterDistrict===d;
+              return(<button key={d} onClick={()=>setFilterDistrict(active?"":d)} style={{padding:"5px 12px",borderRadius:"999px",background:active?"rgba(249,115,22,0.15)":"#1a1a1a",border:`1.5px solid ${active?"#f97316":"#2a2a2a"}`,color:active?"#f97316":"#666",fontSize:12,fontWeight:active?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"all 0.15s"}}>{d}</button>);
+            })}
+          </div>
+          <div style={{position:"relative",marginTop:10}}>
+            <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:13,color:"#555"}}>🔍</span>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar en la bitácora..." style={{width:"100%",background:"#1a1a1a",border:"1px solid #222",borderRadius:12,padding:"10px 12px 10px 34px",color:"#fff",fontSize:14,outline:"none",boxSizing:"border-box"}}/>
+          </div>
+          <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
+            <button onClick={()=>setShowFilters(!showFilters)} style={{padding:"6px 12px",borderRadius:8,background:showFilters?"#f97316":"#1a1a1a",border:showFilters?"1px solid #f97316":"1px solid #222",color:showFilters?"#fff":"#888",fontSize:12,cursor:"pointer"}}>⚙ Filtros {af>0&&`(${af})`}</button>
+            {(filterCuisine||filterNeighborhood)&&<button onClick={()=>{setFilterCuisine("");setFilterNeighborhood("");}} style={{padding:"6px 12px",borderRadius:8,background:"transparent",border:"1px solid #333",color:"#f97316",fontSize:12,cursor:"pointer"}}>Limpiar</button>}
+            <button onClick={()=>setSortByElo(v=>!v)} style={{padding:"6px 12px",borderRadius:8,background:sortByElo?"rgba(249,115,22,0.15)":"#1a1a1a",border:sortByElo?"1px solid #f97316":"1px solid #222",color:sortByElo?"#f97316":"#888",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontWeight:sortByElo?700:400}}>
+              {sortByElo?"▼":"↕"} ELO
+            </button>
+          </div>
+          {showFilters&&(
+            <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:8}}>
+              <select value={filterCuisine} onChange={e=>setFilterCuisine(e.target.value)} style={selS}><option value="">Todas las cocinas</option>{CUISINES.map(c=><option key={c} value={c}>{c}</option>)}</select>
+              <select value={filterNeighborhood} onChange={e=>setFilterNeighborhood(e.target.value)} style={selS}><option value="">Todos los distritos</option>{NEIGHBORHOODS.map(n=><option key={n} value={n}>{n}</option>)}</select>
+            </div>
+          )}
+          </>)}
+        </div>
+        {bitacoraMode==="explore"?(
+          <ExplorarLimaSection restaurants={restaurants} onOpenDetail={onOpenDetail} onPrefillAdd={onEdit}/>
+        ):(
+        <div style={{flex:1,overflowY:"auto",padding:"12px 20px 20px"}}>
+          {restaurants.length===0?(
+            <div style={{textAlign:"center",padding:"48px 16px",display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
+              <div style={{fontSize:72,lineHeight:1}}>📓</div>
+              <h2 style={{fontSize:20,fontWeight:800,color:"#fff",margin:0,lineHeight:1.35}}>Tu bitácora está esperando<br/>su primer hallazgo</h2>
+              <p style={{fontSize:13,color:"#555",lineHeight:1.75,maxWidth:260,margin:0}}>Lima tiene sabores únicos esperando ser descubiertos. Empieza a cartografiar tu territorio gastronómico.</p>
+              <button onClick={onAddOpen} style={{marginTop:8,padding:"13px 28px",borderRadius:14,background:"#f97316",border:"none",color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px rgba(249,115,22,0.4)"}}>+ Registrar primer hallazgo</button>
+            </div>
+          ):filtered.length===0?(
+            <div style={{textAlign:"center",padding:"60px 20px",color:"#444"}}>
+              <div style={{fontSize:40,marginBottom:12}}>🔍</div>
+              <p style={{fontSize:15}}>No hay hallazgos {activeList!=="all"?`en "${activeListData?.name}"`:""} para esa búsqueda.</p>
+            </div>
+          ):(
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              {(sortByElo?[...filtered].sort((a,b)=>(b.eloScore||5)-(a.eloScore||5)):filtered).map((r,i)=>(
+                <div key={r.id} className="fade-up" style={{animationDelay:`${Math.min(i,8)*0.07}s`}}>
+                  <RestaurantCard restaurant={r}
+                    onOpenDetail={onOpenDetail}
+                    onLongPressStart={()=>{timer.current=setTimeout(()=>setDeletingId(r.id),600);}}
+                    onLongPressEnd={()=>clearTimeout(timer.current)}
+                    isDeleting={deletingId===r.id}
+                    onDeleteConfirm={()=>{onDelete(r.id);setDeletingId(null);}}
+                    onDeleteCancel={()=>setDeletingId(null)}
+                    onEdit={onEdit}/>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        )}
+        {showCreateList&&<CreateListModal onSave={list=>{onCreateList(list);setShowCreateList(false);}} onClose={()=>setShowCreateList(false)}/>}
+        {listAction&&<ListActionModal list={listAction} onRename={name=>{onRenameList(listAction.id,name);setListAction(null);}} onDelete={()=>{onDeleteList(listAction.id);if(activeList===listAction.id)setActiveList("all");setListAction(null);}} onClose={()=>setListAction(null)}/>}
+      </div>
+    );
+  }
+
+  // ── Google Place Modal ─────────────────────────────────────────────────────
+  function GooglePlaceModal({place,onClose,onAddRestaurant}){
+    const[entries,setEntries]=useState([]);
+    const[loading,setLoading]=useState(true);
+    useEffect(()=>{const h=e=>{if(e.key==="Escape")onClose();};document.addEventListener("keydown",h);return()=>document.removeEventListener("keydown",h);},[]);
+
+    useEffect(()=>{
+      let cancelled=false;
+      (async()=>{
+        setLoading(true);
+        // 1. Buscar por place_id exacto
+        let{data}=await sb.from("restaurants")
+          .select("id,name,rating,notes,emoji,cover_photo,neighborhood,cuisine,place_id,lat,lng")
+          .eq("is_public",true).eq("place_id",place.id)
+          .order("created_at",{ascending:false}).limit(20);
+        // 2. Fallback por nombre + proximidad
+        if(!data?.length){
+          const safe=place.name.replace(/%/g,"").slice(0,30);
+          const r=await sb.from("restaurants")
+            .select("id,name,rating,notes,emoji,cover_photo,neighborhood,cuisine,place_id,lat,lng")
+            .eq("is_public",true).ilike("name",`%${safe}%`)
+            .order("created_at",{ascending:false}).limit(50);
+          data=(r.data||[]).filter(e=>{
+            if(!e.lat||!e.lng||!place.lat||!place.lng)return true;
+            return haversineM(place.lat,place.lng,e.lat,e.lng)<400;
+          });
+        }
+        if(!cancelled){setEntries(data||[]);setLoading(false);}
+      })();
+      return()=>{cancelled=true;};
+    },[place.id]);
+
+    const rated=entries.filter(e=>e.rating>0);
+    const avgRating=rated.length?rated.reduce((s,e)=>s+e.rating,0)/rated.length:null;
+    return(
+      <div className="slide-up" style={{position:"absolute",inset:0,zIndex:600,background:"#0f0f0f",display:"flex",flexDirection:"column",borderRadius:"inherit",overflow:"hidden"}}>
+        {/* Header */}
+        <div style={{padding:"14px 18px",display:"flex",alignItems:"center",gap:10,borderBottom:"1px solid #1e1e1e",flexShrink:0,background:"#0f0f0f"}}>
+          <button onClick={onClose} style={{width:34,height:34,borderRadius:"50%",background:"#1a1a1a",border:"1px solid #2a2a2a",color:"#fff",fontSize:20,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>‹</button>
+          <div style={{flex:1,minWidth:0}}>
+            <h2 style={{margin:0,fontSize:16,fontWeight:800,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{place.name}</h2>
+            <p style={{margin:"2px 0 0",fontSize:10,color:"#555",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{GTYPE_ES[place.primaryType]||"Restaurante"}{place.address?` · ${place.address}`:""}</p>
+          </div>
+          {place.rating&&<div style={{textAlign:"right",flexShrink:0}}>
+            <p style={{margin:0,fontSize:15,fontWeight:800,color:"#fbbf24"}}>★ {place.rating.toFixed(1)}</p>
+            <p style={{margin:0,fontSize:9,color:"#444",letterSpacing:"0.05em"}}>GOOGLE</p>
+          </div>}
+        </div>
+
+        {/* Content */}
+        <div style={{flex:1,overflowY:"auto",padding:"16px 18px 20px"}}>
+          {loading?(
+            <div style={{textAlign:"center",padding:"60px 0"}}>
+              <p style={{fontSize:28,marginBottom:10}}>🔍</p>
+              <p style={{fontSize:13,color:"#555"}}>Buscando en la comunidad Sabor…</p>
+            </div>
+          ):entries.length===0?(
+            <div style={{textAlign:"center",padding:"60px 0"}}>
+              <p style={{fontSize:40,marginBottom:12}}>🍽️</p>
+              <p style={{fontSize:16,fontWeight:800,color:"#fff",marginBottom:6}}>Nadie lo ha registrado aún</p>
+              <p style={{fontSize:12,color:"#555",lineHeight:1.6}}>¡Visítalo y sé el primero<br/>en dejar tu reseña en Sabor!</p>
+            </div>
+          ):(
+            <>
+              {/* Rating comunitario */}
+              {avgRating&&(
+                <div style={{background:"#1a1a1a",borderRadius:14,padding:"14px 16px",marginBottom:14,border:"1px solid #222",display:"flex",alignItems:"center",gap:14}}>
+                  <span style={{fontSize:42,fontWeight:900,color:"#fbbf24",lineHeight:1}}>{avgRating.toFixed(1)}</span>
+                  <div style={{flex:1}}>
+                    <Stars rating={Math.round(avgRating)} size={18}/>
+                    <p style={{margin:"5px 0 0",fontSize:11,color:"#555"}}>{rated.length} {rated.length===1?"visita":"visitas"} registrada{rated.length!==1?"s":""} en Sabor</p>
+                  </div>
+                  <div style={{textAlign:"right",flexShrink:0}}>
+                    <p style={{margin:0,fontSize:18,fontWeight:900,color:"#f97316",letterSpacing:"-1px"}}>sabor<span style={{color:"#f97316"}}>.</span></p>
+                    <p style={{margin:"2px 0 0",fontSize:9,color:"#444",letterSpacing:"0.08em"}}>COMUNIDAD</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Reseñas */}
+              <p style={{fontSize:10,fontWeight:700,color:"#444",letterSpacing:"0.1em",margin:"0 0 10px"}}>RESEÑAS · SABOR</p>
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                {entries.map((e,i)=>(
+                  <div key={e.id||i} style={{background:"#1a1a1a",borderRadius:14,padding:"14px 16px",border:"1px solid #222"}}>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:e.notes?8:0}}>
+                      <div style={{display:"flex",alignItems:"center",gap:8}}>
+                        <div style={{width:32,height:32,borderRadius:8,background:"#222",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17}}>{e.emoji||"🍽️"}</div>
+                        <div>
+                          <p style={{margin:0,fontSize:12,fontWeight:600,color:"#bbb"}}>{e.cuisine||"Sin especificar"}</p>
+                          {e.neighborhood&&<p style={{margin:0,fontSize:10,color:"#555"}}>{e.neighborhood}</p>}
+                        </div>
+                      </div>
+                      {e.rating>0&&<Stars rating={e.rating} size={12}/>}
+                    </div>
+                    {e.notes&&<p style={{margin:0,fontSize:13,color:"#bbb",lineHeight:1.65,fontStyle:"italic"}}>"{e.notes}"</p>}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer */}
+        {onAddRestaurant&&(
+          <div style={{padding:"10px 18px 16px",borderTop:"1px solid #1e1e1e",flexShrink:0,background:"#0f0f0f"}}>
+            <button onClick={()=>{onAddRestaurant({_mapPrefill:true,id:Date.now(),name:place.name,lat:place.lat,lng:place.lng,place_id:place.id,neighborhood:"",cuisine:"",rating:0,emoji:"🍽️",notes:"",photo:null,date:new Date().toISOString().split("T")[0]});onClose();}} style={{width:"100%",padding:"13px",borderRadius:12,background:"#f97316",border:"none",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 18px rgba(249,115,22,0.35)"}}>+ Agregar a mi bitácora</button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Map Screen ─────────────────────────────────────────────────────────────
+  function chipStyle(active,color){return{padding:"5px 12px",borderRadius:"999px",background:active?color:"#1a1a1a",border:`1px solid ${active?color:"#2a2a2a"}`,color:active?"#fff":"#777",fontSize:11,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0};}
+  function haversineM(la1,lo1,la2,lo2){const R=6371000,f1=la1*Math.PI/180,f2=la2*Math.PI/180,df=(la2-la1)*Math.PI/180,dl=(lo2-lo1)*Math.PI/180,a=Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+  function fmtDist(m){return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(1)} km`;}
+  const GTYPE_ES={restaurant:"Restaurante",cafe:"Café",bar:"Bar",bakery:"Panadería",fast_food_restaurant:"Fast Food",pizza_restaurant:"Pizza",seafood_restaurant:"Mariscos",sushi_restaurant:"Sushi",japanese_restaurant:"Japonesa",chinese_restaurant:"Chifa",italian_restaurant:"Italiana",peruvian_restaurant:"Peruana",steak_house:"Parrilla",vegetarian_restaurant:"Vegetariana",sandwich_shop:"Sándwiches",ice_cream_shop:"Helados",brunch_restaurant:"Brunch",meal_delivery:"Delivery"};
+  const MAP_GKEY="AIzaSyBJz5LMmNFD5rkaoSB8FaVQjj2aMiglRy0";
+
+  function MapScreen({restaurants,onOpenDetail,onAddRestaurant}){
+    const mapDiv=useRef(null),leaflet=useRef(null),layerRef=useRef(null),userMarkerRef=useRef(null);
+    const[filterSource,setFilterSource]=useState("all"); // all|mine|google
+    const[filterSubtype,setFilterSubtype]=useState("");
+    const[filterNeighborhood,setFilterNeighborhood]=useState("");
+    const[filterNearby,setFilterNearby]=useState(false);
+    const[selected,setSelected]=useState(null);
+    const[selectedGoogle,setSelectedGoogle]=useState(null);
+    const[googleModalOpen,setGoogleModalOpen]=useState(false);
+    const[userPos,setUserPos]=useState(null);
+    const[sheetOpen,setSheetOpen]=useState(false);
+    const[googlePlaces,setGooglePlaces]=useState([]);
+    const[loadingGoogle,setLoadingGoogle]=useState(false);
+    const[searchPos,setSearchPos]=useState(null);
+
+    const cuisines=[...new Set(restaurants.map(r=>r.cuisine))].sort();
+    const neighborhoods=[...new Set(restaurants.map(r=>r.neighborhood))].sort();
+    const googleTypes=[...new Set(googlePlaces.map(g=>g.primaryType).filter(Boolean))].sort();
+    const noFilters=filterSource==="all"&&!filterSubtype&&!filterNearby&&!filterNeighborhood;
+
+    const filteredPersonal=(filterSource==="google")?[]:restaurants.filter(r=>{
+      if(filterSubtype&&r.cuisine!==filterSubtype)return false;
+      if(filterNeighborhood&&r.neighborhood!==filterNeighborhood)return false;
+      if(filterNearby&&userPos){const[la,lo]=getCoords(r);return haversineM(userPos.lat,userPos.lng,la,lo)<1000;}
+      return true;
+    });
+    const filteredGoogle=(filterSource==="mine")?[]:googlePlaces.filter(g=>{
+      if(filterSubtype&&g.primaryType!==filterSubtype)return false;
+      if(filterNearby&&userPos)return haversineM(userPos.lat,userPos.lng,g.lat,g.lng)<1000;
+      return true;
+    });
+    const totalCount=filteredPersonal.length+filteredGoogle.length;
+    const sheetItems=[
+      ...filteredPersonal.map(r=>{const[la,lo]=getCoords(r);return{...r,_dist:userPos?haversineM(userPos.lat,userPos.lng,la,lo):null};}),
+      ...filteredGoogle.map(g=>({...g,_dist:userPos?haversineM(userPos.lat,userPos.lng,g.lat,g.lng):null}))
+    ].sort((a,b)=>(a._dist??999999)-(b._dist??999999));
+
+    // Fetch Google Places Nearby
+    const doFetchGoogle=async(lat,lng)=>{
+      setLoadingGoogle(true);
+      try{
+        const res=await fetch("https://places.googleapis.com/v1/places:searchNearby",{method:"POST",headers:{"Content-Type":"application/json","X-Goog-Api-Key":MAP_GKEY,"X-Goog-FieldMask":"places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.primaryType"},body:JSON.stringify({includedTypes:["restaurant","cafe","bar","bakery"],maxResultCount:20,locationRestriction:{circle:{center:{latitude:lat,longitude:lng},radius:1500}}})});
+        const data=await res.json();
+        setGooglePlaces((data.places||[]).map(p=>({id:p.id,name:p.displayName?.text||"",lat:p.location?.latitude,lng:p.location?.longitude,rating:p.rating,userRatingCount:p.userRatingCount,primaryType:p.primaryType||"restaurant",address:p.formattedAddress||"",isGoogle:true})));
+      }catch(e){console.warn("Google Nearby:",e);}
+      setLoadingGoogle(false);
+    };
+
+    // Init map + geolocation
+    useEffect(()=>{
+      if(!mapDiv.current||leaflet.current)return;
+      const map=L.map(mapDiv.current,{center:[-12.1219,-77.0281],zoom:13});
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{attribution:'&copy; <a href="https://carto.com/">CARTO</a>',subdomains:"abcd",maxZoom:19}).addTo(map);
+      leaflet.current=map;
+      if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{const{latitude:lat,longitude:lng}=pos.coords;setUserPos({lat,lng});setSearchPos({lat,lng});map.setView([lat,lng],14);},()=>{});}
+      return()=>{map.remove();leaflet.current=null;};
+    },[]);
+
+    // Fetch when searchPos changes
+    useEffect(()=>{if(searchPos)doFetchGoogle(searchPos.lat,searchPos.lng);},[searchPos]);
+
+    // User location pin
+    useEffect(()=>{
+      const map=leaflet.current;if(!map||!userPos)return;
+      if(userMarkerRef.current)userMarkerRef.current.remove();
+      const icon=L.divIcon({html:`<div class="user-loc-pin"><div class="user-loc-pulse"></div><div class="user-loc-dot"></div></div>`,className:"",iconSize:[40,40],iconAnchor:[20,20]});
+      userMarkerRef.current=L.marker([userPos.lat,userPos.lng],{icon,zIndexOffset:1000}).addTo(map).bindTooltip("Estás aquí",{permanent:false,direction:"top"});
+    },[userPos]);
+
+    // All markers with clustering
+    useEffect(()=>{
+      const map=leaflet.current;if(!map)return;
+      if(layerRef.current){map.removeLayer(layerRef.current);layerRef.current=null;}
+      const useCluster=typeof L.markerClusterGroup==="function";
+      const layer=useCluster?L.markerClusterGroup({maxClusterRadius:55,showCoverageOnHover:false,spiderfyOnMaxZoom:true,iconCreateFunction:cl=>{const c=cl.getChildCount();return L.divIcon({html:`<div class="sabor-cluster"><span>${c}</span></div>`,className:"",iconSize:[40,40],iconAnchor:[20,20]});}}):L.layerGroup();
+      // Personal pins (teardrop con emoji)
+      filteredPersonal.forEach(r=>{
+        const[lat,lng]=getCoords(r);const color=CUISINE_COLORS[r.cuisine]||"#f97316";
+        const icon=L.divIcon({html:`<div class="sabor-pin" style="background:${color}"><div class="sabor-pin-inner">${r.emoji}</div></div>`,className:"",iconSize:[36,36],iconAnchor:[18,36]});
+        L.marker([lat,lng],{icon}).on("click",()=>{setSelected(r);setSelectedGoogle(null);setSheetOpen(false);}).addTo(layer);
+      });
+      // Google pins (círculo azul)
+      filteredGoogle.forEach(g=>{
+        if(!g.lat||!g.lng)return;
+        const icon=L.divIcon({html:`<div class="google-pin"><div class="google-pin-inner">🍽️</div></div>`,className:"",iconSize:[30,30],iconAnchor:[15,15]});
+        L.marker([g.lat,g.lng],{icon}).on("click",()=>{setSelectedGoogle(g);setSelected(null);setSheetOpen(false);}).addTo(layer);
+      });
+      layer.addTo(map);layerRef.current=layer;
+    },[filteredPersonal,filteredGoogle]);
+
+    const flyTo=(lat,lng)=>{leaflet.current?.setView([lat,lng],16);};
+    const resetFilters=()=>{setFilterSource("all");setFilterSubtype("");setFilterNearby(false);setFilterNeighborhood("");};
+
+    return(
+      <div style={{display:"flex",flexDirection:"column",height:"100%",position:"relative"}}>
+        {/* Header */}
+        <div style={{padding:"18px 20px 8px",flexShrink:0}}>
+          <h2 style={{fontSize:"20px",fontWeight:800,color:"#fff",margin:0}}>Mapa de Lima <span style={{color:"#f97316"}}>📍</span></h2>
+          <p style={{fontSize:"12px",color:"#555",marginTop:2}}>
+            {totalCount} {totalCount===1?"lugar":"lugares"}
+            {filteredPersonal.length>0&&<span style={{color:"#f97316"}}> · {filteredPersonal.length} tuyos</span>}
+            {filteredGoogle.length>0&&<span style={{color:"#3b82f6"}}> · {filteredGoogle.length} Google</span>}
+            {loadingGoogle&&<span style={{color:"#3b82f6",marginLeft:6}}>⏳</span>}
+          </p>
+          {/* Filter chips */}
+          <div style={{display:"flex",gap:6,marginTop:10,overflowX:"auto",paddingBottom:4,scrollbarWidth:"none",msOverflowStyle:"none"}}>
+            <button onClick={resetFilters} style={chipStyle(noFilters,"#f97316")}>Todos</button>
+            <button onClick={()=>{setFilterSource(filterSource==="mine"?"all":"mine");setFilterSubtype("");setFilterNeighborhood("");}} style={chipStyle(filterSource==="mine"&&!filterSubtype,"#f97316")}>⭐ Mis hallazgos</button>
+            <button onClick={()=>{setFilterSource(filterSource==="google"?"all":"google");setFilterSubtype("");}} style={chipStyle(filterSource==="google"&&!filterSubtype,"#3b82f6")}>🔍 Google</button>
+            <button onClick={()=>setFilterNearby(v=>!v)} style={chipStyle(filterNearby,"#f97316")}>📍 Cercanos</button>
+            {/* Cuisine chips (personales) */}
+            {cuisines.length>0&&<div style={{width:1,flexShrink:0,background:"#2a2a2a",margin:"4px 2px"}}/>}
+            {cuisines.map(c=>{const a=filterSource==="mine"&&filterSubtype===c;const col=CUISINE_COLORS[c]||"#f97316";return<button key={c} onClick={()=>{if(a){setFilterSubtype("");setFilterSource("mine");}else{setFilterSource("mine");setFilterSubtype(c);setFilterNeighborhood("");}}} style={chipStyle(a,col)}>{c}</button>;})}
+            {/* Google type chips */}
+            {googleTypes.length>0&&<div style={{width:1,flexShrink:0,background:"#2a2a2a",margin:"4px 2px"}}/>}
+            {googleTypes.map(t=>{const a=filterSource==="google"&&filterSubtype===t;return<button key={t} onClick={()=>{if(a){setFilterSubtype("");setFilterSource("google");}else{setFilterSource("google");setFilterSubtype(t);}}} style={chipStyle(a,"#3b82f6")}>{GTYPE_ES[t]||t}</button>;})}
+            {/* Barrio chips */}
+            {neighborhoods.length>0&&<div style={{width:1,flexShrink:0,background:"#2a2a2a",margin:"4px 2px"}}/>}
+            {neighborhoods.map(n=>{const a=filterNeighborhood===n;return<button key={n} onClick={()=>setFilterNeighborhood(a?"":n)} style={chipStyle(a,"#64748b")}>📌 {n}</button>;})}
+          </div>
+        </div>
+
+        {/* Map */}
+        <div style={{flex:1,margin:"0 12px 8px",borderRadius:16,overflow:"hidden",border:"1px solid #222",position:"relative"}}>
+          <div ref={mapDiv} style={{width:"100%",height:"100%"}}/>
+          {/* Buscar aquí */}
+          <button onClick={()=>{const c=leaflet.current?.getCenter();if(c)setSearchPos({lat:c.lat,lng:c.lng});}} style={{position:"absolute",top:10,left:"50%",transform:"translateX(-50%)",background:"#141414",border:"1px solid #333",borderRadius:20,padding:"6px 14px",color:loadingGoogle?"#3b82f6":"#ccc",fontSize:11,fontWeight:600,cursor:"pointer",zIndex:800,boxShadow:"0 2px 12px rgba(0,0,0,0.7)",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:5,transition:"color 0.2s"}}>
+            {loadingGoogle?"⏳ Buscando…":"🔍 Buscar restaurantes aquí"}
+          </button>
+          {/* FAB */}
+          <button onClick={()=>{setSheetOpen(v=>!v);setSelected(null);setSelectedGoogle(null);}} style={{position:"absolute",bottom:12,right:12,width:44,height:44,borderRadius:"50%",background:"#f97316",border:"none",color:"#fff",fontSize:18,cursor:"pointer",boxShadow:"0 4px 16px rgba(249,115,22,0.5)",zIndex:800,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>
+            {sheetOpen?"✕":"≡"}
+          </button>
+        </div>
+
+        {/* Bottom sheet */}
+        <div style={{height:sheetOpen?252:0,flexShrink:0,overflow:"hidden",transition:"height 0.3s cubic-bezier(0.4,0,0.2,1)",background:"#141414",borderTop:sheetOpen?"1px solid #2a2a2a":"none",borderRadius:"16px 16px 0 0"}}>
+          <div style={{padding:"10px 16px 6px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid #1e1e1e",flexShrink:0}}>
+            <span style={{fontSize:13,fontWeight:700,color:"#fff"}}>{userPos?"Ordenados por distancia":"Todos los lugares"}</span>
+            <span style={{fontSize:10,color:"#555"}}>{sheetItems.length} resultados</span>
+          </div>
+          <div style={{overflowY:"auto",maxHeight:200}}>
+            {sheetItems.map((item,idx)=>{
+              const isG=item.isGoogle;
+              const handleClick=()=>{if(isG){flyTo(item.lat,item.lng);setSelectedGoogle(item);setSelected(null);}else{const[la,lo]=getCoords(item);flyTo(la,lo);setSelected(item);setSelectedGoogle(null);}setSheetOpen(false);};
+              return(
+                <div key={item.id||idx} onClick={handleClick} style={{padding:"8px 16px",display:"flex",gap:10,alignItems:"center",cursor:"pointer",borderBottom:"1px solid #1a1a1a"}} onMouseEnter={e=>e.currentTarget.style.background="#1e1e1e"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                  <div style={{width:32,height:32,borderRadius:isG?"50%":"8px",background:isG?"#0f172a":"#222",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0,border:isG?"2px solid #3b82f6":"none"}}>{isG?"🍽️":item.emoji}</div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <p style={{margin:0,fontSize:13,fontWeight:600,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.name}</p>
+                    <p style={{margin:"1px 0 0",fontSize:10,color:isG?"#3b82f688":"#555",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{isG?(GTYPE_ES[item.primaryType]||item.primaryType):`${item.neighborhood} · ${item.cuisine}`}</p>
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:2,flexShrink:0}}>
+                    {isG?<span style={{fontSize:11,fontWeight:700,color:"#fbbf24"}}>{item.rating?`★ ${item.rating.toFixed(1)}`:"—"}</span>:<Stars rating={item.rating} size={10}/>}
+                    {item._dist!=null&&<span style={{fontSize:10,fontWeight:700,color:item._dist<1000?"#f97316":"#666"}}>{fmtDist(item._dist)}</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Card: restaurante personal */}
+        {selected&&!sheetOpen&&(
+          <div style={{position:"absolute",bottom:8,left:12,right:12,background:"#1a1a1a",borderRadius:16,padding:"14px 16px",border:"1px solid #333",zIndex:1000,boxShadow:"0 -4px 24px rgba(0,0,0,0.5)"}}>
+            <button onClick={()=>setSelected(null)} style={{position:"absolute",top:12,right:14,background:"none",border:"none",color:"#555",fontSize:16,cursor:"pointer"}}>✕</button>
+            <div style={{display:"flex",gap:10,alignItems:"center",cursor:"pointer"}} onClick={()=>{onOpenDetail(selected);setSelected(null);}}>
+              <div style={{width:40,height:40,borderRadius:10,background:"#222",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{selected.emoji}</div>
+              <div style={{flex:1,minWidth:0}}>
+                <h3 style={{margin:0,fontSize:15,fontWeight:700,color:"#fff"}}>{selected.name}</h3>
+                <div style={{display:"flex",gap:5,marginTop:4,flexWrap:"wrap"}}><Badge label={selected.neighborhood} color="#777"/><Badge label={selected.cuisine} color={CUISINE_COLORS[selected.cuisine]||"#f97316"}/></div>
+              </div>
+              <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4}}>
+                <Stars rating={selected.rating} size={13}/>
+                {userPos&&(()=>{const[la,lo]=getCoords(selected);return<span style={{fontSize:11,color:"#f97316"}}>{fmtDist(haversineM(userPos.lat,userPos.lng,la,lo))}</span>;})()}
+                <span style={{fontSize:11,color:"#f97316"}}>Ver →</span>
+              </div>
+            </div>
+            {selected.notes&&<p style={{margin:"10px 0 0",fontSize:12,color:"#777",lineHeight:1.5,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>"{selected.notes}"</p>}
+          </div>
+        )}
+
+        {/* Card: lugar de Google */}
+        {selectedGoogle&&!sheetOpen&&!googleModalOpen&&(
+          <div style={{position:"absolute",bottom:8,left:12,right:12,background:"#0b1628",borderRadius:16,padding:"14px 16px",border:"1px solid #1e3a5f",zIndex:1000,boxShadow:"0 -4px 24px rgba(0,0,0,0.6)"}}>
+            <button onClick={()=>setSelectedGoogle(null)} style={{position:"absolute",top:12,right:14,background:"none",border:"none",color:"#555",fontSize:16,cursor:"pointer"}}>✕</button>
+            <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+              <div style={{width:40,height:40,borderRadius:"50%",background:"#0f172a",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0,border:"2px solid #3b82f6"}}>🍽️</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+                  <h3 style={{margin:0,fontSize:15,fontWeight:700,color:"#fff"}}>{selectedGoogle.name}</h3>
+                  <span style={{fontSize:9,padding:"2px 6px",borderRadius:4,background:"#3b82f622",color:"#3b82f6",fontWeight:700,flexShrink:0,border:"1px solid #3b82f633"}}>Google</span>
+                </div>
+                <p style={{margin:"3px 0 0",fontSize:11,color:"#445",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{selectedGoogle.address}</p>
+                <div style={{display:"flex",gap:8,marginTop:6,alignItems:"center",flexWrap:"wrap"}}>
+                  {selectedGoogle.rating&&<span style={{fontSize:13,color:"#fbbf24",fontWeight:700}}>★ {selectedGoogle.rating.toFixed(1)}</span>}
+                  {selectedGoogle.primaryType&&<Badge label={GTYPE_ES[selectedGoogle.primaryType]||selectedGoogle.primaryType} color="#3b82f6"/>}
+                  {userPos&&<span style={{fontSize:11,color:"#f97316",fontWeight:600}}>{fmtDist(haversineM(userPos.lat,userPos.lng,selectedGoogle.lat,selectedGoogle.lng))}</span>}
+                </div>
+              </div>
+            </div>
+            {/* Botones */}
+            <div style={{display:"flex",gap:8,marginTop:12}}>
+              <button onClick={()=>setGoogleModalOpen(true)} style={{flex:1,padding:"9px",borderRadius:10,background:"#1a2744",border:"1px solid #3b82f633",color:"#3b82f6",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+                👥 Ver en Sabor
+              </button>
+              {onAddRestaurant&&<button onClick={()=>{onAddRestaurant({_mapPrefill:true,id:Date.now(),name:selectedGoogle.name,lat:selectedGoogle.lat,lng:selectedGoogle.lng,place_id:selectedGoogle.id,primaryType:selectedGoogle.primaryType,neighborhood:"",cuisine:"",rating:0,emoji:"🍽️",notes:"",photo:null,date:new Date().toISOString().split("T")[0]});setSelectedGoogle(null);}} style={{flex:1,padding:"9px",borderRadius:10,background:"#f97316",border:"none",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+                ＋ Bitácora
+              </button>}
+            </div>
+          </div>
+        )}
+
+        {/* Modal de comunidad Sabor para lugar de Google */}
+        {googleModalOpen&&selectedGoogle&&(
+          <GooglePlaceModal
+            place={selectedGoogle}
+            onClose={()=>setGoogleModalOpen(false)}
+            onAddRestaurant={onAddRestaurant}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // ── Friend Search Modal ─────────────────────────────────────────────────────
+  function FriendSearchModal({user,onClose}){
+    const[query,setQuery]=useState("");
+    const[results,setResults]=useState([]);
+    const[loading,setLoading]=useState(false);
+    const[statuses,setStatuses]=useState({});
+    const debRef=useRef(null);
+    const inp={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"14px",outline:"none",boxSizing:"border-box"};
+    useEffect(()=>{const h=e=>{if(e.key==="Escape")onClose();};document.addEventListener("keydown",h);return()=>document.removeEventListener("keydown",h);},[]);
+
+    useEffect(()=>{
+      if(!user)return;
+      (async()=>{
+        const{data}=await sb.from("friendships").select("requester_id,addressee_id,status")
+          .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
+        const m={};
+        (data||[]).forEach(f=>{const otherId=f.requester_id===user.id?f.addressee_id:f.requester_id;m[otherId]=f.status;});
+        setStatuses(m);
+      })();
+    },[user]);
+
+    const doSearch=async(q)=>{
+      if(!q||q.trim().length<2){setResults([]);return;}
+      setLoading(true);
+      const clean=q.replace(/^@/,"");
+      const{data}=await sb.from("profiles").select("id,username,name,avatar_url")
+        .or(`username.ilike.%${clean}%,name.ilike.%${clean}%`).neq("id",user.id).limit(15);
+      setResults(data||[]);
+      setLoading(false);
+    };
+
+    useEffect(()=>{
+      clearTimeout(debRef.current);
+      debRef.current=setTimeout(()=>doSearch(query),320);
+      return()=>clearTimeout(debRef.current);
+    },[query]);
+
+    const[addErr,setAddErr]=useState(null);
+    const addFriend=async(targetId)=>{
+      const{error}=await sb.from("friendships").insert({requester_id:user.id,addressee_id:targetId,status:"pending"});
+      if(error){setAddErr("No se pudo enviar la solicitud");setTimeout(()=>setAddErr(null),3000);}
+      else setStatuses(s=>({...s,[targetId]:"pending"}));
+    };
+
+    return(
+      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.85)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(6px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="slide-up" style={{background:"#111",borderRadius:"24px 24px 0 0",maxHeight:"80%",display:"flex",flexDirection:"column",border:"1px solid #222",borderBottom:"none"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 20px 0",flexShrink:0}}>
+            <button onClick={onClose} style={{background:"none",border:"none",color:"#777",fontSize:"15px",cursor:"pointer"}}>Cerrar</button>
+            <h2 style={{margin:0,fontSize:"16px",fontWeight:700,color:"#fff"}}>Buscar amigos</h2>
+            <div style={{width:52}}/>
+          </div>
+          <div style={{display:"flex",justifyContent:"center",padding:"10px 0 0"}}><div style={{width:36,height:4,borderRadius:2,background:"#2a2a2a"}}/></div>
+          <div style={{padding:"14px 20px 0",flexShrink:0}}>
+            <div style={{position:"relative"}}>
+              <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:"#f97316",fontWeight:700,fontSize:15}}>@</span>
+              <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar por @usuario o nombre…" style={{...inp,paddingLeft:28}} autoFocus/>
+              {loading&&<span style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",color:"#f97316",fontSize:13}}>⏳</span>}
+            </div>
+          </div>
+          <div style={{flex:1,overflowY:"auto",padding:"12px 20px 44px"}}>
+            {addErr&&<div style={{background:"#ef444422",border:"1px solid #ef4444",borderRadius:10,padding:"10px 14px",fontSize:13,color:"#ef4444",marginBottom:10}}>{addErr}</div>}
+            {query.length>=2&&!loading&&results.length===0&&(
+              <div style={{textAlign:"center",padding:"32px 0",color:"#444"}}>
+                <div style={{fontSize:32,marginBottom:8}}>🔍</div>
+                <p style={{fontSize:13}}>Sin resultados para "{query}"</p>
+              </div>
+            )}
+            {query.length<2&&<p style={{fontSize:12,color:"#333",textAlign:"center",padding:"24px 0"}}>Escribe al menos 2 caracteres</p>}
+            <div style={{display:"flex",flexDirection:"column",gap:4}}>
+              {results.map(p=>{
+                const status=statuses[p.id];
+                return(
+                  <div key={p.id} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:"1px solid #1a1a1a"}}>
+                    <div style={{width:42,height:42,borderRadius:"50%",background:"linear-gradient(135deg,#f97316,#fbbf24)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0,overflow:"hidden"}}>
+                      {p.avatar_url?<img src={p.avatar_url} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:"👤"}
+                    </div>
+                    <div style={{flex:1,minWidth:0}}>
+                      <p style={{margin:0,fontSize:14,fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name}</p>
+                      <p style={{margin:"2px 0 0",fontSize:12,color:"#f97316"}}>@{p.username}</p>
+                    </div>
+                    {!status&&<button onClick={()=>addFriend(p.id)} style={{padding:"7px 14px",borderRadius:20,background:"#f97316",border:"none",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",flexShrink:0}}>Agregar</button>}
+                    {status==="pending"&&<span style={{fontSize:11,color:"#888",padding:"7px 12px",borderRadius:20,background:"#1a1a1a",border:"1px solid #2a2a2a",flexShrink:0}}>Pendiente</span>}
+                    {status==="accepted"&&<span style={{fontSize:11,color:"#10b981",padding:"7px 12px",borderRadius:20,background:"#10b98118",border:"1px solid #10b98133",flexShrink:0}}>✓ Amigos</span>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Friend Profile Modal ────────────────────────────────────────────────────
+  function FriendProfileModal({friendId,user,myRestaurants,onClose}){
+    const[friendProfile,setFriendProfile]=useState(null);
+    const[friendRestaurants,setFriendRestaurants]=useState([]);
+    const[loading,setLoading]=useState(true);
+    const[matchData,setMatchData]=useState(null);
+    useEffect(()=>{const h=e=>{if(e.key==="Escape")onClose();};document.addEventListener("keydown",h);return()=>document.removeEventListener("keydown",h);},[]);
+
+    useEffect(()=>{
+      if(!friendId)return;
+      (async()=>{
+        setLoading(true);
+        const[profRes,restRes]=await Promise.all([
+          sb.from("profiles").select("id,username,name,bio,avatar_url").eq("id",friendId).single(),
+          sb.from("restaurants").select("id,name,rating,emoji,cover_photo,neighborhood,cuisine,place_id,visited_at,created_at,notes").eq("user_id",friendId).eq("is_public",true).order("created_at",{ascending:false})
+        ]);
+        setFriendProfile(profRes.data);
+        const fRests=(restRes.data||[]).map(r=>({...r,photo:r.cover_photo,date:r.visited_at||r.created_at?.split("T")[0]}));
+        setFriendRestaurants(fRests);
+        setMatchData(calcMatchScore(myRestaurants,fRests));
+        setLoading(false);
+      })();
+    },[friendId]);
+
+    const fp=friendProfile;
+    const fRests=friendRestaurants;
+    const rated=fRests.filter(r=>r.rating>0);
+    const avgRating=rated.length?(rated.reduce((s,r)=>s+r.rating,0)/rated.length).toFixed(1):null;
+    const nc=fRests.reduce((a,r)=>({...a,[r.neighborhood]:(a[r.neighborhood]||0)+1}),{});
+    const topN=Object.entries(nc).sort((a,b)=>b[1]-a[1])[0];
+
+    return(
+      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.88)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(8px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="slide-up" style={{background:"#111",borderRadius:"24px 24px 0 0",maxHeight:"92%",display:"flex",flexDirection:"column",border:"1px solid #222",borderBottom:"none"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 20px 0",flexShrink:0}}>
+            <button onClick={onClose} style={{background:"none",border:"none",color:"#777",fontSize:"15px",cursor:"pointer"}}>Cerrar</button>
+            <h2 style={{margin:0,fontSize:"16px",fontWeight:700,color:"#fff"}}>Perfil</h2>
+            <div style={{width:42}}/>
+          </div>
+          <div style={{display:"flex",justifyContent:"center",padding:"10px 0 0"}}><div style={{width:36,height:4,borderRadius:2,background:"#2a2a2a"}}/></div>
+          <div style={{flex:1,overflowY:"auto",padding:"16px 20px 44px"}}>
+            {loading?(
+              <div style={{textAlign:"center",padding:"60px 0"}}>
+                <div style={{fontSize:40,marginBottom:12}}>👤</div>
+                <p style={{fontSize:13,color:"#555"}}>Cargando perfil…</p>
+              </div>
+            ):fp?(
+              <>
+                {/* Header */}
+                <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:20}}>
+                  <div style={{width:64,height:64,borderRadius:"50%",background:"linear-gradient(135deg,#f97316,#fbbf24)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,flexShrink:0,overflow:"hidden",border:"2px solid #2a2a2a"}}>
+                    {fp.avatar_url?<img src={fp.avatar_url} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:"👤"}
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <h2 style={{margin:0,fontSize:20,fontWeight:800,color:"#fff"}}>{fp.name}</h2>
+                    <p style={{margin:"2px 0 0",fontSize:13,color:"#f97316"}}>@{fp.username}</p>
+                    {fp.bio&&<p style={{margin:"4px 0 0",fontSize:12,color:"#666",lineHeight:1.4}}>{fp.bio}</p>}
+                  </div>
+                </div>
+
+                {/* Match Score */}
+                {matchData&&matchData.score!==null?(
+                  <div style={{marginBottom:16}}>
+                    <MatchBadge score={matchData.score} confidence={matchData.confidence} size="large"/>
+                  </div>
+                ):(
+                  <div style={{marginBottom:16,padding:"16px",background:"#1a1a1a",borderRadius:14,border:"1px solid #222",textAlign:"center"}}>
+                    <span style={{fontSize:24}}>🤷</span>
+                    <p style={{margin:"8px 0 0",fontSize:13,color:"#555",lineHeight:1.5}}>Sin datos aún — visiten más lugares juntos</p>
+                  </div>
+                )}
+
+                {/* Stats */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:1,background:"#222",borderRadius:14,overflow:"hidden",marginBottom:16}}>
+                  <div style={{background:"#1a1a1a",padding:"14px 0",textAlign:"center"}}>
+                    <div style={{fontSize:20,fontWeight:800,color:"#fff"}}>{fRests.length}</div>
+                    <div style={{fontSize:9,color:"#555",marginTop:2,letterSpacing:"0.05em"}}>LUGARES</div>
+                  </div>
+                  <div style={{background:"#1a1a1a",padding:"14px 0",textAlign:"center"}}>
+                    <div style={{fontSize:20,fontWeight:800,color:"#fbbf24"}}>{avgRating||"—"}</div>
+                    <div style={{fontSize:9,color:"#555",marginTop:2,letterSpacing:"0.05em"}}>PROMEDIO</div>
+                  </div>
+                  <div style={{background:"#1a1a1a",padding:"14px 0",textAlign:"center"}}>
+                    <div style={{fontSize:14,fontWeight:800,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",padding:"0 4px"}}>{topN?topN[0]:"—"}</div>
+                    <div style={{fontSize:9,color:"#555",marginTop:2,letterSpacing:"0.05em"}}>BARRIO FAV</div>
+                  </div>
+                </div>
+
+                {/* Shared Restaurants */}
+                {matchData&&matchData.common.length>0&&(
+                  <div style={{marginBottom:16}}>
+                    <p style={{fontSize:10,fontWeight:700,color:"#444",letterSpacing:"0.1em",marginBottom:10}}>LUGARES QUE CONOCEN LOS DOS · {matchData.common.length}</p>
+                    <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                      {matchData.common.map((c,i)=>(
+                        <div key={i} style={{background:"#1a1a1a",borderRadius:12,padding:"12px 14px",border:"1px solid #222"}}>
+                          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                            <span style={{fontSize:18}}>{c.mine.emoji||"🍽️"}</span>
+                            <div style={{flex:1,minWidth:0}}>
+                              <p style={{margin:0,fontSize:13,fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.mine.name}</p>
+                              <p style={{margin:"1px 0 0",fontSize:10,color:"#555"}}>{c.mine.neighborhood}</p>
+                            </div>
+                            {c.diff>0&&<span style={{fontSize:9,padding:"2px 7px",borderRadius:"999px",background:c.diff>=2?"#ef444418":"#fbbf2418",color:c.diff>=2?"#ef4444":"#fbbf24",border:`1px solid ${c.diff>=2?"#ef444433":"#fbbf2433"}`,fontWeight:700}}>Δ{c.diff}</span>}
+                          </div>
+                          <div style={{display:"flex",gap:8}}>
+                            <div style={{flex:1,padding:"8px 10px",borderRadius:8,background:"#0f0f0f",border:"1px solid #1e1e1e",textAlign:"center"}}>
+                              <p style={{margin:0,fontSize:9,color:"#555",letterSpacing:"0.05em"}}>TÚ</p>
+                              <div style={{marginTop:3}}><Stars rating={c.mine.rating} size={12}/></div>
+                            </div>
+                            <div style={{flex:1,padding:"8px 10px",borderRadius:8,background:"#0f0f0f",border:"1px solid #1e1e1e",textAlign:"center"}}>
+                              <p style={{margin:0,fontSize:9,color:"#555",letterSpacing:"0.05em"}}>@{fp.username.toUpperCase()}</p>
+                              <div style={{marginTop:3}}><Stars rating={c.theirs.rating} size={12}/></div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Their public restaurants */}
+                <div>
+                  <p style={{fontSize:10,fontWeight:700,color:"#444",letterSpacing:"0.1em",marginBottom:10}}>SUS HALLAZGOS · {fRests.length}</p>
+                  {fRests.length===0?(
+                    <div style={{textAlign:"center",padding:"24px",background:"#1a1a1a",borderRadius:12,border:"1px dashed #2a2a2a"}}>
+                      <p style={{fontSize:13,color:"#444"}}>Aún no comparte sus hallazgos</p>
+                    </div>
+                  ):(
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                      {fRests.map(r=>{
+                        const cc=CUISINE_COLORS[r.cuisine]||"#f97316";
+                        return(
+                          <div key={r.id} style={{background:"#1a1a1a",borderRadius:12,border:"1px solid #222",overflow:"hidden"}}>
+                            {r.photo?(
+                              <div style={{height:70,overflow:"hidden",position:"relative"}}>
+                                <img src={r.photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                                <div style={{position:"absolute",inset:0,background:"linear-gradient(to bottom,transparent 40%,rgba(0,0,0,0.7) 100%)"}}/>
+                              </div>
+                            ):(
+                              <div style={{height:50,background:`linear-gradient(135deg,${cc}15,${cc}08)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>{r.emoji}</div>
+                            )}
+                            <div style={{padding:"8px 10px"}}>
+                              <p style={{margin:0,fontSize:12,fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</p>
+                              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:4}}>
+                                <Stars rating={r.rating} size={10}/>
+                                <span style={{fontSize:9,color:"#555"}}>{r.neighborhood}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </>
+            ):(
+              <div style={{textAlign:"center",padding:"60px 0"}}>
+                <p style={{fontSize:13,color:"#555"}}>No se pudo cargar el perfil</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Profile Screen ─────────────────────────────────────────────────────────
+  function ProfileScreen({restaurants,profile,user}){
+    const[showFriendSearch,setShowFriendSearch]=useState(false);
+    const[friends,setFriends]=useState([]);
+    const[pendingRequests,setPendingRequests]=useState([]);
+    const[loadingFriends,setLoadingFriends]=useState(false);
+    const[avatarUrl,setAvatarUrl]=useState(()=>{try{return localStorage.getItem("sabor_v4_avatar")||null;}catch{return null;}});
+    const[selectedFriendId,setSelectedFriendId]=useState(null);
+    const[friendScores,setFriendScores]=useState({});
+    const avatarRef=useRef();
+    const handleAvatarChange=async(e)=>{const f=e.target.files[0];if(!f)return;const url=await resizeImage(f,400,0.85);setAvatarUrl(url);try{localStorage.setItem("sabor_v4_avatar",url);}catch{}};
+
+    const total=restaurants.filter(r=>r.rating>0).length;
+    const avg=total>0?(restaurants.reduce((s,r)=>s+r.rating,0)/total).toFixed(1):null;
+    const cc=restaurants.reduce((a,r)=>({...a,[r.cuisine]:(a[r.cuisine]||0)+1}),{});
+    const topC=Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    const nc=restaurants.reduce((a,r)=>({...a,[r.neighborhood]:(a[r.neighborhood]||0)+1}),{});
+    const topN=Object.entries(nc).sort((a,b)=>b[1]-a[1])[0];
+    const dist=[5,4,3,2,1].map(s=>({s,c:restaurants.filter(r=>r.rating===s).length}));
+    const rCount=restaurants.length;
+    const level=rCount<=5?{icon:"🌱",name:"Curioso"}:rCount<=15?{icon:"🧭",name:"Explorador"}:rCount<=30?{icon:"🍽️",name:"Conocedor"}:{icon:"🔍",name:"Investigador"};
+    const card={background:"#1a1a1a",borderRadius:16,padding:16,border:"1px solid #222"};
+    const clbl={margin:"0 0 2px",fontSize:"10px",fontWeight:700,color:"#444",letterSpacing:"0.1em"};
+
+    useEffect(()=>{if(user)loadSocialData();},[user]);
+
+    const loadSocialData=async()=>{
+      setLoadingFriends(true);
+      const{data:friendships,error:fErr}=await sb.from("friendships")
+        .select("id,requester_id,addressee_id,status")
+        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+        .in("status",["accepted","pending"]);
+      if(fErr){setLoadingFriends(false);return;}
+      const accepted=(friendships||[]).filter(f=>f.status==="accepted");
+      const pendingIn=(friendships||[]).filter(f=>f.status==="pending"&&f.addressee_id===user.id);
+      const friendIds=accepted.map(f=>f.requester_id===user.id?f.addressee_id:f.requester_id);
+      const pendingIds=pendingIn.map(f=>f.requester_id);
+      const allIds=[...new Set([...friendIds,...pendingIds])];
+      if(allIds.length>0){
+        const{data:profiles,error:pErr}=await sb.from("profiles").select("id,username,name,avatar_url").in("id",allIds);
+        if(pErr){setLoadingFriends(false);return;}
+        const pm={};(profiles||[]).forEach(p=>{pm[p.id]=p;});
+        setFriends(friendIds.map(id=>pm[id]).filter(Boolean));
+        setPendingRequests(pendingIn.map(f=>({...f,profile:pm[f.requester_id]})).filter(f=>f.profile));
+      } else {setFriends([]);setPendingRequests([]);}
+      setLoadingFriends(false);
+    };
+
+    const acceptRequest=async(fid)=>{const{error}=await sb.from("friendships").update({status:"accepted"}).eq("id",fid);if(!error)loadSocialData();};
+    const rejectRequest=async(fid)=>{const{error}=await sb.from("friendships").update({status:"blocked"}).eq("id",fid);if(!error)loadSocialData();};
+
+    // Load match scores for all friends
+    useEffect(()=>{
+      if(!friends.length||!user)return;
+      let cancelled=false;
+      const loadScores=async()=>{
+        const ids=friends.map(f=>f.id);
+        const{data}=await sb.from("restaurants").select("id,name,rating,neighborhood,place_id,user_id").eq("is_public",true).in("user_id",ids);
+        if(!data||cancelled)return;
+        const byUser={};
+        data.forEach(r=>{if(!byUser[r.user_id])byUser[r.user_id]=[];byUser[r.user_id].push(r);});
+        const scores={};
+        ids.forEach(id=>{
+          const fr=byUser[id]||[];
+          const result=calcMatchScore(restaurants,fr);
+          if(result.score!==null)scores[id]=result.score;
+        });
+        if(!cancelled)setFriendScores(scores);
+      };
+      loadScores();
+      return()=>{cancelled=true;};
+    },[friends,restaurants]);
+
+    return(
+      <div style={{overflowY:"auto",height:"100%",padding:"20px 20px 100px"}}>
+        {/* Header */}
+        <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:20}}>
+          <div style={{position:"relative",flexShrink:0,cursor:"pointer"}} onClick={()=>avatarRef.current.click()}>
+            {avatarUrl?(<img src={avatarUrl} style={{width:72,height:72,borderRadius:"50%",objectFit:"cover",border:"2px solid #f97316"}}/>):(<div style={{width:72,height:72,borderRadius:"50%",background:"linear-gradient(135deg,#f97316,#fbbf24)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32}}>👤</div>)}
+            <div style={{position:"absolute",bottom:0,right:0,width:22,height:22,borderRadius:"50%",background:"#f97316",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,border:"2px solid #0f0f0f",pointerEvents:"none"}}>📷</div>
+            <input ref={avatarRef} type="file" accept="image/*" style={{display:"none"}} onChange={handleAvatarChange}/>
+          </div>
+          <div style={{flex:1,minWidth:0}}>
+            <h2 style={{margin:0,fontSize:"20px",fontWeight:800,color:"#fff"}}>{profile?.name||"Investigador"}</h2>
+            <p style={{margin:"2px 0 0",fontSize:13,color:"#f97316"}}>{profile?.handle||"@investigador"}</p>
+            {profile?.bio&&<p style={{margin:"4px 0 0",fontSize:12,color:"#666",lineHeight:1.4,overflow:"hidden",textOverflow:"ellipsis",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{profile.bio}</p>}
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:1,background:"#222",borderRadius:16,overflow:"hidden",marginBottom:14}}>
+          {[{l:"Hallazgos",v:rCount},{l:"Amigos",v:friends.length}].map(s=>(
+            <div key={s.l} style={{background:"#1a1a1a",padding:"16px 0",textAlign:"center"}}>
+              <div style={{fontSize:24,fontWeight:800,color:"#fff"}}>{s.v}</div>
+              <div style={{fontSize:11,color:"#555",marginTop:2,letterSpacing:"0.05em"}}>{s.l.toUpperCase()}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Buscar amigos CTA */}
+        {user&&(
+          <button onClick={()=>setShowFriendSearch(true)} style={{width:"100%",padding:"12px",borderRadius:12,background:"#1a1a1a",border:"1.5px solid #f97316",color:"#f97316",fontSize:14,fontWeight:700,cursor:"pointer",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}
+            onMouseEnter={e=>e.currentTarget.style.background="#f9731618"}
+            onMouseLeave={e=>e.currentTarget.style.background="#1a1a1a"}>
+            🔍 Buscar amigos
+          </button>
+        )}
+
+        {/* Solicitudes pendientes */}
+        {pendingRequests.length>0&&(
+          <div style={{...card,marginBottom:14,border:"1px solid #f9731633",background:"#f9731608"}}>
+            <p style={{...clbl,color:"#f97316",marginBottom:10}}>SOLICITUDES PENDIENTES · {pendingRequests.length}</p>
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              {pendingRequests.map(req=>(
+                <div key={req.id} style={{display:"flex",alignItems:"center",gap:10}}>
+                  <div style={{width:38,height:38,borderRadius:"50%",background:"linear-gradient(135deg,#f97316,#fbbf24)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0,overflow:"hidden"}}>
+                    {req.profile?.avatar_url?<img src={req.profile.avatar_url} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:"👤"}
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <p style={{margin:0,fontSize:13,fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{req.profile.name}</p>
+                    <p style={{margin:0,fontSize:11,color:"#f97316"}}>@{req.profile.username}</p>
+                  </div>
+                  <div style={{display:"flex",gap:6,flexShrink:0}}>
+                    <button onClick={()=>acceptRequest(req.id)} style={{padding:"6px 14px",borderRadius:8,background:"#f97316",border:"none",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer"}}>✓ Aceptar</button>
+                    <button onClick={()=>rejectRequest(req.id)} style={{padding:"6px 10px",borderRadius:8,background:"#1a1a1a",border:"1px solid #333",color:"#555",fontSize:12,cursor:"pointer"}}>✕</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Lista de amigos */}
+        {user&&!loadingFriends&&friends.length===0&&(
+          <div style={{...card,marginBottom:14,textAlign:"center",padding:"20px 16px"}}>
+            <p style={clbl}>MIS AMIGOS</p>
+            <div style={{fontSize:36,marginBottom:8}}>👥</div>
+            <p style={{fontSize:13,color:"#555",lineHeight:1.6,margin:"0 0 12px"}}>Aún no tienes amigos en Sabor.<br/>Busca a tus compañeros gastronómicos.</p>
+            <button onClick={()=>setShowFriendSearch(true)} style={{padding:"10px 20px",borderRadius:12,background:"#f97316",border:"none",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Buscar amigos</button>
+          </div>
+        )}
+        {(friends.length>0||loadingFriends)&&(
+          <div style={{...card,marginBottom:14}}>
+            <p style={clbl}>MIS AMIGOS · {friends.length}</p>
+            {loadingFriends?<p style={{fontSize:12,color:"#555",marginTop:8}}>Cargando…</p>:(
+              <div style={{display:"flex",gap:12,overflowX:"auto",paddingBottom:4,marginTop:10,scrollbarWidth:"none"}}>
+                {friends.map(f=>(
+                  <div key={f.id} onClick={()=>setSelectedFriendId(f.id)} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:5,flexShrink:0,cursor:"pointer"}}>
+                    <div style={{position:"relative"}}>
+                      <div style={{width:48,height:48,borderRadius:"50%",background:"linear-gradient(135deg,#f97316,#fbbf24)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,overflow:"hidden",border:"2px solid #2a2a2a"}}>
+                        {f.avatar_url?<img src={f.avatar_url} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:"👤"}
+                      </div>
+                      {friendScores[f.id]!=null&&(
+                        <div style={{position:"absolute",bottom:-2,right:-4,fontSize:8,fontWeight:800,padding:"1px 5px",borderRadius:"999px",background:friendScores[f.id]>85?"#f97316":friendScores[f.id]>70?"#ef4444":friendScores[f.id]>55?"#fbbf24":"#666",color:"#fff",border:"2px solid #111",lineHeight:1.4}}>{friendScores[f.id]}%</div>
+                      )}
+                    </div>
+                    <p style={{margin:0,fontSize:10,color:"#888",maxWidth:52,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",textAlign:"center"}}>@{f.username}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div style={{display:"flex",flexDirection:"column",gap:12}}>
+          <div style={card}>
+            <p style={clbl}>NIVEL EXPLORADOR</p>
+            <div style={{display:"flex",alignItems:"center",gap:12,marginTop:8}}>
+              <span style={{fontSize:34,lineHeight:1}}>{level.icon}</span>
+              <div style={{flex:1}}><p style={{margin:0,fontSize:18,fontWeight:800,color:"#fff"}}>{level.name}</p><p style={{margin:"3px 0 0",fontSize:11,color:"#555"}}>{rCount} hallazgo{rCount!==1?"s":""} registrado{rCount!==1?"s":""}</p></div>
+              <span style={{fontSize:11,fontWeight:700,padding:"4px 12px",borderRadius:"999px",background:"#f9731622",color:"#f97316",border:"1px solid #f9731633",whiteSpace:"nowrap"}}>{level.name}</span>
+            </div>
+          </div>
+          {topC.length>0&&(<div style={card}><p style={clbl}>MI ESTILO GASTRONÓMICO</p><div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:10}}>{topC.map(([c])=>(<span key={c} style={{fontSize:"12px",fontWeight:700,padding:"5px 14px",borderRadius:"999px",background:(CUISINE_COLORS[c]||"#f97316")+"22",color:CUISINE_COLORS[c]||"#f97316",border:`1px solid ${(CUISINE_COLORS[c]||"#f97316")}44`}}>{c}</span>))}</div></div>)}
+          {avg&&(<div style={card}><p style={clbl}>CALIFICACIÓN PROMEDIO</p><div style={{display:"flex",alignItems:"center",gap:10,marginTop:6}}><span style={{fontSize:36,fontWeight:800,color:"#fbbf24"}}>{avg}</span><Stars rating={Math.round(parseFloat(avg))} size={18}/></div></div>)}
+          {topC.length>0&&(<div style={card}><p style={clbl}>COCINAS FAVORITAS</p><div style={{display:"flex",flexDirection:"column",gap:8,marginTop:8}}>{topC.map(([c,n])=>(<div key={c} style={{display:"flex",alignItems:"center",gap:10}}><div style={{flex:1,height:6,borderRadius:3,background:"#222",overflow:"hidden"}}><div style={{height:"100%",width:`${(n/rCount)*100}%`,background:CUISINE_COLORS[c]||"#f97316",borderRadius:3}}/></div><span style={{fontSize:12,color:"#aaa",minWidth:92,textAlign:"right"}}>{c.length>14?c.slice(0,14)+"…":c}</span><span style={{fontSize:12,color:"#555",minWidth:16,textAlign:"right"}}>{n}</span></div>))}</div></div>)}
+          {total>0&&(<div style={card}><p style={clbl}>DISTRIBUCIÓN DE ESTRELLAS</p><div style={{display:"flex",flexDirection:"column",gap:6,marginTop:8}}>{dist.map(({s,c})=>(<div key={s} style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:11,color:"#fbbf24",minWidth:60}}>{"★".repeat(s)}</span><div style={{flex:1,height:5,borderRadius:3,background:"#222",overflow:"hidden"}}><div style={{height:"100%",width:total?`${(c/total)*100}%`:"0%",background:"#fbbf24",opacity:0.4+s*0.12,borderRadius:3}}/></div><span style={{fontSize:11,color:"#444",minWidth:20,textAlign:"right"}}>{c}</span></div>))}</div></div>)}
+          {topN&&(<div style={card}><p style={clbl}>DISTRITO FAVORITO</p><div style={{display:"flex",alignItems:"center",gap:10,marginTop:4}}><span style={{fontSize:28}}>📍</span><div><p style={{margin:0,fontSize:20,fontWeight:800,color:"#fff"}}>{topN[0]}</p><p style={{margin:"2px 0 0",fontSize:12,color:"#555"}}>{topN[1]} {topN[1]===1?"expedición":"expediciones"}</p></div></div></div>)}
+        </div>
+
+        {showFriendSearch&&user&&<FriendSearchModal user={user} onClose={()=>{setShowFriendSearch(false);loadSocialData();}}/>}
+        {selectedFriendId&&user&&<FriendProfileModal friendId={selectedFriendId} user={user} myRestaurants={restaurants} onClose={()=>setSelectedFriendId(null)}/>}
+      </div>
+    );
+  }
+
+  // ── Onboarding ─────────────────────────────────────────────────────────────
+  function Onboarding({onComplete}){
+    const[step,setStep]=useState(0);
+    const[authMode,setAuthMode]=useState("signup");
+    const[profile,setProfile]=useState({name:"",handle:"",bio:"",email:"",password:""});
+    const[err,setErr]=useState("");
+    const[authLoading,setAuthLoading]=useState(false);
+    const sp=(k,v)=>setProfile(p=>({...p,[k]:v}));
+
+    const finish=async()=>{
+      setErr("");
+      if(authMode==="login"){
+        if(!profile.email.trim()){setErr("Ingresa tu email.");return;}
+        if(!profile.password){setErr("Ingresa tu contraseña.");return;}
+        setAuthLoading(true);
+        const{data,error}=await sb.auth.signInWithPassword({email:profile.email.trim(),password:profile.password});
+        setAuthLoading(false);
+        if(error){setErr(error.message==="Invalid login credentials"?"Email o contraseña incorrectos.":error.message);return;}
+        onComplete(data.user,null);
+      } else {
+        if(!profile.name.trim()){setErr("¿Cuál es tu nombre?");return;}
+        if(!profile.handle.trim()){setErr("Elige un nombre de usuario.");return;}
+        const cleanHandle=profile.handle.replace(/^@/,"");
+        if(cleanHandle.length<3){setErr("El usuario debe tener al menos 3 caracteres.");return;}
+        if(!/^[a-zA-Z0-9_]+$/.test(cleanHandle)){setErr("Solo letras, números y guión bajo (_) en el usuario.");return;}
+        if(!profile.email.trim()){setErr("Ingresa tu email.");return;}
+        if(!profile.password||profile.password.length<6){setErr("La contraseña debe tener al menos 6 caracteres.");return;}
+        setAuthLoading(true);
+        const{data,error}=await sb.auth.signUp({email:profile.email.trim(),password:profile.password});
+        setAuthLoading(false);
+        if(error){setErr(error.message);return;}
+        if(!data.session){
+          // Email confirmation required
+          setErr("✉️ Revisa tu email para confirmar tu cuenta, luego inicia sesión aquí.");
+          setAuthMode("login");
+          return;
+        }
+        onComplete(data.user,{name:profile.name,handle:profile.handle.startsWith("@")?profile.handle:"@"+profile.handle,bio:profile.bio});
+      }
+    };
+
+    const inp={width:"100%",background:"#111",border:"1px solid #2a2a2a",borderRadius:12,padding:"12px 14px",color:"#fff",fontSize:15,outline:"none",boxSizing:"border-box"};
+    const lbl={display:"block",fontSize:"10px",fontWeight:700,color:"#555",letterSpacing:"0.1em",marginBottom:8};
+    const Dots=()=>(<div style={{display:"flex",gap:6,justifyContent:"center",marginTop:20}}>{[0,1,2].map(i=>(<div key={i} style={{width:i===step?20:6,height:6,borderRadius:3,background:i===step?"#f97316":"#2a2a2a",transition:"all 0.3s ease"}}/>))}</div>);
+
+    if(step===0)return(
+      <div style={{height:"100%",background:"#0a0a0a",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"space-between",padding:"0 36px 52px",textAlign:"center",position:"relative"}}>
+        {/* Ambient glow muy sutil */}
+        <div style={{position:"absolute",top:"22%",left:"50%",transform:"translateX(-50%)",width:320,height:320,borderRadius:"50%",background:"radial-gradient(circle,rgba(249,115,22,0.05) 0%,transparent 68%)",pointerEvents:"none"}}/>
+        {/* Hero */}
+        <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:0}}>
+          <div className="fade-up">
+            <h1 style={{fontSize:80,fontWeight:900,color:"#fff",letterSpacing:"-4px",lineHeight:0.9,margin:0}}>sabor<span style={{color:"#f97316"}}>.</span></h1>
+          </div>
+          <div className="fade-up-2" style={{marginTop:14}}>
+            <p style={{fontSize:10,fontWeight:700,color:"rgba(249,115,22,0.55)",letterSpacing:"0.32em",margin:0}}>BITÁCORA</p>
+          </div>
+          <div className="fade-up-3" style={{marginTop:28}}>
+            <p style={{fontSize:12,color:"#2e2e2e",lineHeight:1.75,maxWidth:230,margin:0,fontStyle:"italic"}}>Del lat. <em style={{color:"#3a3a3a"}}>bittaculum</em> — cuaderno del explorador en travesía.</p>
+          </div>
+          <div className="fade-up-3" style={{marginTop:36}}>
+            <p style={{fontSize:17,color:"#666",lineHeight:1.5,maxWidth:260,margin:0,fontWeight:400}}>Lima tiene sabor.<br/><span style={{color:"#c0c0c0",fontWeight:500}}>Empieza a registrarlo.</span></p>
+          </div>
+        </div>
+        {/* CTA minimalista */}
+        <div className="fade-up-4" style={{width:"100%"}}>
+          <button
+            onClick={()=>setStep(1)}
+            style={{width:"100%",padding:"15px",borderRadius:14,background:"transparent",border:"1px solid #282828",color:"#888",fontSize:15,fontWeight:500,cursor:"pointer",letterSpacing:"0.02em",transition:"all 0.2s ease"}}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor="#f97316";e.currentTarget.style.color="#fff";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor="#282828";e.currentTarget.style.color="#888";}}>
+            Comenzar →
+          </button>
+          <Dots/>
+        </div>
+      </div>
+    );
+    if(step===1){
+      const features=[{icon:"📖",color:"#f97316",title:"Registra cada hallazgo",desc:"Anota cada restaurante que visitas — calificación, notas de campo y fotos."},{icon:"📸",color:"#ec4899",title:"Documenta cada plato",desc:"Dentro de cada restaurante, un feed de momentos: fotos de platos con tus comentarios."},{icon:"🗺️",color:"#3b82f6",title:"Cartografía tu Lima",desc:"Todos tus descubrimientos como pines en el mapa. Tu territorio a la vista."}];
+      return(
+        <div style={{height:"100%",background:"#0a0a0a",display:"flex",flexDirection:"column",padding:"48px 24px 50px"}}>
+          <div className="fade-up" style={{textAlign:"center",marginBottom:32}}><p style={{fontSize:11,fontWeight:700,color:"#f97316",letterSpacing:"0.15em",marginBottom:10}}>TU KIT DE CAMPO</p><h2 style={{fontSize:26,fontWeight:800,color:"#fff",lineHeight:1.2}}>Las herramientas<br/>del investigador</h2></div>
+          <div style={{flex:1,display:"flex",flexDirection:"column",gap:12}}>
+            {features.map((f,i)=>(<div key={i} className="fade-up" style={{animationDelay:`${i*0.12}s`,background:"#141414",borderRadius:16,padding:18,border:"1px solid #222",display:"flex",gap:14,alignItems:"flex-start"}}><div style={{width:48,height:48,borderRadius:14,background:f.color+"18",border:`1px solid ${f.color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{f.icon}</div><div><p style={{fontSize:14,fontWeight:700,color:"#fff",marginBottom:4}}>{f.title}</p><p style={{fontSize:12,color:"#666",lineHeight:1.55}}>{f.desc}</p></div></div>))}
+          </div>
+          <div style={{marginTop:28}}><button onClick={()=>setStep(2)} style={{width:"100%",padding:16,borderRadius:14,background:"#f97316",border:"none",color:"#fff",fontSize:16,fontWeight:700,cursor:"pointer",boxShadow:"0 6px 24px rgba(249,115,22,0.4)"}}>Siguiente →</button><Dots/></div>
+        </div>
+      );
+    }
+    return(
+      <div style={{height:"100%",background:"#0a0a0a",display:"flex",flexDirection:"column",padding:"48px 24px 50px",overflowY:"auto"}}>
+        <div className="fade-up" style={{textAlign:"center",marginBottom:authMode==="login"?24:16}}>
+          <p style={{fontSize:11,fontWeight:700,color:"#f97316",letterSpacing:"0.15em",marginBottom:10}}>EXPEDIENTE</p>
+          <h2 style={{fontSize:26,fontWeight:800,color:"#fff",lineHeight:1.2}}>{authMode==="login"?"Bienvenido\nde vuelta":"Identifica\nal investigador"}</h2>
+          <p style={{fontSize:13,color:"#555",marginTop:10}}>{authMode==="login"?"Inicia sesión en tu bitácora":"¿Quién lleva esta bitácora?"}</p>
+        </div>
+        {authMode==="signup"&&(<div className="fade-up-2" style={{display:"flex",justifyContent:"center",marginBottom:18}}><div style={{width:72,height:72,borderRadius:"50%",background:"linear-gradient(135deg,#f97316,#fbbf24)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,boxShadow:"0 4px 20px rgba(249,115,22,0.3)"}}>👤</div></div>)}
+        <div className="fade-up-3" style={{display:"flex",flexDirection:"column",gap:14,flex:1}}>
+          {err&&<div style={{background:"#ef444422",border:"1px solid #ef4444",borderRadius:10,padding:"10px 14px",fontSize:13,color:"#ef4444"}}>{err}</div>}
+          {authMode==="signup"&&(
+            <>
+              <div><label style={lbl}>NOMBRE</label><input value={profile.name} onChange={e=>{sp("name",e.target.value);setErr("");}} placeholder="Ej: María García" style={inp} autoFocus/></div>
+              <div><label style={lbl}>NOMBRE DE USUARIO</label><div style={{position:"relative"}}><span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:"#f97316",fontSize:15,fontWeight:700}}>@</span><input value={profile.handle.replace(/^@/,"")} onChange={e=>{sp("handle",e.target.value.replace(/^@/,""));setErr("");}} placeholder="investigador_gourmet" style={{...inp,paddingLeft:30}}/></div></div>
+              <div><label style={lbl}>BIO <span style={{color:"#333",fontWeight:400,letterSpacing:0}}>(opcional)</span></label><textarea value={profile.bio} onChange={e=>sp("bio",e.target.value)} placeholder="Ej: Explorando la gastronomía de Lima desde 2019..." rows={2} style={{...inp,resize:"none",lineHeight:1.6}}/></div>
+            </>
+          )}
+          <div><label style={lbl}>EMAIL</label><input type="email" value={profile.email} onChange={e=>{sp("email",e.target.value);setErr("");}} placeholder="tu@email.com" style={inp} autoFocus={authMode==="login"}/></div>
+          <div><label style={lbl}>CONTRASEÑA</label><input type="password" value={profile.password} onChange={e=>{sp("password",e.target.value);setErr("");}} placeholder={authMode==="signup"?"Mínimo 6 caracteres":"Tu contraseña"} style={inp}/></div>
+        </div>
+        <div className="fade-up-4" style={{marginTop:20}}>
+          <button onClick={finish} disabled={authLoading} style={{width:"100%",padding:16,borderRadius:14,background:authLoading?"#7c3a13":"#f97316",border:"none",color:"#fff",fontSize:16,fontWeight:700,cursor:authLoading?"not-allowed":"pointer",boxShadow:"0 6px 24px rgba(249,115,22,0.4)",transition:"background 0.2s"}}>
+            {authLoading?"Procesando...":(authMode==="login"?"Iniciar Sesión 🔑":"Abrir mi Bitácora 📖")}
+          </button>
+          <button onClick={()=>{setAuthMode(authMode==="login"?"signup":"login");setErr("");}} style={{width:"100%",padding:"10px",background:"none",border:"none",color:"#555",fontSize:13,cursor:"pointer",marginTop:8}}>
+            {authMode==="login"?"¿No tienes cuenta? Crear cuenta nueva →":"Ya tengo cuenta — Iniciar sesión"}
+          </button>
+          <Dots/>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Feed Screen ────────────────────────────────────────────────────────────
+  function FeedScreen({user,myRestaurants,onGoToProfile,onOpenFriendProfile}){
+    const[posts,setPosts]=useState([]);
+    const[loading,setLoading]=useState(true);
+    const[hasFriends,setHasFriends]=useState(null);
+    const[feedScores,setFeedScores]=useState({});
+    const[expandedComments,setExpandedComments]=useState({});
+    const[commentCounts,setCommentCounts]=useState({});
+
+    const feedCancelRef=useRef(false);
+    useEffect(()=>{feedCancelRef.current=false;if(!user){setLoading(false);return;}loadFeed();return()=>{feedCancelRef.current=true;};},[user]);
+    useEffect(()=>{
+      if(!posts.length)return;
+      let c=false;
+      (async()=>{
+        const ids=posts.map(p=>p.id);
+        const{data}=await sb.from("comments").select("restaurant_id").in("restaurant_id",ids);
+        if(c)return;
+        const counts={};(data||[]).forEach(r=>{counts[r.restaurant_id]=(counts[r.restaurant_id]||0)+1;});
+        setCommentCounts(counts);
+      })();
+      return()=>{c=true;};
+    },[posts]);
+
+    const loadFeed=async()=>{
+      setLoading(true);
+      const{data:friendships,error:fErr}=await sb.from("friendships")
+        .select("requester_id,addressee_id")
+        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+        .eq("status","accepted");
+      if(fErr||feedCancelRef.current){setLoading(false);return;}
+      const friendIds=(friendships||[]).map(f=>f.requester_id===user.id?f.addressee_id:f.requester_id);
+      if(friendIds.length===0){setHasFriends(false);setLoading(false);return;}
+      setHasFriends(true);
+      const{data,error:rErr}=await sb.from("restaurants")
+        .select("id,name,rating,emoji,cover_photo,neighborhood,cuisine,visited_at,created_at,notes,user_id")
+        .eq("is_public",true).in("user_id",friendIds)
+        .order("created_at",{ascending:false}).limit(50);
+      if(rErr||feedCancelRef.current){setLoading(false);return;}
+      if(data&&data.length>0){
+        const uids=[...new Set(data.map(r=>r.user_id))];
+        const{data:profiles}=await sb.from("profiles").select("id,username,name,avatar_url").in("id",uids);
+        const pm={};(profiles||[]).forEach(p=>{pm[p.id]=p;});
+        setPosts(data.map(r=>({...r,profile:pm[r.user_id]||{username:"usuario",name:"Usuario"}})));
+        // Compute match scores per friend
+        const byUser={};data.forEach(r=>{if(!byUser[r.user_id])byUser[r.user_id]=[];byUser[r.user_id].push(r);});
+        const scores={};
+        Object.keys(byUser).forEach(uid=>{const result=calcMatchScore(myRestaurants||[],byUser[uid]);if(result.score!==null)scores[uid]=result.score;});
+        setFeedScores(scores);
+      } else setPosts([]);
+      setLoading(false);
+    };
+
+    if(!user)return(
+      <div style={{height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px"}}>
+        <div style={{fontSize:48,marginBottom:12}}>🔒</div>
+        <p style={{fontSize:14,color:"#555"}}>Inicia sesión para ver el feed</p>
+      </div>
+    );
+
+    const cc=(cuisine)=>CUISINE_COLORS[cuisine]||"#f97316";
+    return(
+      <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
+        <div style={{padding:"20px 20px 10px",flexShrink:0}}>
+          <h1 style={{fontSize:"24px",fontWeight:800,color:"#fff",margin:0,letterSpacing:"-0.5px"}}>Feed <span style={{color:"#f97316"}}>✨</span></h1>
+          <p style={{fontSize:"12px",color:"#555",margin:"2px 0 0"}}>Hallazgos de tus amigos</p>
+        </div>
+        {loading?(
+          <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <div style={{textAlign:"center"}}><div style={{fontSize:40,marginBottom:12}}>🍽️</div><p style={{fontSize:13,color:"#555"}}>Cargando feed…</p></div>
+          </div>
+        ):hasFriends===false?(
+          <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 32px",textAlign:"center"}}>
+            <div style={{fontSize:64,marginBottom:16}}>👥</div>
+            <h2 style={{fontSize:20,fontWeight:800,color:"#fff",margin:"0 0 8px"}}>Sin amigos aún</h2>
+            <p style={{fontSize:13,color:"#555",lineHeight:1.7,marginBottom:24,maxWidth:240}}>Agrega amigos para ver sus hallazgos gastronómicos aquí.</p>
+            <button onClick={onGoToProfile} style={{padding:"12px 24px",borderRadius:14,background:"#f97316",border:"none",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px rgba(249,115,22,0.4)"}}>Buscar amigos →</button>
+          </div>
+        ):posts.length===0?(
+          <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px",textAlign:"center"}}>
+            <div style={{fontSize:48,marginBottom:12}}>🤫</div>
+            <p style={{fontSize:14,color:"#555",lineHeight:1.7}}>Tus amigos no han registrado nada todavía.</p>
+          </div>
+        ):(
+          <div style={{flex:1,overflowY:"auto",padding:"4px 16px 24px"}}>
+            {posts.map((post,i)=>{
+              const p=post.profile;
+              const dateStr=post.visited_at||post.created_at?.split("T")[0];
+              return(
+                <div key={post.id} className="fade-up" style={{animationDelay:`${Math.min(i,8)*0.06}s`,background:"#1a1a1a",borderRadius:16,border:"1px solid #222",overflow:"hidden",marginBottom:12}}>
+                  {post.cover_photo&&(
+                    <div style={{height:120,overflow:"hidden",position:"relative"}}>
+                      <img src={post.cover_photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                      <div style={{position:"absolute",inset:0,background:"linear-gradient(to bottom,rgba(0,0,0,0.15),rgba(0,0,0,0.65))"}}/>
+                    </div>
+                  )}
+                  <div style={{padding:"12px 14px"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,cursor:"pointer"}} onClick={()=>onOpenFriendProfile&&onOpenFriendProfile(post.user_id)}>
+                      <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,#f97316,#fbbf24)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0,overflow:"hidden"}}>
+                        {p?.avatar_url?<img src={p.avatar_url} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:"👤"}
+                      </div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{display:"flex",alignItems:"center",gap:6}}>
+                          <p style={{margin:0,fontSize:12,fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p?.name||"Usuario"}</p>
+                          {feedScores[post.user_id]!=null&&<MatchBadge score={feedScores[post.user_id]}/>}
+                        </div>
+                        <p style={{margin:0,fontSize:10,color:"#f97316"}}>@{p?.username||"usuario"}</p>
+                      </div>
+                      <span style={{fontSize:10,color:"#444",flexShrink:0}}>{dateStr?timeAgo(dateStr):""}</span>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:10}}>
+                      <div style={{width:40,height:40,borderRadius:12,background:"#222",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{post.emoji}</div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <h3 style={{margin:0,fontSize:15,fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{post.name}</h3>
+                        <div style={{display:"flex",gap:5,marginTop:4,flexWrap:"wrap"}}>
+                          <Badge label={post.neighborhood} color="#777"/>
+                          <Badge label={post.cuisine} color={cc(post.cuisine)}/>
+                        </div>
+                      </div>
+                      <div style={{flexShrink:0}}><Stars rating={post.rating} size={13}/></div>
+                    </div>
+                    {post.notes&&<p style={{margin:"10px 0 0",fontSize:12,color:"#888",lineHeight:1.55,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden",fontStyle:"italic"}}>"{post.notes}"</p>}
+                    <div style={{marginTop:10,borderTop:"1px solid #1e1e1e",paddingTop:8}}>
+                      <button onClick={e=>{e.stopPropagation();setExpandedComments(prev=>({...prev,[post.id]:!prev[post.id]}));}} style={{background:"none",border:"none",color:"#555",fontSize:11,cursor:"pointer",padding:0,display:"flex",alignItems:"center",gap:5,fontFamily:"inherit"}} onMouseEnter={e=>e.currentTarget.style.color="#f97316"} onMouseLeave={e=>e.currentTarget.style.color="#555"}>
+                        <span>💬</span> {commentCounts[post.id]||0} comentario{(commentCounts[post.id]||0)!==1?"s":""}
+                      </button>
+                      {expandedComments[post.id]&&<div style={{marginTop:8}}><CommentsSection restaurantId={post.id} currentUser={user} isOwner={false} previewMode={true}/></div>}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Bottom Nav ─────────────────────────────────────────────────────────────
+  function NavTab({icon,label,active,onClick,badge}){
+    return(
+      <button onClick={onClick} style={{background:"none",border:"none",display:"flex",flexDirection:"column",alignItems:"center",gap:3,cursor:"pointer",padding:"5px 8px",position:"relative",flex:1,minWidth:0}}>
+        <div style={{width:42,height:28,borderRadius:14,background:active?"rgba(249,115,22,0.14)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"background 0.22s ease",position:"relative"}}>
+          {badge>0&&<span style={{position:"absolute",top:-2,right:2,minWidth:16,height:16,borderRadius:8,background:"#ef4444",color:"#fff",fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px",border:"2px solid #070707",lineHeight:1}}>{badge>9?"9+":badge}</span>}
+          <span style={{fontSize:17,lineHeight:1,opacity:active?1:0.35,transition:"opacity 0.2s",filter:active?"none":"saturate(0.2)"}}>{icon}</span>
+        </div>
+        <span style={{fontSize:9,fontWeight:active?700:400,color:active?"#f97316":"#3a3a3a",letterSpacing:"0.07em",transition:"color 0.2s",whiteSpace:"nowrap"}}>{label.toUpperCase()}</span>
+      </button>
+    );
+  }
+  function BottomNav({active,onChange,commentBadge}){
+    return(
+      <div style={{position:"absolute",bottom:0,left:0,right:0,height:72,background:"rgba(7,7,7,0.9)",backdropFilter:"blur(22px)",WebkitBackdropFilter:"blur(22px)",borderTop:"1px solid rgba(255,255,255,0.05)",display:"flex",alignItems:"center",justifyContent:"space-around",zIndex:50,paddingBottom:4}}>
+        <NavTab icon="📓" label="Bitácora" active={active==="bitacora"} onClick={()=>onChange("bitacora")}/>
+        <NavTab icon="🗺️" label="Mapa" active={active==="map"} onClick={()=>onChange("map")}/>
+        <NavTab icon="✨" label="Feed" active={active==="feed"} onClick={()=>onChange("feed")}/>
+        <NavTab icon="👤" label="Perfil" active={active==="profile"} onClick={()=>onChange("profile")} badge={commentBadge}/>
+      </div>
+    );
+  }
+
+  // ── App ────────────────────────────────────────────────────────────────────
+  // ── PWA Install Banner ────────────────────────────────────────────────────
+  function PWAInstallBanner(){
+    const[deferredPrompt,setDeferredPrompt]=useState(null);
+    const[showBanner,setShowBanner]=useState(false);
+    const[isIOS,setIsIOS]=useState(false);
+    const[showIOSGuide,setShowIOSGuide]=useState(false);
+    const[dismissed,setDismissed]=useState(()=>localStorage.getItem("sabor_pwa_installed")==="1");
+
+    useEffect(()=>{
+      if(dismissed)return;
+      const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+      const standalone=window.navigator.standalone||window.matchMedia("(display-mode: standalone)").matches;
+      if(standalone){setDismissed(true);return;}
+      setIsIOS(ios);
+      if(ios){setTimeout(()=>setShowBanner(true),3000);return;}
+      const handler=(e)=>{e.preventDefault();setDeferredPrompt(e);setShowBanner(true);};
+      window.addEventListener("beforeinstallprompt",handler);
+      return()=>window.removeEventListener("beforeinstallprompt",handler);
+    },[dismissed]);
+
+    const handleInstall=async()=>{
+      if(isIOS){setShowIOSGuide(true);return;}
+      if(!deferredPrompt)return;
+      deferredPrompt.prompt();
+      const{outcome}=await deferredPrompt.userChoice;
+      if(outcome==="accepted"){localStorage.setItem("sabor_pwa_installed","1");setDismissed(true);}
+      setDeferredPrompt(null);setShowBanner(false);
+    };
+
+    const dismiss=()=>{setShowBanner(false);setShowIOSGuide(false);localStorage.setItem("sabor_pwa_installed","1");setDismissed(true);};
+
+    if(dismissed||!showBanner)return null;
+
+    if(showIOSGuide)return(
+      <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:10000,padding:"16px",animation:"slideInUp 0.35s ease both"}}>
+        <div style={{background:"rgba(20,20,25,0.92)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",borderRadius:16,border:"1px solid rgba(255,255,255,0.08)",padding:"16px 18px",boxShadow:"0 -4px 30px rgba(0,0,0,0.5)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+            <span style={{fontSize:14,fontWeight:700,color:"#fff"}}>Instalar Sabor en iOS</span>
+            <button onClick={dismiss} style={{background:"none",border:"none",color:"#666",fontSize:18,cursor:"pointer",padding:4}}>✕</button>
+          </div>
+          <div style={{fontSize:12,color:"#aaa",lineHeight:1.5}}>
+            <p style={{marginBottom:6}}>1. Toca el botón <span style={{color:"#fff",fontWeight:600}}>Compartir</span> <span style={{fontSize:15}}>⎙</span> en Safari</p>
+            <p>2. Selecciona <span style={{color:"#fff",fontWeight:600}}>"Añadir a pantalla de inicio"</span></p>
+          </div>
+        </div>
+      </div>
+    );
+
+    return(
+      <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:10000,padding:"16px",animation:"slideInUp 0.35s ease both"}}>
+        <div style={{background:"rgba(20,20,25,0.92)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",borderRadius:16,border:"1px solid rgba(255,255,255,0.08)",padding:"12px 16px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 -4px 30px rgba(0,0,0,0.5)"}}>
+          <span style={{fontSize:24}}>📱</span>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:13,fontWeight:600,color:"#fff"}}>Instala Sabor en tu celular</div>
+            <div style={{fontSize:11,color:"#888",marginTop:1}}>Acceso rápido sin abrir el navegador</div>
+          </div>
+          <button onClick={handleInstall} style={{background:"#ff6b35",color:"#fff",border:"none",borderRadius:10,padding:"8px 16px",fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>Instalar</button>
+          <button onClick={dismiss} style={{background:"none",border:"none",color:"#555",fontSize:16,cursor:"pointer",padding:4,flexShrink:0}}>✕</button>
+        </div>
+      </div>
+    );
+  }
+
+  function Sabor(){
+    const[onboardingDone,setOnboardingDone]=useState(false);
+    const[appLoading,setAppLoading]=useState(true);
+    const[user,setUser]=useState(null);
+    const[profile,setProfile]=useState(null);
+    const[restaurants,setRestaurants]=useState([]);
+    const[activeTab,setActiveTab]=useState("bitacora");
+    const[modal,setModal]=useState(null);
+    const[detailId,setDetailId]=useState(null);
+    const[toast,setToast]=useState({visible:false,message:""});
+    const toastTimer=useRef(null);
+    const[eloCompareFor,setEloCompareFor]=useState(null);
+    const[friendProfileId,setFriendProfileId]=useState(null);
+    const[commentBadge,setCommentBadge]=useState(0);
+    const showToast=(message,type)=>{clearTimeout(toastTimer.current);setToast({visible:true,message,type});toastTimer.current=setTimeout(()=>setToast(t=>({...t,visible:false})),type==="error"?3500:2000);};
+    const[customLists,setCustomLists]=useState(()=>{try{const s=localStorage.getItem("sabor_lists");return s?JSON.parse(s):[];}catch{return[];}});
+    useEffect(()=>{try{localStorage.setItem("sabor_lists",JSON.stringify(customLists));}catch{}},[customLists]);
+    const allLists=[...DEFAULT_LISTS,...customLists];
+    const handleCreateList=list=>{setCustomLists(p=>[...p,list]);};
+    const handleDeleteList=listId=>{setCustomLists(p=>p.filter(l=>l.id!==listId));};
+    const handleRenameList=(listId,newName)=>{setCustomLists(p=>p.map(l=>l.id===listId?{...l,name:newName}:l));};
+
+    // ── helpers Supabase ──
+    const loadProfile=async(userId)=>{
+      const{data}=await sb.from("profiles").select("*").eq("id",userId).single();
+      if(data) setProfile({name:data.name||"Investigador",handle:"@"+(data.username||"investigador"),bio:data.bio||""});
+      else setProfile({name:"Investigador",handle:"@investigador",bio:""});
+    };
+
+    const loadRestaurants=async(userId)=>{
+      const{data,error}=await sb.from("restaurants").select("*").eq("user_id",userId).order("created_at",{ascending:false});
+      if(!error&&data&&data.length>0){
+        const ld=getListsData();const ed=getEloData();
+        setRestaurants(data.map(r=>({...r,photo:r.cover_photo,date:r.visited_at||r.created_at?.split("T")[0]||new Date().toISOString().split("T")[0],lists:r.lists||ld[String(r.id)]||getAutoLists(r),eloScore:ed[String(r.id)]?.eloScore??5.0,eloComparisons:ed[String(r.id)]?.eloComparisons??0})));
+      } else {
+        // fallback localStorage
+        try{
+          const v4=localStorage.getItem("sabor_v4_restaurants");
+          if(v4){const p=JSON.parse(v4);if(Array.isArray(p)&&p.length>0){const ld=getListsData();const ed=getEloData();setRestaurants(p.map(r=>({...r,lists:r.lists||ld[String(r.id)]||getAutoLists(r),eloScore:r.eloScore??ed[String(r.id)]?.eloScore??5.0,eloComparisons:r.eloComparisons??ed[String(r.id)]?.eloComparisons??0})));return;}}
+          const v3=localStorage.getItem("sabor_v3_restaurants");
+          if(v3){const p=JSON.parse(v3);if(Array.isArray(p)&&p.length>0){setRestaurants(p.map(r=>({...r,eloScore:5.0,eloComparisons:0})));return;}}
+        }catch{}
+        setRestaurants([]);
+      }
+    };
+
+    // ── init: verificar sesión activa ──
+    useEffect(()=>{
+      const init=async()=>{
+        const{data:{session}}=await sb.auth.getSession();
+        if(session?.user){
+          setUser(session.user);
+          await Promise.all([loadProfile(session.user.id),loadRestaurants(session.user.id)]);
+          setOnboardingDone(true);
+        } else {
+          // sin sesión: intentar datos locales (usuarios que no migraron aún)
+          const done=localStorage.getItem("sabor_v4_onboarding");
+          if(done){
+            setOnboardingDone(true);
+            try{const p=localStorage.getItem("sabor_v4_profile");if(p)setProfile(JSON.parse(p));}catch{}
+            try{
+              const v4=localStorage.getItem("sabor_v4_restaurants");
+              if(v4){const p=JSON.parse(v4);if(Array.isArray(p)&&p.length>0){setRestaurants(p);}}
+              else{
+                const v3=localStorage.getItem("sabor_v3_restaurants");
+                if(v3){const p=JSON.parse(v3);if(Array.isArray(p)&&p.length>0)setRestaurants(p.map(r=>({...r,eloScore:5.0,eloComparisons:0})));}
+                else setRestaurants(SAMPLE_RESTAURANTS);
+              }
+            }catch{setRestaurants(SAMPLE_RESTAURANTS);}
+          }
+        }
+        setAppLoading(false);
+      };
+      init();
+      const{data:{subscription}}=sb.auth.onAuthStateChange((_,session)=>{
+        if(!session) setUser(null);
+      });
+      return()=>subscription.unsubscribe();
+    },[]);
+
+    // ── persistir en localStorage cuando no hay sesión Supabase ──
+    useEffect(()=>{
+      if(!user&&onboardingDone){
+        try{localStorage.setItem("sabor_v4_restaurants",JSON.stringify(restaurants));}
+        catch{try{localStorage.setItem("sabor_v4_restaurants",JSON.stringify(restaurants.map(r=>({...r,photo:null}))));}catch{}}
+      }
+    },[restaurants]);
+    // ── persistir ELO para todos los usuarios (también con Supabase) ──
+    useEffect(()=>{if(onboardingDone)saveEloData(restaurants);},[restaurants]);
+
+    // ── Comment notification polling ──
+    useEffect(()=>{
+      if(!user||!onboardingDone)return;
+      const checkComments=async()=>{
+        try{
+          const lastSeen=localStorage.getItem("sabor_lastSeenComments")||new Date(0).toISOString();
+          const myRestIds=restaurants.filter(r=>typeof r.id==="string").map(r=>r.id);
+          if(!myRestIds.length){setCommentBadge(0);return;}
+          const{data,error}=await sb.from("comments").select("id").in("restaurant_id",myRestIds).neq("user_id",user.id).gt("created_at",lastSeen);
+          if(!error)setCommentBadge((data||[]).length);
+        }catch{}
+      };
+      checkComments();
+      const interval=setInterval(checkComments,30000);
+      return()=>clearInterval(interval);
+    },[user,onboardingDone,restaurants]);
+
+    const updateRestaurant=(id,updater)=>setRestaurants(prev=>prev.map(r=>r.id===id?updater(r):r));
+
+    const handleEloUpdate=(winnerId,loserId)=>{
+      setRestaurants(prev=>{
+        const winner=prev.find(r=>r.id===winnerId);
+        const loser=prev.find(r=>r.id===loserId);
+        if(!winner||!loser)return prev;
+        const{winner:ws,loser:ls}=calcElo(winner.eloScore||5.0,loser.eloScore||5.0);
+        return prev.map(r=>{
+          if(r.id===winnerId)return{...r,eloScore:ws,eloComparisons:(r.eloComparisons||0)+1};
+          if(r.id===loserId)return{...r,eloScore:ls,eloComparisons:(r.eloComparisons||0)+1};
+          return r;
+        });
+      });
+    };
+
+    // ── CRUD restaurantes ──
+    const handleSave=async(r,options={})=>{
+      const isNew=modal==="add"||(modal&&modal._mapPrefill===true);
+      let newId=null;
+      if(user){
+        const dbRec={name:r.name,neighborhood:r.neighborhood,cuisine:r.cuisine,rating:r.rating,notes:r.notes||"",emoji:r.emoji,cover_photo:r.photo||null,notes_photo:r.notes_photo||null,lat:r.lat||null,lng:r.lng||null,place_id:r.place_id||null,is_public:true,visited_at:r.date||null,went_with:r.went_with||[]};
+        if(isNew){
+          dbRec.user_id=user.id;
+          const{data,error}=await sb.from("restaurants").insert(dbRec).select().single();
+          if(error){showToast("Error al guardar: "+error.message,"error");setModal(null);return;}
+          if(data){
+            newId=data.id;
+            const newR={...r,id:data.id,photo:data.cover_photo,date:data.visited_at||data.created_at?.split("T")[0],eloScore:5.0,eloComparisons:0,went_with:r.went_with||[]};
+            setRestaurants(prev=>[newR,...prev]);
+          }
+        } else {
+          const{error}=await sb.from("restaurants").update(dbRec).eq("id",r.id);
+          if(error){showToast("Error al actualizar: "+error.message,"error");return;}
+          setRestaurants(prev=>prev.map(x=>x.id===r.id?{...r}:x));
+        }
+      } else {
+        if(isNew){newId=r.id;setRestaurants(prev=>[{...r,eloScore:5.0,eloComparisons:0},...prev]);}
+        else setRestaurants(prev=>prev.map(x=>x.id===r.id?{...r}:x));
+      }
+      if(r.lists)saveListsData(isNew?(newId||r.id):r.id,r.lists);
+      setModal(null);
+      showToast(isNew?"✓ Hallazgo guardado":"✓ Hallazgo actualizado");
+      if(isNew&&(newId||r.id))setEloCompareFor(newId||r.id);
+    };
+
+    const handleDelete=async(id)=>{
+      if(user){const{error}=await sb.from("restaurants").delete().eq("id",id);if(error){showToast("Error al eliminar","error");return;}}
+      setRestaurants(p=>p.filter(r=>r.id!==id));
+      showToast("Hallazgo eliminado");
+    };
+
+    const handleAddDish=async(rid,dish)=>{
+      const target=restaurants.find(r=>r.id===rid);if(!target)return;
+      const newDishes=[...(target.dishes||[]),dish];
+      if(user){const{error}=await sb.from("restaurants").update({dishes:newDishes}).eq("id",rid);if(error){showToast("Error al guardar plato","error");return;}}
+      updateRestaurant(rid,r=>({...r,dishes:newDishes}));
+      showToast("✓ Plato guardado");
+    };
+
+    const handleDeleteDish=async(rid,did)=>{
+      const target=restaurants.find(r=>r.id===rid);if(!target)return;
+      const newDishes=(target.dishes||[]).filter(d=>d.id!==did);
+      if(user){const{error}=await sb.from("restaurants").update({dishes:newDishes}).eq("id",rid);if(error){showToast("Error al eliminar plato","error");return;}}
+      updateRestaurant(rid,r=>({...r,dishes:newDishes}));
+    };
+
+    // ── callback del onboarding ──
+    const handleOnboardingComplete=async(supabaseUser,profileData)=>{
+      if(supabaseUser){
+        setUser(supabaseUser);
+        if(profileData){
+          // signup: insertar perfil nuevo
+          await sb.from("profiles").insert({id:supabaseUser.id,name:profileData.name,username:profileData.handle.replace(/^@/,""),bio:profileData.bio||null});
+          setProfile(profileData);
+        } else {
+          // login: cargar perfil existente
+          await loadProfile(supabaseUser.id);
+        }
+        await loadRestaurants(supabaseUser.id);
+      } else {
+        // fallback sin Supabase
+        setProfile(profileData);
+        localStorage.setItem("sabor_v4_profile",JSON.stringify(profileData));
+        localStorage.setItem("sabor_v4_onboarding","1");
+        setRestaurants(SAMPLE_RESTAURANTS);
+      }
+      setOnboardingDone(true);
+    };
+
+    const detailRestaurant=detailId!=null?restaurants.find(r=>r.id===detailId):null;
+
+    if(appLoading)return(
+      <div className="phone-outer" style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#050505",fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"}}>
+        <div style={{textAlign:"center"}}>
+          <div style={{fontSize:64,marginBottom:12}}>🍽️</div>
+          <p style={{fontSize:20,fontWeight:900,color:"#fff",letterSpacing:"-1px",margin:0}}>sabor<span style={{color:"#f97316"}}>.</span></p>
+          <p style={{fontSize:12,color:"#444",marginTop:8}}>Cargando tu bitácora…</p>
+        </div>
+      </div>
+    );
+
+    return(
+      <div className="phone-outer" style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#050505",fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"}}>
+        <div className="phone-frame" style={{width:390,height:844,background:"#0f0f0f",borderRadius:48,position:"relative",overflow:"hidden",boxShadow:"0 0 0 1px #333, 0 0 0 3px #111, 0 0 80px rgba(249,115,22,0.08), 0 40px 120px rgba(0,0,0,0.8)",border:"1px solid #2a2a2a"}}>
+          {/* Status bar */}
+          <div style={{height:48,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px",flexShrink:0}}>
+            <span style={{fontSize:13,fontWeight:600,color:"#fff"}}>9:41</span>
+            <div style={{width:126,height:32,background:"#111",borderRadius:18,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{width:11,height:11,borderRadius:"50%",background:"#1a1a1a"}}/></div>
+            <span style={{fontSize:10,color:"#fff"}}>●●● ▲ ⬛</span>
+          </div>
+
+          {/* Onboarding */}
+          {!onboardingDone?(
+            <div style={{position:"absolute",top:48,left:0,right:0,bottom:0,overflow:"hidden"}}>
+              <Onboarding onComplete={handleOnboardingComplete}/>
+            </div>
+          ):(
+            <>
+              {/* Detail screen (full overlay) */}
+              {detailRestaurant&&(
+                <div style={{position:"absolute",top:48,left:0,right:0,bottom:0,zIndex:40,background:"#0f0f0f"}}>
+                  <DetailScreen
+                    restaurant={detailRestaurant}
+                    profile={profile}
+                    user={user}
+                    onBack={()=>setDetailId(null)}
+                    onEdit={r=>{setDetailId(null);setTimeout(()=>setModal(r),50);}}
+                    onAddDish={handleAddDish}
+                    onDeleteDish={handleDeleteDish}
+                  />
+                </div>
+              )}
+
+              {/* Main screens */}
+              <div style={{position:"absolute",top:48,left:0,right:0,bottom:72,overflow:"hidden"}}>
+                {activeTab==="bitacora"&&<BitacoraScreen restaurants={restaurants} onDelete={handleDelete} onAddOpen={()=>setModal("add")} onEdit={r=>setModal(r)} onOpenDetail={r=>setDetailId(r.id)} allLists={allLists} onCreateList={handleCreateList} onDeleteList={handleDeleteList} onRenameList={handleRenameList}/>}
+                {activeTab==="map"&&<MapScreen restaurants={restaurants} onOpenDetail={r=>setDetailId(r.id)} onAddRestaurant={r=>setModal(r)}/>}
+                {activeTab==="feed"&&<FeedScreen user={user} myRestaurants={restaurants} onGoToProfile={()=>setActiveTab("profile")} onOpenFriendProfile={id=>setFriendProfileId(id)}/>}
+                {activeTab==="profile"&&<ProfileScreen restaurants={restaurants} profile={profile} user={user}/>}
+              </div>
+
+              <BottomNav active={activeTab} commentBadge={commentBadge} onChange={t=>{if(t==="profile"&&commentBadge>0){localStorage.setItem("sabor_lastSeenComments",new Date().toISOString());setCommentBadge(0);}setActiveTab(t);setDetailId(null);}}/>
+              {modal&&<AddEditModal initial={modal==="add"||(modal&&modal._mapPrefill)?null:modal} prefillData={modal&&modal._mapPrefill?modal:null} onSave={handleSave} onClose={()=>setModal(null)} onDelete={modal!=="add"&&!(modal&&modal._mapPrefill)?()=>{handleDelete(modal.id);setModal(null);}:null} allLists={allLists} user={user}/>}
+              {friendProfileId&&user&&<FriendProfileModal friendId={friendProfileId} user={user} myRestaurants={restaurants} onClose={()=>setFriendProfileId(null)}/>}
+              <Toast message={toast.message} visible={toast.visible} type={toast.type}/>
+              {eloCompareFor&&restaurants.length>=2&&restaurants.find(r=>r.id===eloCompareFor)&&(
+                <div style={{position:"absolute",top:48,left:0,right:0,bottom:0,zIndex:150}}>
+                  <EloComparisonScreen
+                    restaurants={restaurants}
+                    newRestaurantId={eloCompareFor}
+                    onComplete={()=>{setEloCompareFor(null);setActiveTab("bitacora");}}
+                    onUpdateElo={handleEloUpdate}
+                  />
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        <PWAInstallBanner/>
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(<Sabor/>);
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>

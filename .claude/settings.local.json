@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pandoc VISION.docx -o -)",
+      "Bash(cd /tmp)",
+      "Bash(python3:*)",
+      "Bash(unzip -q \"C:\\\\Users\\\\Joel\\\\Documents\\\\Claude\\\\Projects\\\\Sabor\\\\VISION.docx\")",
+      "Bash(unzip -q \"C:\\\\Users\\\\Joel\\\\Documents\\\\Claude\\\\Projects\\\\Sabor\\\\VISION.docx\" -d vision_extracted)",
+      "Bash(sed -n '1,50p' \"C:\\\\Users\\\\Joel\\\\Documents\\\\Claude\\\\Projects\\\\Sabor\\\\Sabor.html\")",
+      "Bash(sed -n '300,400p' \"C:\\\\Users\\\\Joel\\\\Documents\\\\Claude\\\\Projects\\\\Sabor\\\\Sabor.html\")",
+      "Bash(python \"C:\\\\Users\\\\Joel\\\\AppData\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\skills-plugin\\\\f2fbb370-58ff-4606-bb15-9333453a5085\\\\42285de4-2b70-4110-a667-c6fa47d64cb7\\\\skills\\\\docx\\\\scripts\\\\office\\\\unpack.py\" \"C:\\\\Users\\\\Joel\\\\Documents\\\\Claude\\\\Projects\\\\Sabor\\\\VISION.docx\" unpacked_vision)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(node -e \"require\\(''canvas''\\)\")",
+      "Bash(curl -s http://localhost:8080/manifest.json)",
+      "Bash(curl -s http://localhost:8080/sw.js)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{size_download}\" http://localhost:8080/icon-192.png)",
+      "Bash(netstat -ano)",
+      "Bash(curl -s http://localhost:8080/)"
+    ]
+  }
+}

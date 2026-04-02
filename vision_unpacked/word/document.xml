@@ -1,0 +1,2479 @@
+<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:mo="http://schemas.microsoft.com/office/mac/office/2008/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mv="urn:schemas-microsoft-com:mac:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:wpi="http://schemas.microsoft.com/office/word/2010/wordprocessingInk" xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" mc:Ignorable="w14 wp14">
+  <w:background w:color="050505"/>
+  <w:body>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        <w:spacing w:before="600" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:pBdr>
+          <w:bottom w:val="single" w:sz="18" w:space="1" w:color="F97316"/>
+        </w:pBdr>
+        <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        <w:spacing w:before="0" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        <w:spacing w:before="600" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        <w:spacing w:before="200" w:after="120"/>
+        <w:jc w:val="center"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="112"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        </w:rPr>
+        <w:t>sabor.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        <w:spacing w:before="80" w:after="80"/>
+        <w:jc w:val="center"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b w:val="0"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="36"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        </w:rPr>
+        <w:t>Documento de Visión y Estrategia</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:pBdr>
+          <w:bottom w:val="single" w:sz="6" w:space="1" w:color="F97316"/>
+        </w:pBdr>
+        <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        <w:spacing w:before="160" w:after="0"/>
+        <w:jc w:val="center"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        <w:spacing w:before="240" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        <w:spacing w:before="0" w:after="80"/>
+        <w:jc w:val="center"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="9CA3AF"/>
+          <w:sz w:val="24"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        </w:rPr>
+        <w:t>v1.0  —  Abril 2026</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        <w:spacing w:before="120" w:after="80"/>
+        <w:jc w:val="center"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b w:val="0"/>
+          <w:color w:val="FBBF24"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        </w:rPr>
+        <w:t>Lima · Gastronomía · Comunidad</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        <w:spacing w:before="600" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:pBdr>
+          <w:bottom w:val="single" w:sz="18" w:space="1" w:color="F97316"/>
+        </w:pBdr>
+        <w:shd w:val="clear" w:color="auto" w:fill="111111"/>
+        <w:spacing w:before="0" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="50" w:after="10"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="280" w:after="40"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:pBdr>
+          <w:bottom w:val="single" w:sz="6" w:space="1" w:color="F97316"/>
+        </w:pBdr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">01  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FFFFFF"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>¿QUÉ ES SABOR?</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="80" w:after="80"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b w:val="0"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="24"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Una app móvil para la comunidad limeña que une a las personas a través de la comida. Inspirada en Letterboxd pero para restaurantes.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="80" w:after="80"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b w:val="0"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="24"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Los usuarios llevan una &quot;bitácora&quot; personal de los restaurantes que visitan en Lima — con rating, fotos y notas de campo — y pueden elegir qué tan personal o público lo hacen.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="120" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="25" w:after="10"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="280" w:after="40"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:pBdr>
+          <w:bottom w:val="single" w:sz="6" w:space="1" w:color="F97316"/>
+        </w:pBdr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">02  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FFFFFF"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>EL PROBLEMA QUE RESUELVE</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="40"/>
+        <w:ind w:left="720" w:hanging="288" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">▸  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Google Maps y TripAdvisor están orientados a turistas y reseñas genéricas.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="40"/>
+        <w:ind w:left="720" w:hanging="288" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">▸  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>No existe ninguna app social enfocada específicamente en la escena gastronómica limeña.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="40"/>
+        <w:ind w:left="720" w:hanging="288" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">▸  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>La recomendación de un amigo vale más que mil reseñas de desconocidos.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="40"/>
+        <w:ind w:left="720" w:hanging="288" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">▸  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>El limeño foodie no tiene una voz propia digital sobre su escena culinaria.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="120" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="25" w:after="10"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="280" w:after="40"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:pBdr>
+          <w:bottom w:val="single" w:sz="6" w:space="1" w:color="F97316"/>
+        </w:pBdr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">03  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FFFFFF"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>LA OPORTUNIDAD EN LIMA</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="80" w:after="80"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b w:val="0"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="24"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Lima es un caso especial en el mundo gastronómico — dos veces mejor restaurante del mundo (Central), escena que va de la cevichería de barrio a la alta cocina Nikkei.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="40"/>
+        <w:ind w:left="720" w:hanging="288" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">▸  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Segmento objetivo: millennials y foodies que comen afuera 2–3 veces por semana.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="40"/>
+        <w:ind w:left="720" w:hanging="288" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">▸  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Ninguna app actual captura la perspectiva del limeño sobre su propia escena culinaria.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="40"/>
+        <w:ind w:left="720" w:hanging="288" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">▸  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Beli (el competidor más similar) existe en EEUU pero tiene muy poca densidad en Lima.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="120" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="25" w:after="10"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="280" w:after="40"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:pBdr>
+          <w:bottom w:val="single" w:sz="6" w:space="1" w:color="F97316"/>
+        </w:pBdr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">04  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FFFFFF"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>PROPUESTA DE VALOR</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="80" w:after="80"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b w:val="0"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="24"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Sabor une a la comunidad limeña a través de la comida. Cada usuario decide qué tan personal o público lo hace — desde una bitácora completamente privada hasta un perfil público que comparte sus hallazgos con Lima.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="120" w:after="80"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Dos momentos clave de uso:</w:t>
+      </w:r>
+    </w:p>
+    <w:tbl>
+      <w:tblPr>
+        <w:tblW w:type="auto" w:w="0"/>
+        <w:jc w:val="left"/>
+        <w:tblLook w:firstColumn="1" w:firstRow="1" w:lastColumn="0" w:lastRow="0" w:noHBand="0" w:noVBand="1" w:val="04A0"/>
+        <w:tblBorders>
+          <w:top w:val="none"/>
+          <w:left w:val="none"/>
+          <w:bottom w:val="none"/>
+          <w:right w:val="none"/>
+          <w:insideH w:val="none"/>
+          <w:insideV w:val="none"/>
+        </w:tblBorders>
+        <w:tblW w:w="8800" w:type="dxa"/>
+      </w:tblPr>
+      <w:tblGrid>
+        <w:gridCol w:w="5040"/>
+        <w:gridCol w:w="5040"/>
+      </w:tblGrid>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="2200" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="120" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="120" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+            <w:vAlign w:val="center"/>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b/>
+                <w:color w:val="F97316"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>⏱  Antes o al llegar</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="6600" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="120" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="120" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="E5E7EB"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>El usuario abre Sabor y ve qué pidieron sus amigos en ese lugar, con fotos reales de platos de gente en quien confía. Resuelve la ansiedad del menú mejor que cualquier mozo.</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="2200" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="120" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="120" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+            <w:vAlign w:val="center"/>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b/>
+                <w:color w:val="F97316"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>📸  En el restaurante</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="6600" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="120" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="120" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="E5E7EB"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Saca el teléfono, fotea el plato, lo sube en segundos. Esa foto queda vinculada al restaurante y aparece en el feed de sus amigos.</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+    </w:tbl>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="120" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="25" w:after="10"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="280" w:after="40"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:pBdr>
+          <w:bottom w:val="single" w:sz="6" w:space="1" w:color="F97316"/>
+        </w:pBdr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">05  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FFFFFF"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>TRES HIPÓTESIS A VALIDAR</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+        <w:spacing w:before="120" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+        </w:rPr>
+        <w:t xml:space="preserve">H1  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FFFFFF"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+        </w:rPr>
+        <w:t>El limeño quiere una voz propia</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="0" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="21"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Existe un segmento de limeños que siente que ninguna app actual captura su perspectiva gastronómica. Si esto es cierto, adoptarán Sabor no por tecnología sino porque se siente suya.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="60" w:after="120"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FBBF24"/>
+          <w:sz w:val="21"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">Métrica: </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="FBBF24"/>
+          <w:sz w:val="21"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Retención semana 2 &gt; 40%</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+        <w:spacing w:before="120" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+        </w:rPr>
+        <w:t xml:space="preserve">H2  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FFFFFF"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+        </w:rPr>
+        <w:t>La confianza social supera al algoritmo</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="0" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="21"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>&quot;Mi amigo fue y le dio 8.5&quot; vale más que 4.2 estrellas de 300 desconocidos. Si se valida, el crecimiento es orgánico — cada usuario activo trae a su círculo.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="60" w:after="120"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FBBF24"/>
+          <w:sz w:val="21"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">Métrica: </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="FBBF24"/>
+          <w:sz w:val="21"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Usuarios por invitación directa &gt; 60%</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+        <w:spacing w:before="120" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+        </w:rPr>
+        <w:t xml:space="preserve">H3  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FFFFFF"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+        </w:rPr>
+        <w:t>La fricción está en el registro, no en el descubrimiento</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="0" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="21"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Si agregar un restaurante toma menos de 30 segundos (búsqueda Google Places → estrellas → guardar), el usuario lo hace en el momento, en la mesa. Si tarda más de 60 segundos, lo deja para después y el 80% nunca lo hace.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="60" w:after="120"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FBBF24"/>
+          <w:sz w:val="21"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">Métrica: </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="FBBF24"/>
+          <w:sz w:val="21"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Tiempo promedio de creación de hallazgo &lt; 30 segundos</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="120" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="25" w:after="10"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="280" w:after="40"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:pBdr>
+          <w:bottom w:val="single" w:sz="6" w:space="1" w:color="F97316"/>
+        </w:pBdr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">06  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FFFFFF"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>STACK TÉCNICO ACTUAL</w:t>
+      </w:r>
+    </w:p>
+    <w:tbl>
+      <w:tblPr>
+        <w:tblW w:type="auto" w:w="0"/>
+        <w:jc w:val="left"/>
+        <w:tblLook w:firstColumn="1" w:firstRow="1" w:lastColumn="0" w:lastRow="0" w:noHBand="0" w:noVBand="1" w:val="04A0"/>
+        <w:tblBorders>
+          <w:top w:val="none"/>
+          <w:left w:val="none"/>
+          <w:bottom w:val="none"/>
+          <w:right w:val="none"/>
+          <w:insideH w:val="none"/>
+          <w:insideV w:val="none"/>
+        </w:tblBorders>
+        <w:tblW w:w="9000" w:type="dxa"/>
+      </w:tblPr>
+      <w:tblGrid>
+        <w:gridCol w:w="5040"/>
+        <w:gridCol w:w="5040"/>
+      </w:tblGrid>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="3500" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b/>
+                <w:color w:val="F97316"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Frontend</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="5500" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="E5E7EB"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>HTML + React (CDN) + Babel — un único archivo Sabor.html</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="3500" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b/>
+                <w:color w:val="F97316"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Base de datos</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="5500" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="E5E7EB"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Supabase (PostgreSQL) — tablas: profiles, restaurants</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="3500" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b/>
+                <w:color w:val="F97316"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Autenticación</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="5500" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="E5E7EB"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Supabase Auth (email/password)</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="3500" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b/>
+                <w:color w:val="F97316"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Mapas</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="5500" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="E5E7EB"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Leaflet.js con tiles CartoDB oscuros</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="3500" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b/>
+                <w:color w:val="F97316"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Búsqueda</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="5500" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="E5E7EB"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Google Places API (New) via REST</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="3500" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b/>
+                <w:color w:val="F97316"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Almacenamiento</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="5500" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="E5E7EB"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Supabase Storage + localStorage como fallback</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+    </w:tbl>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="120" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="25" w:after="10"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="280" w:after="40"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:pBdr>
+          <w:bottom w:val="single" w:sz="6" w:space="1" w:color="F97316"/>
+        </w:pBdr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">07  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FFFFFF"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>ROADMAP DE DESARROLLO</w:t>
+      </w:r>
+    </w:p>
+    <w:tbl>
+      <w:tblPr>
+        <w:tblW w:type="auto" w:w="0"/>
+        <w:jc w:val="left"/>
+        <w:tblLook w:firstColumn="1" w:firstRow="1" w:lastColumn="0" w:lastRow="0" w:noHBand="0" w:noVBand="1" w:val="04A0"/>
+        <w:tblBorders>
+          <w:top w:val="none"/>
+          <w:left w:val="none"/>
+          <w:bottom w:val="none"/>
+          <w:right w:val="none"/>
+          <w:insideH w:val="none"/>
+          <w:insideV w:val="none"/>
+        </w:tblBorders>
+        <w:tblW w:w="8800" w:type="dxa"/>
+      </w:tblPr>
+      <w:tblGrid>
+        <w:gridCol w:w="5040"/>
+        <w:gridCol w:w="5040"/>
+      </w:tblGrid>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="2600" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+            <w:vAlign w:val="center"/>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b/>
+                <w:color w:val="F97316"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Fase 1  —  MVP</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="6200" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="E5E7EB"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Bitácora personal, perfil, mapa, auth con Supabase, búsqueda Google Places</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="2600" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+            <w:vAlign w:val="center"/>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b w:val="0"/>
+                <w:color w:val="9CA3AF"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Fase 2  —  Red social</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="6200" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="6B7280"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Agregar amigos, perfil público/privado, feed de actividad de amigos</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="2600" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+            <w:vAlign w:val="center"/>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b w:val="0"/>
+                <w:color w:val="9CA3AF"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Fase 3  —  Feed público</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="6200" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="6B7280"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Trending Lima, mejor rateado, filtros por cocina y barrio</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="2600" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+            <w:vAlign w:val="center"/>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b w:val="0"/>
+                <w:color w:val="9CA3AF"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Fase 4  —  PWA</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="6200" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="6B7280"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Instalable, notificaciones push, cámara nativa, experiencia móvil completa</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="2600" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+            <w:vAlign w:val="center"/>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b w:val="0"/>
+                <w:color w:val="9CA3AF"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Fase 5  —  Inteligencia</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="6200" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="6B7280"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Recomendaciones basadas en gustos del usuario y su red social</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+    </w:tbl>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="120" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="25" w:after="10"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="280" w:after="40"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:pBdr>
+          <w:bottom w:val="single" w:sz="6" w:space="1" w:color="F97316"/>
+        </w:pBdr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">08  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FFFFFF"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>PRINCIPIOS DE DISEÑO</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="80" w:after="40"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">Minimalismo premium  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>— Oscuro, limpio, respirable. Inspiración: Notion, Linear, Letterboxd.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="80" w:after="40"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">Identidad limeña  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>— El lenguaje, los barrios, los tipos de cocina son de Lima.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="80" w:after="40"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">Privacidad por defecto  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>— El usuario controla qué comparte y con quién.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="80" w:after="40"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">Velocidad sobre features  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>— Cada interacción debe ser rápida y satisfactoria.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="160" w:after="80"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Paleta de colores:</w:t>
+      </w:r>
+    </w:p>
+    <w:tbl>
+      <w:tblPr>
+        <w:tblW w:type="auto" w:w="0"/>
+        <w:jc w:val="left"/>
+        <w:tblLook w:firstColumn="1" w:firstRow="1" w:lastColumn="0" w:lastRow="0" w:noHBand="0" w:noVBand="1" w:val="04A0"/>
+        <w:tblBorders>
+          <w:top w:val="none"/>
+          <w:left w:val="none"/>
+          <w:bottom w:val="none"/>
+          <w:right w:val="none"/>
+          <w:insideH w:val="none"/>
+          <w:insideV w:val="none"/>
+        </w:tblBorders>
+        <w:tblW w:w="8800" w:type="dxa"/>
+      </w:tblPr>
+      <w:tblGrid>
+        <w:gridCol w:w="5040"/>
+        <w:gridCol w:w="5040"/>
+      </w:tblGrid>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="2800" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b/>
+                <w:color w:val="F97316"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Fondo</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="6000" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="E5E7EB"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>#050505</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="2800" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b/>
+                <w:color w:val="F97316"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Cards</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="6000" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="E5E7EB"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>#1a1a1a  /  #2d2d2d</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="2800" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b/>
+                <w:color w:val="F97316"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Acento</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="6000" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="E5E7EB"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>#f97316  (naranja)</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="2800" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b/>
+                <w:color w:val="F97316"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Estrellas</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="6000" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="E5E7EB"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>#fbbf24  (amarillo)</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="2800" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="100" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:b/>
+                <w:color w:val="F97316"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>Texto</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="6000" w:type="dxa"/>
+            <w:tcBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+            </w:tcBorders>
+            <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+            <w:tcMar>
+              <w:top w:w="100" w:type="dxa"/>
+              <w:start w:w="150" w:type="dxa"/>
+              <w:bottom w:w="100" w:type="dxa"/>
+              <w:end w:w="150" w:type="dxa"/>
+            </w:tcMar>
+          </w:tcPr>
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="0" w:after="0"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+                <w:color w:val="E5E7EB"/>
+                <w:sz w:val="21"/>
+              </w:rPr>
+              <w:t>#ffffff  /  #e5e7eb  /  #9ca3af</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+    </w:tbl>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="120" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="25" w:after="10"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="280" w:after="40"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:pBdr>
+          <w:bottom w:val="single" w:sz="6" w:space="1" w:color="F97316"/>
+        </w:pBdr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="40" w:after="0"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="F97316"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t xml:space="preserve">09  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b/>
+          <w:color w:val="FFFFFF"/>
+          <w:sz w:val="26"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>MODELO DE AGENTES DE DESARROLLO</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="80" w:after="80"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b w:val="0"/>
+          <w:color w:val="E5E7EB"/>
+          <w:sz w:val="24"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Este proyecto se construye con un equipo de agentes de IA especializados orquestados por Claude Dispatch. Cada agente recibe tareas específicas y construye en base a este documento como fuente de verdad.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="80" w:after="80"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:b w:val="0"/>
+          <w:color w:val="9CA3AF"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        </w:rPr>
+        <w:t>Todos los cambios deben ser consistentes con la visión y los principios definidos aquí. Este documento es la fuente canónica del producto.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="20" w:after="10"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+        <w:spacing w:before="80" w:after="80"/>
+        <w:ind w:left="360" w:right="360"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:color w:val="FBBF24"/>
+          <w:sz w:val="24"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+        </w:rPr>
+        <w:t xml:space="preserve">★  </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+          <w:i/>
+          <w:color w:val="9CA3AF"/>
+          <w:sz w:val="22"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="2D2D2D"/>
+        </w:rPr>
+        <w:t>Este documento es la fuente de verdad de sabor. — v1.0, Abril 2026</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="1A1A1A"/>
+        <w:spacing w:before="120" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="050505"/>
+        <w:spacing w:before="40" w:after="0"/>
+      </w:pPr>
+    </w:p>
+    <w:sectPr w:rsidR="00FC693F" w:rsidRPr="0006063C" w:rsidSect="00034616">
+      <w:pgSz w:w="12240" w:h="15840"/>
+      <w:pgMar w:top="864" w:right="1080" w:bottom="864" w:left="1080" w:header="720" w:footer="720" w:gutter="0"/>
+      <w:cols w:space="720"/>
+      <w:docGrid w:linePitch="360"/>
+    </w:sectPr>
+  </w:body>
+</w:document>
