@@ -125,6 +125,11 @@
   const { useState, useEffect, useRef } = React;
 
   // ── Supabase ───────────────────────────────────────────────────────────────
+  // SECURITY NOTE: The Supabase anon key below is intentionally public — it is
+  // safe to expose because Row Level Security (RLS) policies enforce all access
+  // control on the database. The Google Places API key should be restricted to
+  // the production domain (joelpkirschbaum-cmyk.github.io) via Google Cloud
+  // Console → APIs & Services → Credentials → API key restrictions.
   const SUPABASE_URL  = 'https://qogyremzusekrcdzlyto.supabase.co';
   const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFvZ3lyZW16dXNla3JjZHpseXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5OTA3ODMsImV4cCI6MjA5MDU2Njc4M30._NDPkDhPiTbIHYReujKafxeNsqTUfBtMPHtyAmqKot0';
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -661,6 +666,7 @@
         const placeId=suggestion.placePrediction?.placeId;
         if(!placeId)throw new Error("No placeId");
         const res=await fetch(`https://places.googleapis.com/v1/places/${placeId}?fields=displayName,formattedAddress,location,photos,addressComponents&key=${PLACES_KEY}`);
+        if(!res.ok)throw new Error(`Places API error ${res.status}`);
         const place=await res.json();
         const ac=place.addressComponents||[];
         const distComp=ac.find(c=>c.types&&(c.types.includes("locality")||c.types.includes("sublocality_level_1")||c.types.includes("administrative_area_level_3")));
@@ -678,7 +684,7 @@
         const displayName=place.displayName?.text||place.displayName||"";
         setForm(f=>{const u={...f,name:displayName||f.name,neighborhood:matchedNeighborhood,photo,place_id:placeId||f.place_id};if(lat&&lng){u.lat=lat;u.lng=lng;}return u;});
         setPlaceSearch("");setErr("");setPlaceFilled(true);setFilledPlaceName(displayName||"Restaurante");
-      }catch(e){console.warn("Place detail error:",e);}
+      }catch(e){console.warn("Place detail error:",e);setErr("No se pudo cargar el restaurante. Verifica tu conexión e intenta de nuevo.");}
       setLoadingPlace(false);
     };
     const inp={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"14px",outline:"none",boxSizing:"border-box"};
@@ -1369,7 +1375,7 @@
   const MAP_GKEY="AIzaSyBJz5LMmNFD5rkaoSB8FaVQjj2aMiglRy0";
 
   function MapScreen({restaurants,onOpenDetail,onAddRestaurant}){
-    const mapDiv=useRef(null),leaflet=useRef(null),layerRef=useRef(null),userMarkerRef=useRef(null);
+    const mapDiv=useRef(null),leaflet=useRef(null),layerRef=useRef(null),userMarkerRef=useRef(null),skipMoveRef=useRef(0);
     const[filterSource,setFilterSource]=useState("all"); // all|mine|google
     const[filterSubtype,setFilterSubtype]=useState("");
     const[filterNeighborhood,setFilterNeighborhood]=useState("");
@@ -1382,6 +1388,7 @@
     const[googlePlaces,setGooglePlaces]=useState([]);
     const[loadingGoogle,setLoadingGoogle]=useState(false);
     const[searchPos,setSearchPos]=useState(null);
+    const[mapMoved,setMapMoved]=useState(false);
 
     const cuisines=[...new Set(restaurants.map(r=>r.cuisine))].sort();
     const neighborhoods=[...new Set(restaurants.map(r=>r.neighborhood))].sort();
@@ -1422,7 +1429,8 @@
       const map=L.map(mapDiv.current,{center:[-12.1219,-77.0281],zoom:13});
       L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{attribution:'&copy; <a href="https://carto.com/">CARTO</a>',subdomains:"abcd",maxZoom:19}).addTo(map);
       leaflet.current=map;
-      if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{const{latitude:lat,longitude:lng}=pos.coords;setUserPos({lat,lng});setSearchPos({lat,lng});map.setView([lat,lng],14);},()=>{});}
+      map.on('moveend',()=>{if(skipMoveRef.current>0){skipMoveRef.current--;return;}setMapMoved(true);});
+      if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{const{latitude:lat,longitude:lng}=pos.coords;setUserPos({lat,lng});setSearchPos({lat,lng});skipMoveRef.current++;map.setView([lat,lng],14);},()=>{});}
       return()=>{map.remove();leaflet.current=null;};
     },[]);
 
@@ -1493,10 +1501,10 @@
         {/* Map */}
         <div style={{flex:1,margin:"0 12px 8px",borderRadius:16,overflow:"hidden",border:"1px solid #222",position:"relative"}}>
           <div ref={mapDiv} style={{width:"100%",height:"100%"}}/>
-          {/* Buscar aquí */}
-          <button onClick={()=>{const c=leaflet.current?.getCenter();if(c)setSearchPos({lat:c.lat,lng:c.lng});}} style={{position:"absolute",top:10,left:"50%",transform:"translateX(-50%)",background:"#141414",border:"1px solid #333",borderRadius:20,padding:"6px 14px",color:loadingGoogle?"#3b82f6":"#ccc",fontSize:11,fontWeight:600,cursor:"pointer",zIndex:800,boxShadow:"0 2px 12px rgba(0,0,0,0.7)",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:5,transition:"color 0.2s"}}>
+          {/* Buscar aquí — solo visible después de que el usuario mueve el mapa */}
+          {mapMoved&&<button onClick={()=>{const c=leaflet.current?.getCenter();if(c){setSearchPos({lat:c.lat,lng:c.lng});setMapMoved(false);}}} style={{position:"absolute",top:10,left:"50%",transform:"translateX(-50%)",background:"#141414",border:"1px solid #333",borderRadius:20,padding:"6px 14px",color:loadingGoogle?"#3b82f6":"#ccc",fontSize:11,fontWeight:600,cursor:"pointer",zIndex:800,boxShadow:"0 2px 12px rgba(0,0,0,0.7)",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:5,transition:"color 0.2s"}}>
             {loadingGoogle?"⏳ Buscando…":"🔍 Buscar restaurantes aquí"}
-          </button>
+          </button>}
           {/* Empty state overlay */}
           {!loadingGoogle&&totalCount===0&&(
             <div style={{position:"absolute",bottom:16,left:"50%",transform:"translateX(-50%)",background:"rgba(20,20,20,0.92)",backdropFilter:"blur(10px)",borderRadius:14,padding:"14px 20px",zIndex:800,textAlign:"center",border:"1px solid #2a2a2a",boxShadow:"0 4px 20px rgba(0,0,0,0.5)",maxWidth:260}}>
@@ -2470,6 +2478,7 @@
       init();
       const{data:{subscription}}=sb.auth.onAuthStateChange((_,session)=>{
         if(!session) setUser(null);
+        else setUser(session.user);
       });
       return()=>subscription.unsubscribe();
     },[]);
@@ -2643,7 +2652,7 @@
                 {activeTab==="profile"&&<ProfileScreen restaurants={restaurants} profile={profile} user={user}/>}
               </div>
 
-              <BottomNav active={activeTab} commentBadge={commentBadge} onChange={t=>{if(t==="profile"&&commentBadge>0){localStorage.setItem("sabor_lastSeenComments",new Date().toISOString());setCommentBadge(0);}setActiveTab(t);setDetailId(null);}}/>
+              {!detailId&&<BottomNav active={activeTab} commentBadge={commentBadge} onChange={t=>{if(t==="profile"&&commentBadge>0){localStorage.setItem("sabor_lastSeenComments",new Date().toISOString());setCommentBadge(0);}setActiveTab(t);setDetailId(null);}}/>}
               {modal&&<AddEditModal initial={modal==="add"||(modal&&modal._mapPrefill)?null:modal} prefillData={modal&&modal._mapPrefill?modal:null} onSave={handleSave} onClose={()=>setModal(null)} onDelete={modal!=="add"&&!(modal&&modal._mapPrefill)?()=>{handleDelete(modal.id);setModal(null);}:null} allLists={allLists} user={user}/>}
               {friendProfileId&&user&&<FriendProfileModal friendId={friendProfileId} user={user} myRestaurants={restaurants} onClose={()=>setFriendProfileId(null)}/>}
               <Toast message={toast.message} visible={toast.visible} type={toast.type}/>
