@@ -1,7 +1,7 @@
-const CACHE_NAME = 'sabor-v1';
+const CACHE_NAME = 'sabor-v3';
 
 const PRECACHE_URLS = [
-  './Sabor.html',
+  './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -19,7 +19,10 @@ const NETWORK_FIRST_PATTERNS = [
   'supabase.co',
   'googleapis.com',
   'maps.googleapis.com',
-  'places.googleapis.com'
+  'places.googleapis.com',
+  // Always fetch fresh HTML so deploys take effect immediately
+  '/index.html',
+  'index.html'
 ];
 
 function isNetworkFirst(url) {
@@ -46,14 +49,14 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch: Cache First for static, Network First for APIs
+// Fetch: Cache First for static, Network First for APIs and HTML
 self.addEventListener('fetch', event => {
   const { request } = event;
 
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
-  // Network First for Supabase and Google Places
+  // Network First for Supabase, Google Places, and HTML
   if (isNetworkFirst(request.url)) {
     event.respondWith(
       fetch(request)
