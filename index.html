@@ -1903,7 +1903,7 @@
   }
 
   // ── Profile Screen ─────────────────────────────────────────────────────────
-  function ProfileScreen({restaurants,profile,user}){
+  function ProfileScreen({restaurants,profile,user,onSignOut}){
     const[showFriendSearch,setShowFriendSearch]=useState(false);
     const[friends,setFriends]=useState([]);
     const[pendingRequests,setPendingRequests]=useState([]);
@@ -2082,6 +2082,15 @@
           {topN&&(<div style={card}><p style={clbl}>DISTRITO FAVORITO</p><div style={{display:"flex",alignItems:"center",gap:10,marginTop:4}}><span style={{fontSize:28}}>📍</span><div><p style={{margin:0,fontSize:20,fontWeight:800,color:"#fff"}}>{topN[0]}</p><p style={{margin:"2px 0 0",fontSize:12,color:"#555"}}>{topN[1]} {topN[1]===1?"expedición":"expediciones"}</p></div></div></div>)}
         </div>
 
+        {user&&onSignOut&&(
+          <div style={{marginTop:16,paddingTop:16,borderTop:"1px solid #1e1e1e"}}>
+            <button onClick={onSignOut} style={{width:"100%",padding:"11px",borderRadius:10,background:"transparent",border:"1px solid #2a2a2a",color:"#555",fontSize:13,cursor:"pointer",transition:"all 0.2s"}}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor="#ef4444";e.currentTarget.style.color="#ef4444";}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor="#2a2a2a";e.currentTarget.style.color="#555";}}>
+              Cerrar sesión
+            </button>
+          </div>
+        )}
         {showFriendSearch&&user&&<FriendSearchModal user={user} onClose={()=>{setShowFriendSearch(false);loadSocialData();}}/>}
         {selectedFriendId&&user&&<FriendProfileModal friendId={selectedFriendId} user={user} myRestaurants={restaurants} onClose={()=>setSelectedFriendId(null)}/>}
       </div>
@@ -2289,9 +2298,10 @@
             <button onClick={onGoToProfile} style={{padding:"12px 24px",borderRadius:14,background:"#f97316",border:"none",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px rgba(249,115,22,0.4)"}}>Buscar amigos →</button>
           </div>
         ):posts.length===0?(
-          <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px",textAlign:"center"}}>
-            <div style={{fontSize:48,marginBottom:12}}>🤫</div>
-            <p style={{fontSize:14,color:"#555",lineHeight:1.7}}>Tus amigos no han registrado nada todavía.</p>
+          <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 32px",textAlign:"center"}}>
+            <div style={{fontSize:56,marginBottom:16}}>🌮</div>
+            <h3 style={{fontSize:17,fontWeight:800,color:"#fff",margin:"0 0 8px",letterSpacing:"-0.3px"}}>¡El feed está en blanco!</h3>
+            <p style={{fontSize:13,color:"#555",lineHeight:1.7,maxWidth:240,margin:0}}>Tus amigos aún no han registrado hallazgos. Comparte Sabor con ellos para descubrir sus rincones favoritos.</p>
           </div>
         ):(
           <div style={{flex:1,overflowY:"auto",padding:"4px 16px 24px"}}>
@@ -2456,6 +2466,11 @@
     const handleCreateList=list=>{setCustomLists(p=>[...p,list]);};
     const handleDeleteList=listId=>{setCustomLists(p=>p.filter(l=>l.id!==listId));};
     const handleRenameList=(listId,newName)=>{setCustomLists(p=>p.map(l=>l.id===listId?{...l,name:newName}:l));};
+    const handleSignOut=async()=>{
+      await sb.auth.signOut();
+      setUser(null);setProfile(null);setRestaurants([]);setOnboardingDone(false);
+      localStorage.removeItem("sabor_v4_onboarding");localStorage.removeItem("sabor_v4_profile");
+    };
 
     // ── helpers Supabase ──
     const loadProfile=async(userId)=>{
@@ -2564,7 +2579,7 @@
       const isNew=modal==="add"||(modal&&modal._mapPrefill===true);
       let newId=null;
       if(user){
-        const dbRec={name:r.name,neighborhood:r.neighborhood,cuisine:r.cuisine,rating:r.rating,notes:r.notes||"",emoji:r.emoji,cover_photo:r.photo||null,lat:r.lat||null,lng:r.lng||null,place_id:r.place_id||null,is_public:true,visited_at:r.date||null,featured_dish:r.featured_dish||null};
+        const dbRec={name:r.name,neighborhood:r.neighborhood,cuisine:r.cuisine,rating:r.rating,notes:r.notes||"",emoji:r.emoji,cover_photo:r.photo||null,lat:r.lat||null,lng:r.lng||null,place_id:r.place_id||null,is_public:true,visited_at:r.date||null,featured_dish:r.featured_dish||null,went_with:r.went_with||null};
         if(isNew){
           dbRec.user_id=user.id;
           const{data,error}=await sb.from("restaurants").insert(dbRec).select().single();
@@ -2682,7 +2697,7 @@
                 {activeTab==="bitacora"&&<BitacoraScreen restaurants={restaurants} onDelete={handleDelete} onAddOpen={()=>setModal("add")} onEdit={r=>setModal(r)} onOpenDetail={r=>setDetailId(r.id)} allLists={allLists} onCreateList={handleCreateList} onDeleteList={handleDeleteList} onRenameList={handleRenameList}/>}
                 {activeTab==="map"&&<MapScreen restaurants={restaurants} onOpenDetail={r=>setDetailId(r.id)} onAddRestaurant={r=>setModal(r)}/>}
                 {activeTab==="feed"&&<FeedScreen user={user} myRestaurants={restaurants} onGoToProfile={()=>setActiveTab("profile")} onOpenFriendProfile={id=>setFriendProfileId(id)}/>}
-                {activeTab==="profile"&&<ProfileScreen restaurants={restaurants} profile={profile} user={user}/>}
+                {activeTab==="profile"&&<ProfileScreen restaurants={restaurants} profile={profile} user={user} onSignOut={user?handleSignOut:null}/>}
               </div>
 
               {!detailId&&<BottomNav active={activeTab} commentBadge={commentBadge} onChange={t=>{if(t==="profile"&&commentBadge>0){localStorage.setItem("sabor_lastSeenComments",new Date().toISOString());setCommentBadge(0);}setActiveTab(t);setDetailId(null);}}/>}
