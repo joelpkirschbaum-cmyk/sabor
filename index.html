@@ -62,6 +62,9 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <title>Sabor — Bitácora Gastronómica de Lima</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
@@ -70,29 +73,45 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    :root{
+      --bg:#0a0804;
+      --bg-card:#13100c;
+      --bg-elevated:#1c1710;
+      --bg-modal:#100d0a;
+      --accent:#e8621a;
+      --accent-warm:#f0a050;
+      --text-primary:#f5ede0;
+      --text-secondary:#9d8a73;
+      --text-muted:#5c4d3c;
+      --star:#f0c040;
+      --border:rgba(240,210,170,0.1);
+      --border-strong:rgba(240,210,170,0.2);
+      --font-display:'Playfair Display',Georgia,'Times New Roman',serif;
+      --font-body:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+    }
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#050505;}
+    body{background:var(--bg);font-family:var(--font-body);}
     ::-webkit-scrollbar{width:4px;}
     ::-webkit-scrollbar-track{background:transparent;}
-    ::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:2px;}
-    input,select,textarea,button{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16px!important;}
-    input:focus,select:focus,textarea:focus{outline:2px solid #f97316 !important;outline-offset:0;}
-    option{background:#1a1a1a;color:#fff;}
-    .leaflet-container{background:#1a1a1a !important;}
-    .sabor-pin{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 3px 10px rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.25);}
+    ::-webkit-scrollbar-thumb{background:#2a2218;border-radius:2px;}
+    input,select,textarea,button{font-family:var(--font-body);font-size:16px!important;}
+    input:focus,select:focus,textarea:focus{outline:2px solid var(--accent) !important;outline-offset:0;}
+    option{background:var(--bg-elevated);color:var(--text-primary);}
+    .leaflet-container{background:#1a150f !important;}
+    .sabor-pin{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 3px 10px rgba(0,0,0,0.6);border:2px solid rgba(240,200,160,0.3);}
     .sabor-pin-inner{transform:rotate(45deg);font-size:16px;line-height:1;}
-    .leaflet-control-zoom{border:1px solid #333 !important;}
-    .leaflet-control-zoom a{background:#1a1a1a !important;color:#fff !important;border-color:#333 !important;}
-    .leaflet-control-zoom a:hover{background:#2a2a2a !important;}
-    .leaflet-control-attribution{background:rgba(10,10,10,0.7) !important;color:#333 !important;font-size:9px !important;}
-    .leaflet-control-attribution a{color:#555 !important;}
+    .leaflet-control-zoom{border:1px solid #2a2218 !important;}
+    .leaflet-control-zoom a{background:var(--bg-card) !important;color:var(--text-primary) !important;border-color:#2a2218 !important;}
+    .leaflet-control-zoom a:hover{background:var(--bg-elevated) !important;}
+    .leaflet-control-attribution{background:rgba(10,8,4,0.7) !important;color:#3a3020 !important;font-size:9px !important;}
+    .leaflet-control-attribution a{color:var(--text-muted) !important;}
     @keyframes userPinPulse{0%{transform:scale(1);opacity:0.7;}100%{transform:scale(2.8);opacity:0;}}
     .user-loc-pin{position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center;}
-    .user-loc-pulse{position:absolute;width:40px;height:40px;border-radius:50%;background:rgba(249,115,22,0.35);animation:userPinPulse 1.6s ease-out infinite;}
-    .user-loc-dot{width:14px;height:14px;border-radius:50%;background:#f97316;border:3px solid #fff;box-shadow:0 2px 10px rgba(249,115,22,0.7);position:relative;z-index:1;}
-    .sabor-cluster{width:40px;height:40px;border-radius:50%;background:#f97316;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;border:3px solid rgba(255,255,255,0.3);box-shadow:0 3px 14px rgba(249,115,22,0.55);}
-    .leaflet-tooltip{background:#1a1a1a !important;border:1px solid #333 !important;color:#fff !important;font-size:11px !important;font-weight:600 !important;padding:4px 8px !important;border-radius:8px !important;box-shadow:0 4px 12px rgba(0,0,0,0.5) !important;}
-    .leaflet-tooltip::before{border-top-color:#333 !important;}
+    .user-loc-pulse{position:absolute;width:40px;height:40px;border-radius:50%;background:rgba(232,98,26,0.35);animation:userPinPulse 1.6s ease-out infinite;}
+    .user-loc-dot{width:14px;height:14px;border-radius:50%;background:var(--accent);border:3px solid var(--text-primary);box-shadow:0 2px 10px rgba(232,98,26,0.7);position:relative;z-index:1;}
+    .sabor-cluster{width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;font-family:var(--font-body);border:3px solid rgba(245,237,224,0.3);box-shadow:0 3px 14px rgba(232,98,26,0.55);}
+    .leaflet-tooltip{background:var(--bg-card) !important;border:1px solid var(--border-strong) !important;color:var(--text-primary) !important;font-size:11px !important;font-weight:600 !important;padding:4px 8px !important;border-radius:8px !important;box-shadow:0 4px 12px rgba(0,0,0,0.5) !important;font-family:var(--font-body) !important;}
+    .leaflet-tooltip::before{border-top-color:var(--border-strong) !important;}
     .marker-cluster-small,.marker-cluster-medium,.marker-cluster-large{background:transparent !important;}
     .marker-cluster-small div,.marker-cluster-medium div,.marker-cluster-large div{background:transparent !important;}
     .google-pin{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#0f172a;border:2px solid #3b82f6;box-shadow:0 2px 10px rgba(59,130,246,0.45);}
@@ -100,19 +119,24 @@
     @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
     @keyframes slideInRight{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
     @keyframes slideInUp{from{opacity:0;transform:translateY(100%);}to{opacity:1;transform:translateY(0);}}
+    @keyframes shimmer{0%{background-position:-400px 0;}100%{background-position:400px 0;}}
     .fade-up{animation:fadeUp 0.6s ease both;}
     .fade-up-2{animation:fadeUp 0.6s ease 0.15s both;}
     .fade-up-3{animation:fadeUp 0.6s ease 0.3s both;}
     .fade-up-4{animation:fadeUp 0.6s ease 0.45s both;}
     .slide-in{animation:slideInRight 0.3s ease both;}
-    .slide-up{animation:slideInUp 0.35s ease both;}
-    .places-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,0.7);max-height:220px;overflow-y:auto;}
-    .places-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;gap:10;}
+    .slide-up{animation:slideInUp 0.35s cubic-bezier(0.25,0.46,0.45,0.94) both;}
+    .places-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg-elevated);border:1px solid var(--border-strong);border-radius:12px;overflow:hidden;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,0.7);max-height:220px;overflow-y:auto;}
+    .places-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10;transition:background 0.15s;}
     .places-item:last-child{border-bottom:none;}
-    .places-item:hover{background:#2a2a2a;}
+    .places-item:hover{background:rgba(240,210,170,0.06);}
     .places-icon{font-size:15px;flex-shrink:0;}
-    .places-text{font-size:13px;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .places-sub{font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .places-text{font-size:13px;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .places-sub{font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .card-warm{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;transition:transform 0.2s ease,box-shadow 0.2s ease;}
+    .card-warm:hover{transform:translateY(-2px);box-shadow:0 0 20px rgba(232,98,26,0.08);}
+    .editorial{font-family:var(--font-display) !important;}
+    .shimmer{background:linear-gradient(90deg,var(--bg-card) 25%,var(--bg-elevated) 50%,var(--bg-card) 75%);background-size:800px 100%;animation:shimmer 1.5s infinite linear;}
     @media(max-width:440px){
       .phone-outer{align-items:flex-start!important;}
       .phone-frame{width:100%!important;height:100vh!important;height:100dvh!important;border-radius:0!important;box-shadow:none!important;border:none!important;}
@@ -233,7 +257,7 @@
   // ── Shared UI ──────────────────────────────────────────────────────────────
   function Stars({rating,interactive=false,onChange,size=16}){
     const[hover,setHover]=useState(0);
-    return(<div style={{display:"flex",gap:"1px"}}>{[1,2,3,4,5].map(i=>(<span key={i} onClick={()=>interactive&&onChange&&onChange(i)} onMouseEnter={()=>interactive&&setHover(i)} onMouseLeave={()=>interactive&&setHover(0)} style={{cursor:interactive?"pointer":"default",fontSize:`${size}px`,color:i<=(interactive?hover||rating:rating)?"#fbbf24":"#2a2a2a",userSelect:"none",lineHeight:1,transition:"color 0.1s"}}>★</span>))}</div>);
+    return(<div style={{display:"flex",gap:"1px"}}>{[1,2,3,4,5].map(i=>(<span key={i} onClick={()=>interactive&&onChange&&onChange(i)} onMouseEnter={()=>interactive&&setHover(i)} onMouseLeave={()=>interactive&&setHover(0)} style={{cursor:interactive?"pointer":"default",fontSize:`${size}px`,color:i<=(interactive?hover||rating:rating)?"var(--star)":"#2a2218",userSelect:"none",lineHeight:1,transition:"color 0.1s"}}>★</span>))}</div>);
   }
   function Badge({label,color}){return<span style={{fontSize:"11px",fontWeight:600,padding:"2px 8px",borderRadius:"999px",background:(color||"#f97316")+"22",color:color||"#f97316",letterSpacing:"0.02em",whiteSpace:"nowrap"}}>{label}</span>;}
 
@@ -344,19 +368,19 @@
     const[notes,setNotes]=useState("");
     const[err,setErr]=useState("");
     useEffect(()=>{const h=e=>{if(e.key==="Escape")onClose();};document.addEventListener("keydown",h);return()=>document.removeEventListener("keydown",h);},[]);
-    const inp={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"14px",outline:"none",boxSizing:"border-box"};
-    const lbl={display:"block",fontSize:"10px",fontWeight:700,color:"#555",letterSpacing:"0.08em",marginBottom:"6px"};
+    const inp={width:"100%",background:"var(--bg-elevated)",border:"1px solid var(--border-strong)",borderRadius:"10px",padding:"10px 12px",color:"var(--text-primary)",fontSize:"14px",outline:"none",boxSizing:"border-box"};
+    const lbl={display:"block",fontSize:"10px",fontWeight:600,color:"var(--text-muted)",letterSpacing:"0.08em",marginBottom:"6px",fontFamily:"var(--font-body)"};
     const save=()=>{if(!name.trim()){setErr("Escribe el nombre del plato.");return;}onSave({id:Date.now(),name:name.trim(),rating,notes:notes.trim(),createdAt:new Date().toISOString()});};
     const RATINGS=[{id:"bueno",icon:"👍",label:"Bueno"},{id:"destacado",icon:"⭐",label:"Destacado"},{id:"imperdible",icon:"🏆",label:"Imperdible"}];
     return(
-      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.82)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(6px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-        <div className="slide-up" style={{background:"#111",borderRadius:"24px 24px 0 0",border:"1px solid #222",borderBottom:"none"}}>
+      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.85)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(8px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="slide-up" style={{background:"var(--bg-modal)",borderRadius:"24px 24px 0 0",border:"1px solid var(--border-strong)",borderBottom:"none"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 20px 0"}}>
-            <button onClick={onClose} style={{background:"none",border:"none",color:"#777",fontSize:"15px",cursor:"pointer"}}>Cancelar</button>
-            <h2 style={{margin:0,fontSize:"16px",fontWeight:700,color:"#fff"}}>Nuevo Plato</h2>
-            <button onClick={save} style={{background:"#f97316",border:"none",color:"#fff",fontSize:"15px",fontWeight:700,cursor:"pointer",borderRadius:"8px",padding:"6px 16px"}}>Guardar</button>
+            <button onClick={onClose} style={{background:"none",border:"none",color:"var(--text-secondary)",fontSize:"15px",cursor:"pointer",fontFamily:"var(--font-body)"}}>Cancelar</button>
+            <h2 style={{margin:0,fontSize:"16px",fontWeight:600,color:"var(--text-primary)",fontFamily:"var(--font-display)",fontStyle:"italic"}}>Nuevo Plato</h2>
+            <button onClick={save} style={{background:"var(--accent)",border:"none",color:"#fff",fontSize:"14px",fontWeight:600,cursor:"pointer",borderRadius:"20px",padding:"7px 18px",fontFamily:"var(--font-body)"}}>Guardar</button>
           </div>
-          <div style={{display:"flex",justifyContent:"center",padding:"10px 0 0"}}><div style={{width:36,height:4,borderRadius:2,background:"#2a2a2a"}}/></div>
+          <div style={{display:"flex",justifyContent:"center",padding:"10px 0 0"}}><div style={{width:36,height:4,borderRadius:2,background:"var(--border-strong)"}}/></div>
           <div style={{padding:"16px 20px 44px",display:"flex",flexDirection:"column",gap:14}}>
             {err&&<div style={{background:"#ef444422",border:"1px solid #ef4444",borderRadius:"8px",padding:"10px 14px",fontSize:"13px",color:"#ef4444"}}>{err}</div>}
             <div><label style={lbl}>NOMBRE DEL PLATO *</label><input value={name} onChange={e=>{setName(e.target.value);setErr("");}} placeholder="Ej: Ceviche clásico, Lomo saltado…" style={inp} autoFocus/></div>
@@ -389,7 +413,7 @@
     const DISH_RATING_ICONS={bueno:"👍",destacado:"⭐",imperdible:"🏆"};
 
     return(
-      <div className="slide-in" style={{height:"100%",display:"flex",flexDirection:"column",background:"#0f0f0f"}}>
+      <div className="slide-in" style={{height:"100%",display:"flex",flexDirection:"column",background:"var(--bg)"}}>
         {/* Hero area */}
         <div style={{position:"relative",flexShrink:0}}>
           {r.photo?(
@@ -416,7 +440,7 @@
             <div style={{display:"flex",alignItems:"flex-start",gap:12,marginBottom:10}}>
               {!r.photo&&<div style={{width:48,height:48,borderRadius:14,background:"#222",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{r.emoji}</div>}
               <div style={{flex:1}}>
-                <h1 style={{fontSize:"22px",fontWeight:800,color:"#fff",letterSpacing:"-0.3px",margin:0}}>{r.name}</h1>
+                <h1 style={{fontSize:"24px",fontWeight:600,color:"var(--text-primary)",letterSpacing:"-0.2px",margin:0,fontFamily:"var(--font-display)"}}>{r.name}</h1>
                 <div style={{display:"flex",gap:6,marginTop:6,flexWrap:"wrap"}}>
                   <Badge label={r.neighborhood} color="#777"/>
                   <Badge label={r.cuisine} color={cc}/>
@@ -440,7 +464,7 @@
 
           {/* Notes */}
           {(r.notes||r.notes_photo)&&(
-            <div style={{background:"#1a1a1a",borderRadius:14,overflow:"hidden",marginBottom:"20px",border:"1px solid #242424"}}>
+            <div style={{background:"var(--bg-card)",borderRadius:14,overflow:"hidden",marginBottom:"20px",border:"1px solid var(--border)"}}>
               {r.notes_photo&&(
                 <div style={{position:"relative"}}>
                   <img src={r.notes_photo} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>
@@ -539,9 +563,11 @@
   function RestaurantCard({restaurant:r,onOpenDetail,onLongPressStart,onLongPressEnd,isDeleting,onDeleteConfirm,onDeleteCancel,onEdit}){
     const cc=CUISINE_COLORS[r.cuisine]||"#f97316";
     return(
-      <div style={{background:"#1a1a1a",borderRadius:16,border:isDeleting?"1px solid #ef4444":"1px solid #242424",position:"relative",overflow:"hidden",cursor:"pointer",transition:"border-color 0.2s"}}
+      <div style={{background:"var(--bg-card)",borderRadius:16,border:isDeleting?"1px solid #ef4444":"1px solid var(--border)",position:"relative",overflow:"hidden",cursor:"pointer",transition:"transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s",borderLeft:isDeleting?"1px solid #ef4444":"2px solid var(--accent)"}}
         onMouseDown={onLongPressStart} onMouseUp={onLongPressEnd}
         onTouchStart={onLongPressStart} onTouchEnd={onLongPressEnd}
+        onMouseEnter={e=>{if(!isDeleting){e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 0 20px rgba(232,98,26,0.08)";}}}
+        onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}
         onClick={()=>!isDeleting&&onOpenDetail(r)}>
 
         {isDeleting&&(
@@ -565,10 +591,10 @@
 
         <div style={{padding:"12px 14px"}}>
           <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
-            <div style={{width:42,height:42,borderRadius:12,background:"#222",display:"flex",alignItems:"center",justifyContent:"center",fontSize:21,flexShrink:0}}>{r.emoji}</div>
+            <div style={{width:42,height:42,borderRadius:12,background:"var(--bg-elevated)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:21,flexShrink:0,border:"1px solid var(--border)"}}>{r.emoji}</div>
             <div style={{flex:1,minWidth:0}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:6}}>
-                <h3 style={{margin:0,fontSize:"15px",fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</h3>
+                <h3 style={{margin:0,fontSize:"16px",fontWeight:600,color:"var(--text-primary)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontFamily:"var(--font-display)"}}>{r.name}</h3>
               {r.featured_dish&&<p style={{margin:"2px 0 0",fontSize:"11px",color:"#888",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>🍽️ {r.featured_dish}</p>}
                 <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
                   {r.rating?<Stars rating={r.rating} size={12}/>:<span style={{color:"#555",fontSize:11}}>Sin calificar</span>}
@@ -687,16 +713,16 @@
       }catch(e){console.warn("Place detail error:",e);setErr("No se pudo cargar el restaurante. Verifica tu conexión e intenta de nuevo.");}
       setLoadingPlace(false);
     };
-    const inp={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"14px",outline:"none",boxSizing:"border-box"};
-    const lbl={display:"block",fontSize:"10px",fontWeight:700,color:"#555",letterSpacing:"0.08em",marginBottom:"6px"};
+    const inp={width:"100%",background:"var(--bg-elevated)",border:"1px solid var(--border-strong)",borderRadius:"10px",padding:"10px 12px",color:"var(--text-primary)",fontSize:"14px",outline:"none",boxSizing:"border-box"};
+    const lbl={display:"block",fontSize:"10px",fontWeight:600,color:"var(--text-muted)",letterSpacing:"0.08em",marginBottom:"6px",fontFamily:"var(--font-body)"};
     return(
-      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.82)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(6px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-        <div className="slide-up" style={{background:"#111",borderRadius:"24px 24px 0 0",maxHeight:"92%",display:"flex",flexDirection:"column",border:"1px solid #222",borderBottom:"none"}}>
+      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.85)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(8px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="slide-up" style={{background:"var(--bg-modal)",borderRadius:"24px 24px 0 0",maxHeight:"92%",display:"flex",flexDirection:"column",border:"1px solid var(--border-strong)",borderBottom:"none"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 20px 0",flexShrink:0}}>
-            <button onClick={onClose} style={{background:"none",border:"none",color:"#777",fontSize:"15px",cursor:"pointer"}}>Cancelar</button>
-            <button onClick={save} disabled={saving} style={{background:saving?"#7c3a13":"#f97316",border:"none",color:"#fff",fontSize:"15px",fontWeight:700,cursor:saving?"not-allowed":"pointer",borderRadius:"8px",padding:"6px 16px",transition:"background 0.2s"}}>{saving?"Guardando…":(isEdit?"Guardar":"Registrar")}</button>
+            <button onClick={onClose} style={{background:"none",border:"none",color:"var(--text-secondary)",fontSize:"15px",cursor:"pointer",fontFamily:"var(--font-body)"}}>Cancelar</button>
+            <button onClick={save} disabled={saving} style={{background:saving?"#7c3a13":"var(--accent)",border:"none",color:"#fff",fontSize:"14px",fontWeight:600,cursor:saving?"not-allowed":"pointer",borderRadius:"20px",padding:"7px 18px",transition:"background 0.2s",fontFamily:"var(--font-body)"}}>{saving?"Guardando…":(isEdit?"Guardar":"Registrar")}</button>
           </div>
-          <div style={{display:"flex",justifyContent:"center",padding:"10px 0 0"}}><div style={{width:36,height:4,borderRadius:2,background:"#2a2a2a"}}/></div>
+          <div style={{display:"flex",justifyContent:"center",padding:"10px 0 0"}}><div style={{width:36,height:4,borderRadius:2,background:"var(--border-strong)"}}/></div>
           <div style={{overflowY:"auto",padding:"14px 20px 50px",display:"flex",flexDirection:"column",gap:15}}>
             {!isEdit&&!placeFilled&&(
               <div style={{position:"relative"}}>
@@ -839,19 +865,19 @@
     const[err,setErr]=useState("");
     useEffect(()=>{const h=e=>{if(e.key==="Escape")onClose();};document.addEventListener("keydown",h);return()=>document.removeEventListener("keydown",h);},[]);
     const LIST_EMOJIS=["📍","⭐","🎯","💫","🔖","❤️"];
-    const inp={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"14px",outline:"none",boxSizing:"border-box"};
-    const lbl={display:"block",fontSize:"10px",fontWeight:700,color:"#555",letterSpacing:"0.08em",marginBottom:"6px"};
-    const save=()=>{if(!name.trim()){setErr("Escribe un nombre.");return;}onSave({id:Date.now().toString(),name:name.trim(),emoji,color:"#f97316",createdAt:new Date().toISOString()});};
+    const inp={width:"100%",background:"var(--bg-elevated)",border:"1px solid var(--border-strong)",borderRadius:"10px",padding:"10px 12px",color:"var(--text-primary)",fontSize:"14px",outline:"none",boxSizing:"border-box"};
+    const lbl={display:"block",fontSize:"10px",fontWeight:600,color:"var(--text-muted)",letterSpacing:"0.08em",marginBottom:"6px",fontFamily:"var(--font-body)"};
+    const save=()=>{if(!name.trim()){setErr("Escribe un nombre.");return;}onSave({id:Date.now().toString(),name:name.trim(),emoji,color:"var(--accent)",createdAt:new Date().toISOString()});};
     return(
-      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.82)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(6px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-        <div className="slide-up" style={{background:"#111",borderRadius:"24px 24px 0 0",border:"1px solid #222",borderBottom:"none",padding:"20px 20px 44px"}}>
+      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.85)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(8px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="slide-up" style={{background:"var(--bg-modal)",borderRadius:"24px 24px 0 0",border:"1px solid var(--border-strong)",borderBottom:"none",padding:"20px 20px 44px"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18}}>
-            <button onClick={onClose} style={{background:"none",border:"none",color:"#777",fontSize:"15px",cursor:"pointer"}}>Cancelar</button>
-            <h2 style={{margin:0,fontSize:"16px",fontWeight:700,color:"#fff"}}>Nueva lista</h2>
-            <button onClick={save} style={{background:"#f97316",border:"none",color:"#fff",fontSize:"15px",fontWeight:700,cursor:"pointer",borderRadius:"8px",padding:"6px 16px"}}>Crear</button>
+            <button onClick={onClose} style={{background:"none",border:"none",color:"var(--text-secondary)",fontSize:"15px",cursor:"pointer",fontFamily:"var(--font-body)"}}>Cancelar</button>
+            <h2 style={{margin:0,fontSize:"16px",fontWeight:600,color:"var(--text-primary)",fontFamily:"var(--font-display)",fontStyle:"italic"}}>Nueva lista</h2>
+            <button onClick={save} style={{background:"var(--accent)",border:"none",color:"#fff",fontSize:"14px",fontWeight:600,cursor:"pointer",borderRadius:"20px",padding:"7px 18px",fontFamily:"var(--font-body)"}}>Crear</button>
           </div>
           <div style={{display:"flex",justifyContent:"center",gap:8,marginBottom:16}}>
-            {LIST_EMOJIS.map(e=>(<button key={e} onClick={()=>setEmoji(e)} style={{width:46,height:46,borderRadius:12,background:emoji===e?"#f9731622":"#1a1a1a",border:emoji===e?"1px solid #f97316":"1px solid #2a2a2a",fontSize:22,cursor:"pointer"}}>{e}</button>))}
+            {LIST_EMOJIS.map(e=>(<button key={e} onClick={()=>setEmoji(e)} style={{width:46,height:46,borderRadius:12,background:emoji===e?"rgba(232,98,26,0.15)":"var(--bg-elevated)",border:emoji===e?"1px solid var(--accent)":"1px solid var(--border)",fontSize:22,cursor:"pointer"}}>{e}</button>))}
           </div>
           {err&&<div style={{background:"#ef444422",border:"1px solid #ef4444",borderRadius:"8px",padding:"8px 12px",fontSize:"13px",color:"#ef4444",marginBottom:12}}>{err}</div>}
           <div><label style={lbl}>NOMBRE DE LA LISTA</label><input value={name} onChange={e=>{setName(e.target.value);setErr("");}} placeholder="Ej: Brunch favoritos, Cenas románticas…" style={inp} autoFocus/></div>
@@ -866,11 +892,11 @@
     const[newName,setNewName]=useState(list.name);
     const[confirmDel,setConfirmDel]=useState(false);
     useEffect(()=>{const h=e=>{if(e.key==="Escape")onClose();};document.addEventListener("keydown",h);return()=>document.removeEventListener("keydown",h);},[]);
-    const inp={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"14px",outline:"none",boxSizing:"border-box"};
+    const inp={width:"100%",background:"var(--bg-elevated)",border:"1px solid var(--border-strong)",borderRadius:"10px",padding:"10px 12px",color:"var(--text-primary)",fontSize:"14px",outline:"none",boxSizing:"border-box"};
     return(
-      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.75)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(4px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-        <div className="slide-up" style={{background:"#111",borderRadius:"24px 24px 0 0",border:"1px solid #222",borderBottom:"none",padding:"20px 20px 44px"}}>
-          <div style={{display:"flex",justifyContent:"center",marginBottom:14}}><div style={{width:40,height:4,borderRadius:2,background:"#2a2a2a"}}/></div>
+      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.85)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(8px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="slide-up" style={{background:"var(--bg-modal)",borderRadius:"24px 24px 0 0",border:"1px solid var(--border-strong)",borderBottom:"none",padding:"20px 20px 44px"}}>
+          <div style={{display:"flex",justifyContent:"center",marginBottom:14}}><div style={{width:40,height:4,borderRadius:2,background:"var(--border-strong)"}}/></div>
           {!renaming&&!confirmDel&&(
             <>
               <p style={{textAlign:"center",fontSize:16,fontWeight:700,color:"#fff",marginBottom:20}}>{list.emoji} {list.name}</p>
@@ -935,10 +961,10 @@
     const EloCard=({r})=>{
       const isWinner=animWinner===r.id;
       return(
-        <div onClick={()=>pick(r.id)} style={{flex:1,background:"#1a1a1a",borderRadius:20,padding:"22px 14px 20px",display:"flex",flexDirection:"column",alignItems:"center",gap:12,cursor:"pointer",border:`2px solid ${isWinner?"#f97316":"#2a2a2a"}`,transform:isWinner?"scale(1.05)":"scale(1)",transition:"transform 0.22s ease,border-color 0.22s ease,box-shadow 0.22s ease",boxShadow:isWinner?"0 0 28px rgba(249,115,22,0.4)":"none",userSelect:"none",WebkitUserSelect:"none",WebkitTapHighlightColor:"transparent"}}>
+        <div onClick={()=>pick(r.id)} style={{flex:1,background:"var(--bg-card)",borderRadius:20,padding:"22px 14px 20px",display:"flex",flexDirection:"column",alignItems:"center",gap:12,cursor:"pointer",border:`2px solid ${isWinner?"var(--accent)":"var(--border)"}`,transform:isWinner?"scale(1.05)":"scale(1)",transition:"transform 0.22s ease,border-color 0.22s ease,box-shadow 0.22s ease",boxShadow:isWinner?"0 0 28px rgba(232,98,26,0.4)":"none",userSelect:"none",WebkitUserSelect:"none",WebkitTapHighlightColor:"transparent"}}>
           <span style={{fontSize:52,lineHeight:1}}>{r.emoji}</span>
-          <p style={{fontSize:15,fontWeight:700,color:"#fff",margin:0,textAlign:"center",lineHeight:1.3}}>{r.name}</p>
-          <p style={{fontSize:12,color:"#555",margin:0}}>{r.neighborhood}</p>
+          <p style={{fontSize:15,fontWeight:600,color:"var(--text-primary)",margin:0,textAlign:"center",lineHeight:1.3,fontFamily:"var(--font-display)"}}>{r.name}</p>
+          <p style={{fontSize:12,color:"var(--text-muted)",margin:0}}>{r.neighborhood}</p>
           <div style={{background:"rgba(249,115,22,0.15)",border:"1px solid rgba(249,115,22,0.3)",borderRadius:"999px",padding:"4px 14px",marginTop:2}}>
             <span style={{fontSize:16,fontWeight:900,color:"#f97316",letterSpacing:"-0.3px"}}>{(r.eloScore||5.0).toFixed(1)}</span>
           </div>
@@ -946,11 +972,11 @@
       );
     };
     return(
-      <div style={{position:"absolute",inset:0,background:"#0a0a0a",zIndex:200,display:"flex",flexDirection:"column",opacity:closing?0:1,transition:"opacity 0.28s ease"}}>
+      <div style={{position:"absolute",inset:0,background:"var(--bg)",zIndex:200,display:"flex",flexDirection:"column",opacity:closing?0:1,transition:"opacity 0.28s ease"}}>
         <div style={{padding:"30px 20px 10px",textAlign:"center",flexShrink:0}}>
-          <p style={{fontSize:10,fontWeight:700,color:"rgba(249,115,22,0.55)",letterSpacing:"0.22em",margin:"0 0 8px"}}>DUELO GASTRONÓMICO</p>
-          <h2 style={{fontSize:22,fontWeight:800,color:"#fff",margin:"0 0 6px",letterSpacing:"-0.3px"}}>¿Cuál preferiste?</h2>
-          <p style={{fontSize:12,color:"#555",margin:0}}>Comparación {step+1} de {maxSteps}</p>
+          <p style={{fontSize:10,fontWeight:600,color:"rgba(232,98,26,0.6)",letterSpacing:"0.22em",margin:"0 0 8px",fontFamily:"var(--font-body)"}}>DUELO GASTRONÓMICO</p>
+          <h2 style={{fontSize:22,fontWeight:600,color:"var(--text-primary)",margin:"0 0 6px",letterSpacing:"-0.2px",fontFamily:"var(--font-display)",fontStyle:"italic"}}>¿Cuál preferiste?</h2>
+          <p style={{fontSize:12,color:"var(--text-muted)",margin:0}}>Comparación {step+1} de {maxSteps}</p>
         </div>
         <div style={{display:"flex",gap:6,padding:"12px 24px 0",flexShrink:0}}>
           {Array.from({length:maxSteps}).map((_,i)=>(
@@ -1048,7 +1074,7 @@
             <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:15,pointerEvents:"none"}}>🔍</span>
             <input value={query} onChange={e=>setQuery(e.target.value)}
               placeholder="Buscar restaurantes en Lima..."
-              style={{width:"100%",background:"#1a1a1a",border:"1.5px solid #2a2a2a",borderRadius:14,padding:"11px 36px 11px 38px",color:"#fff",fontSize:14,outline:"none",boxSizing:"border-box"}}
+              style={{width:"100%",background:"var(--bg-card)",border:"1.5px solid var(--border-strong)",borderRadius:14,padding:"11px 36px 11px 38px",color:"var(--text-primary)",fontSize:14,outline:"none",boxSizing:"border-box"}}
               autoFocus/>
             {loading&&<span style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",fontSize:13,color:"#f97316"}}>⏳</span>}
             {!loading&&query&&<button onClick={()=>{setQuery("");setResults([]);setQueried(false);}} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:"#555",fontSize:16,cursor:"pointer",padding:4,lineHeight:1}}>✕</button>}
@@ -1148,19 +1174,19 @@
       return m&&inList&&inDistrict&&(!filterCuisine||r.cuisine===filterCuisine)&&(!filterNeighborhood||r.neighborhood===filterNeighborhood);
     });
     const af=[filterCuisine,filterNeighborhood].filter(Boolean).length;
-    const selS={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"13px",outline:"none"};
+    const selS={width:"100%",background:"var(--bg-elevated)",border:"1px solid var(--border-strong)",borderRadius:"10px",padding:"10px 12px",color:"var(--text-primary)",fontSize:"13px",outline:"none"};
     const activeListData=lists.find(l=>l.id===activeList)||lists[0];
     return(
       <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
         <div style={{padding:"20px 20px 0",flexShrink:0}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
             <div>
-              <h1 style={{fontSize:"28px",fontWeight:800,color:"#fff",margin:0,letterSpacing:"-0.5px"}}>sabor<span style={{color:"#f97316"}}>.</span></h1>
-              <p style={{fontSize:"12px",color:"#555",margin:"2px 0 0"}}>Bitácora · {restaurants.length} {restaurants.length===1?"hallazgo":"hallazgos"}</p>
+              <h1 style={{fontSize:"30px",fontWeight:600,color:"var(--text-primary)",margin:0,letterSpacing:"-0.3px",fontFamily:"var(--font-display)",fontStyle:"italic"}}>sabor<span style={{color:"var(--accent)"}}>.</span></h1>
+              <p style={{fontSize:"12px",color:"var(--text-muted)",margin:"2px 0 0",letterSpacing:"0.05em"}}>Bitácora · {restaurants.length} {restaurants.length===1?"hallazgo":"hallazgos"}</p>
             </div>
             <button onClick={onAddOpen} style={{width:44,height:44,borderRadius:"50%",background:"#f97316",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,color:"#fff",boxShadow:"0 4px 20px #f9731640",flexShrink:0,transition:"transform 0.12s ease"}} onMouseDown={e=>e.currentTarget.style.transform="scale(0.88)"} onMouseUp={e=>e.currentTarget.style.transform="scale(1)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"} onTouchStart={e=>e.currentTarget.style.transform="scale(0.88)"} onTouchEnd={e=>e.currentTarget.style.transform="scale(1)"}>+</button>
           </div>
-          <div style={{display:"flex",marginTop:12,background:"#1a1a1a",borderRadius:10,padding:3,border:"1px solid #222"}}>
+          <div style={{display:"flex",marginTop:12,background:"var(--bg-card)",borderRadius:10,padding:3,border:"1px solid var(--border)"}}>
             <button onClick={()=>setBitacoraMode("mine")} style={{flex:1,padding:"6px 0",borderRadius:7,background:bitacoraMode==="mine"?"rgba(249,115,22,0.15)":"transparent",border:`1.5px solid ${bitacoraMode==="mine"?"#f97316":"transparent"}`,color:bitacoraMode==="mine"?"#f97316":"#555",fontSize:12,fontWeight:bitacoraMode==="mine"?700:400,cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
               <span>📓</span><span>Mi Bitácora</span>
             </button>
@@ -1199,7 +1225,7 @@
           </div>
           <div style={{position:"relative",marginTop:10}}>
             <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:13,color:"#555"}}>🔍</span>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar en la bitácora..." style={{width:"100%",background:"#1a1a1a",border:"1px solid #222",borderRadius:12,padding:"10px 12px 10px 34px",color:"#fff",fontSize:14,outline:"none",boxSizing:"border-box"}}/>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar en la bitácora..." style={{width:"100%",background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:12,padding:"10px 12px 10px 34px",color:"var(--text-primary)",fontSize:14,outline:"none",boxSizing:"border-box"}}/>
           </div>
           <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
             <button onClick={()=>setShowFilters(!showFilters)} style={{padding:"6px 12px",borderRadius:8,background:showFilters?"#f97316":"#1a1a1a",border:showFilters?"1px solid #f97316":"1px solid #222",color:showFilters?"#fff":"#888",fontSize:12,cursor:"pointer"}}>⚙ Filtros {af>0&&`(${af})`}</button>
@@ -1473,8 +1499,8 @@
       <div style={{display:"flex",flexDirection:"column",height:"100%",position:"relative"}}>
         {/* Header */}
         <div style={{padding:"18px 20px 8px",flexShrink:0}}>
-          <h2 style={{fontSize:"20px",fontWeight:800,color:"#fff",margin:0}}>Mapa de Lima <span style={{color:"#f97316"}}>📍</span></h2>
-          <p style={{fontSize:"12px",color:"#555",marginTop:2}}>
+          <h2 style={{fontSize:"22px",fontWeight:600,color:"var(--text-primary)",margin:0,fontFamily:"var(--font-display)",fontStyle:"italic"}}>Mapa de Lima <span style={{color:"var(--accent)"}}>📍</span></h2>
+          <p style={{fontSize:"12px",color:"var(--text-muted)",marginTop:2}}>
             {totalCount} {totalCount===1?"lugar":"lugares"}
             {filteredPersonal.length>0&&<span style={{color:"#f97316"}}> · {filteredPersonal.length} tuyos</span>}
             {filteredGoogle.length>0&&<span style={{color:"#3b82f6"}}> · {filteredGoogle.length} Google</span>}
@@ -1614,7 +1640,7 @@
     const[loading,setLoading]=useState(false);
     const[statuses,setStatuses]=useState({});
     const debRef=useRef(null);
-    const inp={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"14px",outline:"none",boxSizing:"border-box"};
+    const inp={width:"100%",background:"var(--bg-elevated)",border:"1px solid var(--border-strong)",borderRadius:"10px",padding:"10px 12px",color:"var(--text-primary)",fontSize:"14px",outline:"none",boxSizing:"border-box"};
     useEffect(()=>{const h=e=>{if(e.key==="Escape")onClose();};document.addEventListener("keydown",h);return()=>document.removeEventListener("keydown",h);},[]);
 
     useEffect(()=>{
@@ -1652,11 +1678,11 @@
     };
 
     return(
-      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.85)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(6px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-        <div className="slide-up" style={{background:"#111",borderRadius:"24px 24px 0 0",maxHeight:"80%",display:"flex",flexDirection:"column",border:"1px solid #222",borderBottom:"none"}}>
+      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.85)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(8px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="slide-up" style={{background:"var(--bg-modal)",borderRadius:"24px 24px 0 0",maxHeight:"80%",display:"flex",flexDirection:"column",border:"1px solid var(--border-strong)",borderBottom:"none"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 20px 0",flexShrink:0}}>
-            <button onClick={onClose} style={{background:"none",border:"none",color:"#777",fontSize:"15px",cursor:"pointer"}}>Cerrar</button>
-            <h2 style={{margin:0,fontSize:"16px",fontWeight:700,color:"#fff"}}>Buscar amigos</h2>
+            <button onClick={onClose} style={{background:"none",border:"none",color:"var(--text-secondary)",fontSize:"15px",cursor:"pointer",fontFamily:"var(--font-body)"}}>Cerrar</button>
+            <h2 style={{margin:0,fontSize:"16px",fontWeight:600,color:"var(--text-primary)",fontFamily:"var(--font-display)",fontStyle:"italic"}}>Buscar amigos</h2>
             <div style={{width:52}}/>
           </div>
           <div style={{display:"flex",justifyContent:"center",padding:"10px 0 0"}}><div style={{width:36,height:4,borderRadius:2,background:"#2a2a2a"}}/></div>
@@ -1737,10 +1763,10 @@
 
     return(
       <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.88)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(8px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-        <div className="slide-up" style={{background:"#111",borderRadius:"24px 24px 0 0",maxHeight:"92%",display:"flex",flexDirection:"column",border:"1px solid #222",borderBottom:"none"}}>
+        <div className="slide-up" style={{background:"var(--bg-modal)",borderRadius:"24px 24px 0 0",maxHeight:"92%",display:"flex",flexDirection:"column",border:"1px solid var(--border-strong)",borderBottom:"none"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 20px 0",flexShrink:0}}>
-            <button onClick={onClose} style={{background:"none",border:"none",color:"#777",fontSize:"15px",cursor:"pointer"}}>Cerrar</button>
-            <h2 style={{margin:0,fontSize:"16px",fontWeight:700,color:"#fff"}}>Perfil</h2>
+            <button onClick={onClose} style={{background:"none",border:"none",color:"var(--text-secondary)",fontSize:"15px",cursor:"pointer",fontFamily:"var(--font-body)"}}>Cerrar</button>
+            <h2 style={{margin:0,fontSize:"16px",fontWeight:600,color:"var(--text-primary)",fontFamily:"var(--font-display)",fontStyle:"italic"}}>Perfil</h2>
             <div style={{width:42}}/>
           </div>
           <div style={{display:"flex",justifyContent:"center",padding:"10px 0 0"}}><div style={{width:36,height:4,borderRadius:2,background:"#2a2a2a"}}/></div>
@@ -1890,8 +1916,8 @@
     const dist=[5,4,3,2,1].map(s=>({s,c:restaurants.filter(r=>r.rating===s).length}));
     const rCount=restaurants.length;
     const level=rCount<=5?{icon:"🌱",name:"Curioso"}:rCount<=15?{icon:"🧭",name:"Explorador"}:rCount<=30?{icon:"🍽️",name:"Conocedor"}:{icon:"🔍",name:"Investigador"};
-    const card={background:"#1a1a1a",borderRadius:16,padding:16,border:"1px solid #222"};
-    const clbl={margin:"0 0 2px",fontSize:"10px",fontWeight:700,color:"#444",letterSpacing:"0.1em"};
+    const card={background:"var(--bg-card)",borderRadius:16,padding:16,border:"1px solid var(--border)"};
+    const clbl={margin:"0 0 2px",fontSize:"10px",fontWeight:600,color:"var(--text-muted)",letterSpacing:"0.1em",fontFamily:"var(--font-body)"};
 
     useEffect(()=>{if(user)loadSocialData();},[user]);
 
@@ -2101,31 +2127,31 @@
     const Dots=()=>(<div style={{display:"flex",gap:6,justifyContent:"center",marginTop:20}}>{[0,1,2].map(i=>(<div key={i} style={{width:i===step?20:6,height:6,borderRadius:3,background:i===step?"#f97316":"#2a2a2a",transition:"all 0.3s ease"}}/>))}</div>);
 
     if(step===0)return(
-      <div style={{height:"100%",background:"#0a0a0a",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"space-between",padding:"0 36px 52px",textAlign:"center",position:"relative"}}>
-        {/* Ambient glow muy sutil */}
-        <div style={{position:"absolute",top:"22%",left:"50%",transform:"translateX(-50%)",width:320,height:320,borderRadius:"50%",background:"radial-gradient(circle,rgba(249,115,22,0.05) 0%,transparent 68%)",pointerEvents:"none"}}/>
+      <div style={{height:"100%",background:"var(--bg)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"space-between",padding:"0 36px 52px",textAlign:"center",position:"relative"}}>
+        {/* Ambient glow */}
+        <div style={{position:"absolute",top:"22%",left:"50%",transform:"translateX(-50%)",width:340,height:340,borderRadius:"50%",background:"radial-gradient(circle,rgba(232,98,26,0.07) 0%,transparent 68%)",pointerEvents:"none"}}/>
         {/* Hero */}
         <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:0}}>
           <div className="fade-up">
-            <h1 style={{fontSize:80,fontWeight:900,color:"#fff",letterSpacing:"-4px",lineHeight:0.9,margin:0}}>sabor<span style={{color:"#f97316"}}>.</span></h1>
+            <h1 style={{fontSize:80,fontWeight:600,color:"var(--text-primary)",letterSpacing:"-2px",lineHeight:0.9,margin:0,fontFamily:"var(--font-display)",fontStyle:"italic"}}>sabor<span style={{color:"var(--accent)"}}>.</span></h1>
           </div>
-          <div className="fade-up-2" style={{marginTop:14}}>
-            <p style={{fontSize:10,fontWeight:700,color:"rgba(249,115,22,0.55)",letterSpacing:"0.32em",margin:0}}>BITÁCORA</p>
+          <div className="fade-up-2" style={{marginTop:16}}>
+            <p style={{fontSize:10,fontWeight:600,color:"rgba(232,98,26,0.6)",letterSpacing:"0.32em",margin:0,fontFamily:"var(--font-body)"}}>BITÁCORA GASTRONÓMICA</p>
           </div>
           <div className="fade-up-3" style={{marginTop:28}}>
-            <p style={{fontSize:12,color:"#2e2e2e",lineHeight:1.75,maxWidth:230,margin:0,fontStyle:"italic"}}>Del lat. <em style={{color:"#3a3a3a"}}>bittaculum</em> — cuaderno del explorador en travesía.</p>
+            <p style={{fontSize:12,color:"var(--text-muted)",lineHeight:1.75,maxWidth:230,margin:0,fontStyle:"italic",fontFamily:"var(--font-display)"}}>Del lat. <em style={{color:"var(--text-secondary)"}}>bittaculum</em> — cuaderno del explorador en travesía.</p>
           </div>
           <div className="fade-up-3" style={{marginTop:36}}>
-            <p style={{fontSize:17,color:"#666",lineHeight:1.5,maxWidth:260,margin:0,fontWeight:400}}>Lima tiene sabor.<br/><span style={{color:"#c0c0c0",fontWeight:500}}>Empieza a registrarlo.</span></p>
+            <p style={{fontSize:17,color:"var(--text-secondary)",lineHeight:1.6,maxWidth:260,margin:0,fontWeight:400}}>Lima tiene sabor.<br/><span style={{color:"var(--text-primary)",fontWeight:500}}>Empieza a registrarlo.</span></p>
           </div>
         </div>
-        {/* CTA minimalista */}
+        {/* CTA */}
         <div className="fade-up-4" style={{width:"100%"}}>
           <button
             onClick={()=>setStep(1)}
-            style={{width:"100%",padding:"15px",borderRadius:14,background:"transparent",border:"1px solid #282828",color:"#888",fontSize:15,fontWeight:500,cursor:"pointer",letterSpacing:"0.02em",transition:"all 0.2s ease"}}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor="#f97316";e.currentTarget.style.color="#fff";}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor="#282828";e.currentTarget.style.color="#888";}}>
+            style={{width:"100%",padding:"15px",borderRadius:14,background:"transparent",border:"1px solid var(--border-strong)",color:"var(--text-secondary)",fontSize:15,fontWeight:500,cursor:"pointer",letterSpacing:"0.02em",transition:"all 0.2s ease",fontFamily:"var(--font-body)"}}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--accent)";e.currentTarget.style.color="var(--text-primary)";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border-strong)";e.currentTarget.style.color="var(--text-secondary)";}}>
             Comenzar →
           </button>
           <Dots/>
@@ -2133,42 +2159,44 @@
       </div>
     );
     if(step===1){
-      const features=[{icon:"📖",color:"#f97316",title:"Registra cada hallazgo",desc:"Anota cada restaurante que visitas — calificación, notas de campo y fotos."},{icon:"📸",color:"#ec4899",title:"Documenta cada plato",desc:"Dentro de cada restaurante, un feed de momentos: fotos de platos con tus comentarios."},{icon:"🗺️",color:"#3b82f6",title:"Cartografía tu Lima",desc:"Todos tus descubrimientos como pines en el mapa. Tu territorio a la vista."}];
+      const features=[{icon:"📖",color:"var(--accent)",title:"Registra cada hallazgo",desc:"Anota cada restaurante que visitas — calificación, notas de campo y fotos."},{icon:"📸",color:"#ec4899",title:"Documenta cada plato",desc:"Dentro de cada restaurante, un feed de momentos: fotos de platos con tus comentarios."},{icon:"🗺️",color:"#3b82f6",title:"Cartografía tu Lima",desc:"Todos tus descubrimientos como pines en el mapa. Tu territorio a la vista."}];
       return(
-        <div style={{height:"100%",background:"#0a0a0a",display:"flex",flexDirection:"column",padding:"48px 24px 50px"}}>
-          <div className="fade-up" style={{textAlign:"center",marginBottom:32}}><p style={{fontSize:11,fontWeight:700,color:"#f97316",letterSpacing:"0.15em",marginBottom:10}}>TU KIT DE CAMPO</p><h2 style={{fontSize:26,fontWeight:800,color:"#fff",lineHeight:1.2}}>Las herramientas<br/>del investigador</h2></div>
+        <div style={{height:"100%",background:"var(--bg)",display:"flex",flexDirection:"column",padding:"48px 24px 50px"}}>
+          <div className="fade-up" style={{textAlign:"center",marginBottom:32}}><p style={{fontSize:11,fontWeight:600,color:"var(--accent)",letterSpacing:"0.15em",marginBottom:10,fontFamily:"var(--font-body)"}}>TU KIT DE CAMPO</p><h2 style={{fontSize:26,fontWeight:600,color:"var(--text-primary)",lineHeight:1.2,fontFamily:"var(--font-display)",fontStyle:"italic"}}>Las herramientas<br/>del investigador</h2></div>
           <div style={{flex:1,display:"flex",flexDirection:"column",gap:12}}>
-            {features.map((f,i)=>(<div key={i} className="fade-up" style={{animationDelay:`${i*0.12}s`,background:"#141414",borderRadius:16,padding:18,border:"1px solid #222",display:"flex",gap:14,alignItems:"flex-start"}}><div style={{width:48,height:48,borderRadius:14,background:f.color+"18",border:`1px solid ${f.color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{f.icon}</div><div><p style={{fontSize:14,fontWeight:700,color:"#fff",marginBottom:4}}>{f.title}</p><p style={{fontSize:12,color:"#666",lineHeight:1.55}}>{f.desc}</p></div></div>))}
+            {features.map((f,i)=>(<div key={i} className="fade-up" style={{animationDelay:`${i*0.12}s`,background:"var(--bg-card)",borderRadius:16,padding:18,border:"1px solid var(--border)",display:"flex",gap:14,alignItems:"flex-start"}}><div style={{width:48,height:48,borderRadius:14,background:f.color+"18",border:`1px solid ${f.color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{f.icon}</div><div><p style={{fontSize:14,fontWeight:600,color:"var(--text-primary)",marginBottom:4,fontFamily:"var(--font-body)"}}>{f.title}</p><p style={{fontSize:12,color:"var(--text-secondary)",lineHeight:1.55}}>{f.desc}</p></div></div>))}
           </div>
-          <div style={{marginTop:28}}><button onClick={()=>setStep(2)} style={{width:"100%",padding:16,borderRadius:14,background:"#f97316",border:"none",color:"#fff",fontSize:16,fontWeight:700,cursor:"pointer",boxShadow:"0 6px 24px rgba(249,115,22,0.4)"}}>Siguiente →</button><Dots/></div>
+          <div style={{marginTop:28}}><button onClick={()=>setStep(2)} style={{width:"100%",padding:16,borderRadius:14,background:"var(--accent)",border:"none",color:"#fff",fontSize:16,fontWeight:600,cursor:"pointer",boxShadow:"0 6px 24px rgba(232,98,26,0.4)",fontFamily:"var(--font-body)"}}>Siguiente →</button><Dots/></div>
         </div>
       );
     }
+    const inp={width:"100%",background:"var(--bg-elevated)",border:"1px solid var(--border-strong)",borderRadius:12,padding:"12px 14px",color:"var(--text-primary)",fontSize:15,outline:"none",boxSizing:"border-box"};
+    const lbl={display:"block",fontSize:"10px",fontWeight:600,color:"var(--text-muted)",letterSpacing:"0.1em",marginBottom:8,fontFamily:"var(--font-body)"};
     return(
-      <div style={{height:"100%",background:"#0a0a0a",display:"flex",flexDirection:"column",padding:"48px 24px 50px",overflowY:"auto"}}>
+      <div style={{height:"100%",background:"var(--bg)",display:"flex",flexDirection:"column",padding:"48px 24px 50px",overflowY:"auto"}}>
         <div className="fade-up" style={{textAlign:"center",marginBottom:authMode==="login"?24:16}}>
-          <p style={{fontSize:11,fontWeight:700,color:"#f97316",letterSpacing:"0.15em",marginBottom:10}}>EXPEDIENTE</p>
-          <h2 style={{fontSize:26,fontWeight:800,color:"#fff",lineHeight:1.2}}>{authMode==="login"?"Bienvenido\nde vuelta":"Identifica\nal investigador"}</h2>
-          <p style={{fontSize:13,color:"#555",marginTop:10}}>{authMode==="login"?"Inicia sesión en tu bitácora":"¿Quién lleva esta bitácora?"}</p>
+          <p style={{fontSize:11,fontWeight:600,color:"var(--accent)",letterSpacing:"0.15em",marginBottom:10,fontFamily:"var(--font-body)"}}>EXPEDIENTE</p>
+          <h2 style={{fontSize:26,fontWeight:600,color:"var(--text-primary)",lineHeight:1.2,fontFamily:"var(--font-display)",fontStyle:"italic"}}>{authMode==="login"?"Bienvenido\nde vuelta":"Identifica\nal investigador"}</h2>
+          <p style={{fontSize:13,color:"var(--text-secondary)",marginTop:10}}>{authMode==="login"?"Inicia sesión en tu bitácora":"¿Quién lleva esta bitácora?"}</p>
         </div>
-        {authMode==="signup"&&(<div className="fade-up-2" style={{display:"flex",justifyContent:"center",marginBottom:18}}><div style={{width:72,height:72,borderRadius:"50%",background:"linear-gradient(135deg,#f97316,#fbbf24)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,boxShadow:"0 4px 20px rgba(249,115,22,0.3)"}}>👤</div></div>)}
+        {authMode==="signup"&&(<div className="fade-up-2" style={{display:"flex",justifyContent:"center",marginBottom:18}}><div style={{width:72,height:72,borderRadius:"50%",background:"linear-gradient(135deg,var(--accent),var(--accent-warm))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,boxShadow:"0 4px 20px rgba(232,98,26,0.3)"}}>👤</div></div>)}
         <div className="fade-up-3" style={{display:"flex",flexDirection:"column",gap:14,flex:1}}>
           {err&&<div style={{background:"#ef444422",border:"1px solid #ef4444",borderRadius:10,padding:"10px 14px",fontSize:13,color:"#ef4444"}}>{err}</div>}
           {authMode==="signup"&&(
             <>
               <div><label style={lbl}>NOMBRE</label><input value={profile.name} onChange={e=>{sp("name",e.target.value);setErr("");}} placeholder="Ej: María García" style={inp} autoFocus/></div>
-              <div><label style={lbl}>NOMBRE DE USUARIO</label><div style={{position:"relative"}}><span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:"#f97316",fontSize:15,fontWeight:700}}>@</span><input value={profile.handle.replace(/^@/,"")} onChange={e=>{sp("handle",e.target.value.replace(/^@/,""));setErr("");}} placeholder="investigador_gourmet" style={{...inp,paddingLeft:30}}/></div></div>
-              <div><label style={lbl}>BIO <span style={{color:"#333",fontWeight:400,letterSpacing:0}}>(opcional)</span></label><textarea value={profile.bio} onChange={e=>sp("bio",e.target.value)} placeholder="Ej: Explorando la gastronomía de Lima desde 2019..." rows={2} style={{...inp,resize:"none",lineHeight:1.6}}/></div>
+              <div><label style={lbl}>NOMBRE DE USUARIO</label><div style={{position:"relative"}}><span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:"var(--accent)",fontSize:15,fontWeight:700}}>@</span><input value={profile.handle.replace(/^@/,"")} onChange={e=>{sp("handle",e.target.value.replace(/^@/,""));setErr("");}} placeholder="investigador_gourmet" style={{...inp,paddingLeft:30}}/></div></div>
+              <div><label style={lbl}>BIO <span style={{color:"var(--text-muted)",fontWeight:400,letterSpacing:0}}>(opcional)</span></label><textarea value={profile.bio} onChange={e=>sp("bio",e.target.value)} placeholder="Ej: Explorando la gastronomía de Lima desde 2019..." rows={2} style={{...inp,resize:"none",lineHeight:1.6}}/></div>
             </>
           )}
           <div><label style={lbl}>EMAIL</label><input type="email" value={profile.email} onChange={e=>{sp("email",e.target.value);setErr("");}} placeholder="tu@email.com" style={inp} autoFocus={authMode==="login"}/></div>
           <div><label style={lbl}>CONTRASEÑA</label><input type="password" value={profile.password} onChange={e=>{sp("password",e.target.value);setErr("");}} placeholder={authMode==="signup"?"Mínimo 6 caracteres":"Tu contraseña"} style={inp}/></div>
         </div>
         <div className="fade-up-4" style={{marginTop:20}}>
-          <button onClick={finish} disabled={authLoading} style={{width:"100%",padding:16,borderRadius:14,background:authLoading?"#7c3a13":"#f97316",border:"none",color:"#fff",fontSize:16,fontWeight:700,cursor:authLoading?"not-allowed":"pointer",boxShadow:"0 6px 24px rgba(249,115,22,0.4)",transition:"background 0.2s"}}>
+          <button onClick={finish} disabled={authLoading} style={{width:"100%",padding:16,borderRadius:14,background:authLoading?"#7c3a13":"var(--accent)",border:"none",color:"#fff",fontSize:16,fontWeight:600,cursor:authLoading?"not-allowed":"pointer",boxShadow:"0 6px 24px rgba(232,98,26,0.4)",transition:"background 0.2s",fontFamily:"var(--font-body)"}}>
             {authLoading?"Procesando...":(authMode==="login"?"Iniciar Sesión 🔑":"Abrir mi Bitácora 📖")}
           </button>
-          <button onClick={()=>{setAuthMode(authMode==="login"?"signup":"login");setErr("");}} style={{width:"100%",padding:"10px",background:"none",border:"none",color:"#555",fontSize:13,cursor:"pointer",marginTop:8}}>
+          <button onClick={()=>{setAuthMode(authMode==="login"?"signup":"login");setErr("");}} style={{width:"100%",padding:"10px",background:"none",border:"none",color:"var(--text-secondary)",fontSize:13,cursor:"pointer",marginTop:8,fontFamily:"var(--font-body)"}}>
             {authMode==="login"?"¿No tienes cuenta? Crear cuenta nueva →":"Ya tengo cuenta — Iniciar sesión"}
           </button>
           <Dots/>
@@ -2241,8 +2269,8 @@
     return(
       <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
         <div style={{padding:"20px 20px 10px",flexShrink:0}}>
-          <h1 style={{fontSize:"24px",fontWeight:800,color:"#fff",margin:0,letterSpacing:"-0.5px"}}>Feed <span style={{color:"#f97316"}}>✨</span></h1>
-          <p style={{fontSize:"12px",color:"#555",margin:"2px 0 0"}}>Hallazgos de tus amigos</p>
+          <h1 style={{fontSize:"26px",fontWeight:600,color:"var(--text-primary)",margin:0,letterSpacing:"-0.3px",fontFamily:"var(--font-display)",fontStyle:"italic"}}>Feed <span style={{color:"var(--accent)"}}>✨</span></h1>
+          <p style={{fontSize:"12px",color:"var(--text-muted)",margin:"2px 0 0",letterSpacing:"0.04em"}}>Hallazgos de tus amigos</p>
         </div>
         {loading?(
           <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -2266,7 +2294,7 @@
               const p=post.profile;
               const dateStr=post.visited_at||post.created_at?.split("T")[0];
               return(
-                <div key={post.id} className="fade-up" style={{animationDelay:`${Math.min(i,8)*0.06}s`,background:"#1a1a1a",borderRadius:16,border:"1px solid #222",overflow:"hidden",marginBottom:12}}>
+                <div key={post.id} className="fade-up" style={{animationDelay:`${Math.min(i,8)*0.06}s`,background:"var(--bg-card)",borderRadius:16,border:"1px solid var(--border)",overflow:"hidden",marginBottom:12,transition:"box-shadow 0.2s ease"}}>
                   {post.cover_photo&&(
                     <div style={{height:120,overflow:"hidden",position:"relative"}}>
                       <img src={post.cover_photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
@@ -2290,7 +2318,7 @@
                     <div style={{display:"flex",alignItems:"center",gap:10}}>
                       <div style={{width:40,height:40,borderRadius:12,background:"#222",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{post.emoji}</div>
                       <div style={{flex:1,minWidth:0}}>
-                        <h3 style={{margin:0,fontSize:15,fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{post.name}</h3>
+                        <h3 style={{margin:0,fontSize:16,fontWeight:600,color:"var(--text-primary)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontFamily:"var(--font-display)"}}>{post.name}</h3>
                         <div style={{display:"flex",gap:5,marginTop:4,flexWrap:"wrap"}}>
                           <Badge label={post.neighborhood} color="#777"/>
                           <Badge label={post.cuisine} color={cc(post.cuisine)}/>
@@ -2319,17 +2347,18 @@
   function NavTab({icon,label,active,onClick,badge}){
     return(
       <button onClick={onClick} style={{background:"none",border:"none",display:"flex",flexDirection:"column",alignItems:"center",gap:3,cursor:"pointer",padding:"5px 8px",position:"relative",flex:1,minWidth:0}}>
-        <div style={{width:42,height:28,borderRadius:14,background:active?"rgba(249,115,22,0.14)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"background 0.22s ease",position:"relative"}}>
-          {badge>0&&<span style={{position:"absolute",top:-2,right:2,minWidth:16,height:16,borderRadius:8,background:"#ef4444",color:"#fff",fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px",border:"2px solid #070707",lineHeight:1}}>{badge>9?"9+":badge}</span>}
-          <span style={{fontSize:17,lineHeight:1,opacity:active?1:0.35,transition:"opacity 0.2s",filter:active?"none":"saturate(0.2)"}}>{icon}</span>
+        <div style={{width:42,height:28,borderRadius:14,background:active?"rgba(232,98,26,0.15)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"background 0.22s ease",position:"relative"}}>
+          {badge>0&&<span style={{position:"absolute",top:-2,right:2,minWidth:16,height:16,borderRadius:8,background:"#ef4444",color:"#fff",fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px",border:"2px solid #100e0b",lineHeight:1}}>{badge>9?"9+":badge}</span>}
+          <span style={{fontSize:17,lineHeight:1,opacity:active?1:0.32,transition:"opacity 0.2s",filter:active?"none":"saturate(0.15)"}}>{icon}</span>
         </div>
-        <span style={{fontSize:9,fontWeight:active?700:400,color:active?"#f97316":"#3a3a3a",letterSpacing:"0.07em",transition:"color 0.2s",whiteSpace:"nowrap"}}>{label.toUpperCase()}</span>
+        <span style={{fontSize:9,fontWeight:active?700:400,color:active?"var(--accent)":"var(--text-muted)",letterSpacing:"0.07em",transition:"color 0.2s",whiteSpace:"nowrap",fontFamily:"var(--font-body)"}}>{label.toUpperCase()}</span>
+        {active&&<div style={{position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",width:4,height:4,borderRadius:"50%",background:"var(--accent)"}}/>}
       </button>
     );
   }
   function BottomNav({active,onChange,commentBadge}){
     return(
-      <div style={{position:"fixed",bottom:0,left:0,right:0,height:72,background:"rgba(7,7,7,0.9)",backdropFilter:"blur(22px)",WebkitBackdropFilter:"blur(22px)",borderTop:"1px solid rgba(255,255,255,0.05)",display:"flex",alignItems:"center",justifyContent:"space-around",zIndex:50,paddingBottom:4}}>
+      <div style={{position:"fixed",bottom:0,left:0,right:0,height:72,background:"rgba(10,8,4,0.92)",backdropFilter:"blur(22px)",WebkitBackdropFilter:"blur(22px)",borderTop:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"space-around",zIndex:50,paddingBottom:4}}>
         <NavTab icon="📓" label="Bitácora" active={active==="bitacora"} onClick={()=>onChange("bitacora")}/>
         <NavTab icon="🗺️" label="Mapa" active={active==="map"} onClick={()=>onChange("map")}/>
         <NavTab icon="✨" label="Feed" active={active==="feed"} onClick={()=>onChange("feed")}/>
@@ -2603,23 +2632,23 @@
     const detailRestaurant=detailId!=null?restaurants.find(r=>r.id===detailId):null;
 
     if(appLoading)return(
-      <div className="phone-outer" style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#050505",fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"}}>
+      <div className="phone-outer" style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"var(--bg)",fontFamily:"var(--font-body)"}}>
         <div style={{textAlign:"center"}}>
-          <div style={{fontSize:64,marginBottom:12}}>🍽️</div>
-          <p style={{fontSize:20,fontWeight:900,color:"#fff",letterSpacing:"-1px",margin:0}}>sabor<span style={{color:"#f97316"}}>.</span></p>
-          <p style={{fontSize:12,color:"#444",marginTop:8}}>Cargando tu bitácora…</p>
+          <div style={{fontSize:64,marginBottom:16}}>🍽️</div>
+          <p style={{fontSize:22,fontWeight:700,color:"var(--text-primary)",letterSpacing:"-0.5px",margin:0,fontFamily:"var(--font-display)",fontStyle:"italic"}}>sabor<span style={{color:"var(--accent)"}}>.</span></p>
+          <p style={{fontSize:12,color:"var(--text-muted)",marginTop:10,letterSpacing:"0.08em"}}>Cargando tu bitácora…</p>
         </div>
       </div>
     );
 
     return(
-      <div className="phone-outer" style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#050505",fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"}}>
-        <div className="phone-frame" style={{width:390,height:844,background:"#0f0f0f",borderRadius:48,position:"relative",overflow:"hidden",boxShadow:"0 0 0 1px #333, 0 0 0 3px #111, 0 0 80px rgba(249,115,22,0.08), 0 40px 120px rgba(0,0,0,0.8)",border:"1px solid #2a2a2a"}}>
+      <div className="phone-outer" style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"var(--bg)",fontFamily:"var(--font-body)"}}>
+        <div className="phone-frame" style={{width:390,height:844,background:"#100e0b",borderRadius:48,position:"relative",overflow:"hidden",boxShadow:"0 0 0 1px #2a2218, 0 0 0 3px #100e0b, 0 0 80px rgba(232,98,26,0.12), 0 40px 120px rgba(0,0,0,0.85)",border:"1px solid #2a2218"}}>
           {/* Status bar */}
           <div style={{height:48,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px",flexShrink:0}}>
-            <span style={{fontSize:13,fontWeight:600,color:"#fff"}}>9:41</span>
-            <div style={{width:126,height:32,background:"#111",borderRadius:18,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{width:11,height:11,borderRadius:"50%",background:"#1a1a1a"}}/></div>
-            <span style={{fontSize:10,color:"#fff"}}>●●● ▲ ⬛</span>
+            <span style={{fontSize:13,fontWeight:600,color:"var(--text-primary)"}}>9:41</span>
+            <div style={{width:126,height:32,background:"#0f0d0a",borderRadius:18,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{width:11,height:11,borderRadius:"50%",background:"#1c1710"}}/></div>
+            <span style={{fontSize:10,color:"var(--text-primary)"}}>●●● ▲ ⬛</span>
           </div>
 
           {/* Onboarding */}
