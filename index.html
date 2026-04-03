@@ -62,6 +62,9 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <title>Sabor — Bitácora Gastronómica de Lima</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
@@ -70,28 +73,54 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    :root {
+      --bg: #0a0804;
+      --bg-card: #13100c;
+      --bg-elevated: #1c1710;
+      --bg-input: #1a1510;
+      --accent: #e8621a;
+      --accent-warm: #f0a050;
+      --text-primary: #f5ede0;
+      --text-secondary: #9d8a73;
+      --text-muted: #5c4d3c;
+      --star-color: #f0c040;
+      --border: rgba(240, 210, 170, 0.08);
+      --border-strong: rgba(240, 210, 170, 0.18);
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+    }
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#050505;}
+    body{background:var(--bg);font-family:var(--font-body);}
     ::-webkit-scrollbar{width:4px;}
     ::-webkit-scrollbar-track{background:transparent;}
     ::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:2px;}
-    input,select,textarea,button{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16px!important;}
-    input:focus,select:focus,textarea:focus{outline:2px solid #f97316 !important;outline-offset:0;}
-    option{background:#1a1a1a;color:#fff;}
-    .leaflet-container{background:#1a1a1a !important;}
+    input,select,textarea,button{font-family:var(--font-body);font-size:16px!important;}
+    input:focus,select:focus,textarea:focus{outline:2px solid var(--accent) !important;outline-offset:0;}
+    input:focus,textarea:focus,button:focus{outline:2px solid var(--accent);outline-offset:2px;}
+    option{background:var(--bg-elevated);color:var(--text-primary);}
+    h1,h2,h3{font-family:var(--font-display);}
+    .restaurant-name,[class*="restaurantName"],[class*="restaurant-name"]{font-family:var(--font-display);}
+    .app-title,[class*="appTitle"],[class*="app-title"]{font-family:var(--font-display);font-style:italic;}
+    [class*="card"]:hover,[class*="Card"]:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(232,98,26,0.1);}
+    [class*="card"],[class*="Card"],[class*="item"],[class*="Item"]{transition:transform 0.2s ease,box-shadow 0.2s ease;}
+    [class*="star"],[class*="Star"]{color:var(--star-color) !important;}
+    [class*="restaurantCard"],[class*="hallazgo"],[class*="RestaurantCard"]{border-left:2px solid var(--accent) !important;}
+    [class*="nav"],[class*="Nav"],[class*="bottom"]{font-family:var(--font-body);}
+    [class*="chip"],[class*="Chip"],[class*="tag"],[class*="Tag"],[class*="badge"],[class*="Badge"]{font-family:var(--font-body);font-size:0.75rem;font-weight:500;}
+    .leaflet-container{background:var(--bg-elevated) !important;}
     .sabor-pin{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 3px 10px rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.25);}
     .sabor-pin-inner{transform:rotate(45deg);font-size:16px;line-height:1;}
     .leaflet-control-zoom{border:1px solid #333 !important;}
-    .leaflet-control-zoom a{background:#1a1a1a !important;color:#fff !important;border-color:#333 !important;}
-    .leaflet-control-zoom a:hover{background:#2a2a2a !important;}
-    .leaflet-control-attribution{background:rgba(10,10,10,0.7) !important;color:#333 !important;font-size:9px !important;}
+    .leaflet-control-zoom a{background:var(--bg-elevated) !important;color:var(--text-primary) !important;border-color:#333 !important;}
+    .leaflet-control-zoom a:hover{background:var(--bg-card) !important;}
+    .leaflet-control-attribution{background:rgba(10,8,4,0.7) !important;color:#333 !important;font-size:9px !important;}
     .leaflet-control-attribution a{color:#555 !important;}
     @keyframes userPinPulse{0%{transform:scale(1);opacity:0.7;}100%{transform:scale(2.8);opacity:0;}}
     .user-loc-pin{position:relative;width:40px;height:40px;display:flex;align-items:center;justify-content:center;}
-    .user-loc-pulse{position:absolute;width:40px;height:40px;border-radius:50%;background:rgba(249,115,22,0.35);animation:userPinPulse 1.6s ease-out infinite;}
-    .user-loc-dot{width:14px;height:14px;border-radius:50%;background:#f97316;border:3px solid #fff;box-shadow:0 2px 10px rgba(249,115,22,0.7);position:relative;z-index:1;}
-    .sabor-cluster{width:40px;height:40px;border-radius:50%;background:#f97316;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;border:3px solid rgba(255,255,255,0.3);box-shadow:0 3px 14px rgba(249,115,22,0.55);}
-    .leaflet-tooltip{background:#1a1a1a !important;border:1px solid #333 !important;color:#fff !important;font-size:11px !important;font-weight:600 !important;padding:4px 8px !important;border-radius:8px !important;box-shadow:0 4px 12px rgba(0,0,0,0.5) !important;}
+    .user-loc-pulse{position:absolute;width:40px;height:40px;border-radius:50%;background:rgba(232,98,26,0.35);animation:userPinPulse 1.6s ease-out infinite;}
+    .user-loc-dot{width:14px;height:14px;border-radius:50%;background:var(--accent);border:3px solid var(--text-primary);box-shadow:0 2px 10px rgba(232,98,26,0.7);position:relative;z-index:1;}
+    .sabor-cluster{width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;font-family:var(--font-body);border:3px solid rgba(255,255,255,0.3);box-shadow:0 3px 14px rgba(232,98,26,0.55);}
+    .leaflet-tooltip{background:var(--bg-elevated) !important;border:1px solid #333 !important;color:var(--text-primary) !important;font-size:11px !important;font-weight:600 !important;padding:4px 8px !important;border-radius:8px !important;box-shadow:0 4px 12px rgba(0,0,0,0.5) !important;}
     .leaflet-tooltip::before{border-top-color:#333 !important;}
     .marker-cluster-small,.marker-cluster-medium,.marker-cluster-large{background:transparent !important;}
     .marker-cluster-small div,.marker-cluster-medium div,.marker-cluster-large div{background:transparent !important;}
@@ -100,19 +129,23 @@
     @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
     @keyframes slideInRight{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
     @keyframes slideInUp{from{opacity:0;transform:translateY(100%);}to{opacity:1;transform:translateY(0);}}
+    @keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
+    @keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
     .fade-up{animation:fadeUp 0.6s ease both;}
     .fade-up-2{animation:fadeUp 0.6s ease 0.15s both;}
     .fade-up-3{animation:fadeUp 0.6s ease 0.3s both;}
     .fade-up-4{animation:fadeUp 0.6s ease 0.45s both;}
     .slide-in{animation:slideInRight 0.3s ease both;}
     .slide-up{animation:slideInUp 0.35s ease both;}
-    .places-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,0.7);max-height:220px;overflow-y:auto;}
-    .places-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;gap:10;}
+    .shimmer{background:linear-gradient(90deg,var(--bg-card) 25%,var(--bg-elevated) 50%,var(--bg-card) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;}
+    [class*="modal"],[class*="Modal"]{animation:slideUp 0.25s cubic-bezier(0.25,0.46,0.45,0.94);}
+    .places-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg-elevated);border:1px solid var(--border-strong);border-radius:12px;overflow:hidden;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,0.7);max-height:220px;overflow-y:auto;}
+    .places-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10;}
     .places-item:last-child{border-bottom:none;}
-    .places-item:hover{background:#2a2a2a;}
+    .places-item:hover{background:var(--bg-card);}
     .places-icon{font-size:15px;flex-shrink:0;}
-    .places-text{font-size:13px;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .places-sub{font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .places-text{font-size:13px;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .places-sub{font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     @media(max-width:440px){
       .phone-outer{align-items:flex-start!important;}
       .phone-frame{width:100%!important;height:100vh!important;height:100dvh!important;border-radius:0!important;box-shadow:none!important;border:none!important;}
