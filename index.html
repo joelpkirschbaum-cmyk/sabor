@@ -55,7 +55,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#ff6b35" />
+  <meta name="theme-color" content="#1a0f08" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Sabor" />
@@ -64,7 +64,7 @@
   <title>Sabor — Bitácora Gastronómica de Lima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
@@ -74,20 +74,21 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg: #0a0804;
-      --bg-card: #13100c;
-      --bg-elevated: #1c1710;
-      --bg-input: #1a1510;
-      --accent: #e8621a;
-      --accent-warm: #f0a050;
-      --text-primary: #f5ede0;
-      --text-secondary: #9d8a73;
-      --text-muted: #5c4d3c;
-      --star-color: #f0c040;
-      --border: rgba(240, 210, 170, 0.08);
-      --border-strong: rgba(240, 210, 170, 0.18);
-      --font-display: 'Playfair Display', Georgia, serif;
-      --font-body: 'DM Sans', system-ui, sans-serif;
+      --bg: #f7f3ee;
+      --bg-dark: #1a0f08;
+      --bg-card: #ffffff;
+      --bg-elevated: #ede4d8;
+      --bg-input: #f0e8df;
+      --accent: #c9862a;
+      --accent-warm: #d49b45;
+      --text-primary: #0f0a06;
+      --text-secondary: #4a3a28;
+      --text-muted: #9a8470;
+      --star-color: #c9862a;
+      --border: #e5ddd4;
+      --border-strong: #d0c4b4;
+      --font-display: 'Libre Baskerville', Georgia, serif;
+      --font-body: 'Outfit', sans-serif;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:var(--bg);font-family:var(--font-body);}
@@ -150,6 +151,52 @@
       .phone-outer{align-items:flex-start!important;}
       .phone-frame{width:100%!important;height:100vh!important;height:100dvh!important;border-radius:0!important;box-shadow:none!important;border:none!important;}
     }
+
+    /* ═══════════════════════════════════════════
+       NOIR SUIZO ESPRESSO — full visual redesign
+       ═══════════════════════════════════════════ */
+
+    /* Phone shell */
+    .phone-outer{background:#2a1f14!important;}
+    .phone-frame{background:#f7f3ee!important;}
+    ::-webkit-scrollbar-thumb{background:#c8b9a8!important;}
+
+    /* Kill old dark card left-border rule */
+    [class*="restaurantCard"],[class*="RestaurantCard"]{border-left:none!important;}
+    [class*="card"]:hover,[class*="Card"]:hover{transform:none!important;box-shadow:none!important;}
+
+    /* ── Espresso header band ── */
+    .espresso-header{background:#1a0f08!important;padding:16px 20px 0!important;flex-shrink:0;}
+    .espresso-header h1{color:#f5ede4!important;font-family:'Libre Baskerville',Georgia,serif!important;font-style:normal!important;}
+    .logo-dot{color:#c9862a!important;}
+    .header-subtitle{color:rgba(245,237,228,0.3)!important;font-size:12px!important;margin:2px 0 0!important;}
+    .header-gold-rule{height:1px;background:linear-gradient(90deg,#c9862a 0%,rgba(201,134,42,0.2) 70%,transparent 100%);opacity:0.5;margin:12px 0 0;}
+
+    /* ── Bitácora tabs (on dark band) ── */
+    .bitacora-tab{flex:1;padding:10px 0;font-family:'Outfit',sans-serif!important;font-size:10px!important;letter-spacing:0.2em!important;text-transform:uppercase!important;cursor:pointer;background:transparent!important;border:none!important;border-bottom:1px solid transparent!important;border-radius:0!important;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.15s;}
+    .bitacora-tab-active{color:rgba(245,237,228,0.9)!important;font-weight:500!important;border-bottom-color:#c9862a!important;}
+    .bitacora-tab-inactive{color:rgba(245,237,228,0.28)!important;font-weight:400!important;}
+
+    /* ── Restaurant cards — espresso list style ── */
+    .restaurant-card-espresso{background:#ffffff!important;border:none!important;border-top:1px solid #e5ddd4!important;border-radius:0!important;box-shadow:none!important;}
+    .restaurant-card-espresso:hover{background:#fdfaf7!important;transform:none!important;box-shadow:none!important;}
+    .restaurant-card-espresso h3{font-family:'Libre Baskerville',Georgia,serif!important;font-size:17px!important;font-weight:700!important;color:#0f0a06!important;}
+    .card-ghost-num{font-family:'Libre Baskerville',Georgia,serif;font-size:26px;font-weight:700;color:#ede4d8;line-height:1;flex-shrink:0;align-self:center;min-width:36px;text-align:left;}
+
+    /* ── Star squares ── */
+    .star-sq-filled,.star-sq-empty{display:inline-block;border-radius:1px;flex-shrink:0;transition:background 0.1s,border-color 0.1s;}
+    .star-sq-filled{background:#1a0f08;border:1px solid transparent;}
+    .star-sq-empty{background:transparent;border:1px solid #e5ddd4;}
+
+    /* ── Bottom nav — solid white ── */
+    .bottom-nav-espresso{background:#ffffff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-top:1px solid #e5ddd4!important;}
+    .nav-tab-lbl-on{font-family:'Outfit',sans-serif!important;font-size:9px!important;letter-spacing:0.18em!important;text-transform:uppercase!important;color:#0f0a06!important;font-weight:600!important;}
+    .nav-tab-lbl-off{font-family:'Outfit',sans-serif!important;font-size:9px!important;letter-spacing:0.18em!important;text-transform:uppercase!important;color:#9a8470!important;font-weight:400!important;}
+    .nav-pill-on{background:rgba(201,134,42,0.12)!important;}
+    .nav-pill-off{background:transparent!important;}
+
+    /* ── Loading screen ── */
+    .loading-espresso{background:#f7f3ee!important;}
   </style>
 </head>
 <body>
@@ -266,7 +313,8 @@
   // ── Shared UI ──────────────────────────────────────────────────────────────
   function Stars({rating,interactive=false,onChange,size=16}){
     const[hover,setHover]=useState(0);
-    return(<div style={{display:"flex",gap:"1px"}}>{[1,2,3,4,5].map(i=>(<span key={i} onClick={()=>interactive&&onChange&&onChange(i)} onMouseEnter={()=>interactive&&setHover(i)} onMouseLeave={()=>interactive&&setHover(0)} style={{cursor:interactive?"pointer":"default",fontSize:`${size}px`,color:i<=(interactive?hover||rating:rating)?"#fbbf24":"#2a2a2a",userSelect:"none",lineHeight:1,transition:"color 0.1s"}}>★</span>))}</div>);
+    const sq=interactive?Math.max(12,Math.round(size*0.5)):8;
+    return(<div style={{display:"flex",gap:"3px",alignItems:"center"}}>{[1,2,3,4,5].map(i=>{const filled=i<=(interactive?hover||rating:rating);return(<span key={i} onClick={()=>interactive&&onChange&&onChange(i)} onMouseEnter={()=>interactive&&setHover(i)} onMouseLeave={()=>interactive&&setHover(0)} className={filled?"star-sq-filled":"star-sq-empty"} style={{cursor:interactive?"pointer":"default",userSelect:"none",width:`${sq}px`,height:`${sq}px`,display:"inline-block"}}/>);})}</div>);
   }
   function Badge({label,color}){return<span style={{fontSize:"11px",fontWeight:600,padding:"2px 8px",borderRadius:"999px",background:(color||"#f97316")+"22",color:color||"#f97316",letterSpacing:"0.02em",whiteSpace:"nowrap"}}>{label}</span>;}
 
@@ -572,10 +620,10 @@
   }
 
   // ── Restaurant Card (compact, tap to open detail) ──────────────────────────
-  function RestaurantCard({restaurant:r,onOpenDetail,onLongPressStart,onLongPressEnd,isDeleting,onDeleteConfirm,onDeleteCancel,onEdit}){
-    const cc=CUISINE_COLORS[r.cuisine]||"#f97316";
+  function RestaurantCard({restaurant:r,index=0,onOpenDetail,onLongPressStart,onLongPressEnd,isDeleting,onDeleteConfirm,onDeleteCancel,onEdit}){
+    const cc=CUISINE_COLORS[r.cuisine]||"#c9862a";
     return(
-      <div style={{background:"#1a1a1a",borderRadius:16,border:isDeleting?"1px solid #ef4444":"1px solid #242424",position:"relative",overflow:"hidden",cursor:"pointer",transition:"border-color 0.2s"}}
+      <div className="restaurant-card-espresso" style={{border:isDeleting?"1px solid #ef4444":undefined,position:"relative",overflow:"hidden",cursor:"pointer",transition:"border-color 0.2s"}}
         onMouseDown={onLongPressStart} onMouseUp={onLongPressEnd}
         onTouchStart={onLongPressStart} onTouchEnd={onLongPressEnd}
         onClick={()=>!isDeleting&&onOpenDetail(r)}>
@@ -601,16 +649,17 @@
 
         <div style={{padding:"12px 14px"}}>
           <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
-            <div style={{width:42,height:42,borderRadius:12,background:"#222",display:"flex",alignItems:"center",justifyContent:"center",fontSize:21,flexShrink:0}}>{r.emoji}</div>
+            <span className="card-ghost-num">{String(index+1).padStart(2,"0")}</span>
+            <div style={{width:42,height:42,borderRadius:12,background:"#f0e8df",display:"flex",alignItems:"center",justifyContent:"center",fontSize:21,flexShrink:0}}>{r.emoji}</div>
             <div style={{flex:1,minWidth:0}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:6}}>
-                <h3 style={{margin:0,fontSize:"15px",fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</h3>
-              {r.featured_dish&&<p style={{margin:"2px 0 0",fontSize:"11px",color:"#888",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>🍽️ {r.featured_dish}</p>}
+                <h3 style={{margin:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</h3>
+              {r.featured_dish&&<p style={{margin:"2px 0 0",fontSize:"11px",color:"#9a8470",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>🍽️ {r.featured_dish}</p>}
                 <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
                   {r.rating?<Stars rating={r.rating} size={12}/>:<span style={{color:"#555",fontSize:11}}>Sin calificar</span>}
-                  {r.eloScore!==undefined&&<span style={{fontSize:10,fontWeight:800,padding:"2px 6px",borderRadius:"999px",background:"#f97316",color:"#fff",letterSpacing:"-0.2px",lineHeight:1.4}}>{r.eloScore.toFixed(1)}</span>}
-                  <button onClick={e=>{e.stopPropagation();onEdit(r);}} style={{background:"none",border:"none",color:"#444",fontSize:14,cursor:"pointer",padding:"2px 4px",lineHeight:1}}
-                    onMouseEnter={e=>e.currentTarget.style.color="#f97316"} onMouseLeave={e=>e.currentTarget.style.color="#444"}>✏️</button>
+                  {r.eloScore!==undefined&&<span style={{fontSize:10,fontWeight:800,padding:"2px 6px",borderRadius:"2px",background:"#c9862a",color:"#fff",letterSpacing:"-0.2px",lineHeight:1.4,fontFamily:"'Libre Baskerville',Georgia,serif"}}>{r.eloScore.toFixed(1)}</span>}
+                  <button onClick={e=>{e.stopPropagation();onEdit(r);}} style={{background:"none",border:"none",color:"#c8b9a8",fontSize:14,cursor:"pointer",padding:"2px 4px",lineHeight:1}}
+                    onMouseEnter={e=>e.currentTarget.style.color="#c9862a"} onMouseLeave={e=>e.currentTarget.style.color="#c8b9a8"}>✏️</button>
                 </div>
               </div>
               <div style={{display:"flex",gap:5,marginTop:5,flexWrap:"wrap"}}>
@@ -621,9 +670,9 @@
           </div>
 
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:9}}>
-            <span style={{fontSize:"11px",color:"#444"}}>{r.photo?formatDate(r.date):timeAgo(r.date)}</span>
+            <span style={{fontSize:"11px",color:"#9a8470",fontFamily:"'Outfit',sans-serif",fontWeight:300,letterSpacing:"0.04em",textTransform:"uppercase"}}>{r.photo?formatDate(r.date):timeAgo(r.date)}</span>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontSize:"11px",color:"#333"}}>mantén para borrar</span>
+              <span style={{fontSize:"10px",color:"#c8b9a8",fontFamily:"'Outfit',sans-serif"}}>mantén para borrar</span>
             </div>
           </div>
         </div>
@@ -1184,23 +1233,24 @@
       return m&&inList&&inDistrict&&(!filterCuisine||r.cuisine===filterCuisine)&&(!filterNeighborhood||r.neighborhood===filterNeighborhood);
     });
     const af=[filterCuisine,filterNeighborhood].filter(Boolean).length;
-    const selS={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"13px",outline:"none"};
+    const selS={width:"100%",background:"#ffffff",border:"1px solid #e5ddd4",borderRadius:"4px",padding:"10px 12px",color:"#0f0a06",fontSize:"13px",outline:"none",fontFamily:"'Outfit',sans-serif"};
     const activeListData=lists.find(l=>l.id===activeList)||lists[0];
     return(
       <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
-        <div style={{padding:"20px 20px 0",flexShrink:0}}>
+        <div className="espresso-header">
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
             <div>
-              <h1 style={{fontSize:"28px",fontWeight:800,color:"#fff",margin:0,letterSpacing:"-0.5px"}}>sabor<span style={{color:"#f97316"}}>.</span></h1>
-              <p style={{fontSize:"12px",color:"#555",margin:"2px 0 0"}}>Bitácora · {restaurants.length} {restaurants.length===1?"lugar":"lugares"}</p>
+              <h1 style={{fontSize:"28px",fontWeight:800,margin:0,letterSpacing:"-0.5px"}}>sabor<span className="logo-dot">.</span></h1>
+              <p className="header-subtitle">{restaurants.length} {restaurants.length===1?"lugar":"lugares"}</p>
             </div>
-            <button onClick={onAddOpen} style={{width:44,height:44,borderRadius:"50%",background:"#f97316",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,color:"#fff",boxShadow:"0 4px 20px #f9731640",flexShrink:0,transition:"transform 0.12s ease"}} onMouseDown={e=>e.currentTarget.style.transform="scale(0.88)"} onMouseUp={e=>e.currentTarget.style.transform="scale(1)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"} onTouchStart={e=>e.currentTarget.style.transform="scale(0.88)"} onTouchEnd={e=>e.currentTarget.style.transform="scale(1)"}>+</button>
+            <button onClick={onAddOpen} style={{width:44,height:44,borderRadius:"50%",background:"#c9862a",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,color:"#fff",boxShadow:"0 4px 20px rgba(201,134,42,0.4)",flexShrink:0,transition:"transform 0.12s ease"}} onMouseDown={e=>e.currentTarget.style.transform="scale(0.88)"} onMouseUp={e=>e.currentTarget.style.transform="scale(1)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"} onTouchStart={e=>e.currentTarget.style.transform="scale(0.88)"} onTouchEnd={e=>e.currentTarget.style.transform="scale(1)"}>+</button>
           </div>
-          <div style={{display:"flex",marginTop:12,background:"#1a1a1a",borderRadius:10,padding:3,border:"1px solid #222"}}>
-            <button onClick={()=>setBitacoraMode("mine")} style={{flex:1,padding:"6px 0",borderRadius:7,background:bitacoraMode==="mine"?"rgba(249,115,22,0.15)":"transparent",border:`1.5px solid ${bitacoraMode==="mine"?"#f97316":"transparent"}`,color:bitacoraMode==="mine"?"#f97316":"#555",fontSize:12,fontWeight:bitacoraMode==="mine"?700:400,cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+          <div className="header-gold-rule"/>
+          <div style={{display:"flex",marginTop:4}}>
+            <button onClick={()=>setBitacoraMode("mine")} className={"bitacora-tab "+(bitacoraMode==="mine"?"bitacora-tab-active":"bitacora-tab-inactive")}>
               <span>📓</span><span>Mi Bitácora</span>
             </button>
-            <button onClick={()=>setBitacoraMode("explore")} style={{flex:1,padding:"6px 0",borderRadius:7,background:bitacoraMode==="explore"?"rgba(249,115,22,0.15)":"transparent",border:`1.5px solid ${bitacoraMode==="explore"?"#f97316":"transparent"}`,color:bitacoraMode==="explore"?"#f97316":"#555",fontSize:12,fontWeight:bitacoraMode==="explore"?700:400,cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+            <button onClick={()=>setBitacoraMode("explore")} className={"bitacora-tab "+(bitacoraMode==="explore"?"bitacora-tab-active":"bitacora-tab-inactive")}>
               <span>🔍</span><span>Explorar Lima</span>
             </button>
           </div>
@@ -1217,30 +1267,30 @@
                   onMouseUp={()=>clearTimeout(listTimerRef.current)}
                   onTouchStart={()=>{if(!list.isDefault){listTimerRef.current=setTimeout(()=>setListAction(list),650);}}}
                   onTouchEnd={()=>clearTimeout(listTimerRef.current)}
-                  style={{padding:"7px 14px",borderRadius:"999px",background:isActive?col+"22":"#1a1a1a",border:`1.5px solid ${isActive?col:"#2a2a2a"}`,color:isActive?col:"#777",fontSize:13,fontWeight:isActive?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,display:"flex",alignItems:"center",gap:5,transition:"all 0.15s",userSelect:"none"}}>
+                  style={{padding:"5px 13px",borderRadius:"2px",background:isActive?col+"18":"#ffffff",border:`1px solid ${isActive?col:"#e5ddd4"}`,color:isActive?col:"#9a8470",fontSize:11,fontWeight:isActive?600:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,display:"flex",alignItems:"center",gap:5,transition:"all 0.15s",userSelect:"none",fontFamily:"'Outfit',sans-serif"}}>
                   <span style={{fontSize:14}}>{list.emoji}</span>
                   <span>{list.name}</span>
                 </button>
               );
             })}
-            <button onClick={()=>setShowCreateList(true)} style={{padding:"7px 13px",borderRadius:"999px",background:"#1a1a1a",border:"1.5px solid #2a2a2a",color:"#f97316",fontSize:16,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,fontWeight:700,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center"}}>＋</button>
+            <button onClick={()=>setShowCreateList(true)} style={{padding:"5px 13px",borderRadius:"2px",background:"#ffffff",border:"1px solid #c9862a",color:"#c9862a",fontSize:16,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,fontWeight:700,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center"}}>＋</button>
           </div>
           {/* District chips */}
           <div style={{display:"flex",gap:6,marginTop:10,overflowX:"auto",paddingBottom:2,scrollbarWidth:"none",msOverflowStyle:"none",WebkitOverflowScrolling:"touch"}}>
-            <button onClick={()=>setFilterDistrict("")} style={{padding:"5px 12px",borderRadius:"999px",background:!filterDistrict?"rgba(249,115,22,0.15)":"#1a1a1a",border:`1.5px solid ${!filterDistrict?"#f97316":"#2a2a2a"}`,color:!filterDistrict?"#f97316":"#666",fontSize:12,fontWeight:!filterDistrict?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"all 0.15s"}}>Todos</button>
+            <button onClick={()=>setFilterDistrict("")} style={{padding:"5px 12px",borderRadius:"2px",background:!filterDistrict?"#1a0f08":"#ffffff",border:`1px solid ${!filterDistrict?"#1a0f08":"#e5ddd4"}`,color:!filterDistrict?"#ffffff":"#9a8470",fontSize:11,fontWeight:!filterDistrict?600:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"all 0.15s",fontFamily:"'Outfit',sans-serif"}}>Todos</button>
             {LIMA_DISTRICTS.map(d=>{
               const active=filterDistrict===d;
-              return(<button key={d} onClick={()=>setFilterDistrict(active?"":d)} style={{padding:"5px 12px",borderRadius:"999px",background:active?"rgba(249,115,22,0.15)":"#1a1a1a",border:`1.5px solid ${active?"#f97316":"#2a2a2a"}`,color:active?"#f97316":"#666",fontSize:12,fontWeight:active?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"all 0.15s"}}>{d}</button>);
+              return(<button key={d} onClick={()=>setFilterDistrict(active?"":d)} style={{padding:"5px 12px",borderRadius:"2px",background:active?"rgba(201,134,42,0.08)":"#ffffff",border:`1px solid ${active?"#c9862a":"#e5ddd4"}`,color:active?"#c9862a":"#9a8470",fontSize:11,fontWeight:active?600:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"all 0.15s",fontFamily:"'Outfit',sans-serif"}}>{d}</button>);
             })}
           </div>
           <div style={{position:"relative",marginTop:10}}>
             <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:13,color:"#555"}}>🔍</span>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar en la bitácora..." style={{width:"100%",background:"#1a1a1a",border:"1px solid #222",borderRadius:12,padding:"10px 12px 10px 34px",color:"#fff",fontSize:14,outline:"none",boxSizing:"border-box"}}/>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar en la bitácora..." style={{width:"100%",background:"#ffffff",border:"1px solid #e5ddd4",borderRadius:4,padding:"10px 12px 10px 34px",color:"#0f0a06",fontSize:13,outline:"none",boxSizing:"border-box",fontFamily:"'Outfit',sans-serif"}}/>
           </div>
           <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
-            <button onClick={()=>setShowFilters(!showFilters)} style={{padding:"6px 12px",borderRadius:8,background:showFilters?"#f97316":"#1a1a1a",border:showFilters?"1px solid #f97316":"1px solid #222",color:showFilters?"#fff":"#888",fontSize:12,cursor:"pointer"}}>⚙ Filtros {af>0&&`(${af})`}</button>
-            {(filterCuisine||filterNeighborhood)&&<button onClick={()=>{setFilterCuisine("");setFilterNeighborhood("");}} style={{padding:"6px 12px",borderRadius:8,background:"transparent",border:"1px solid #333",color:"#f97316",fontSize:12,cursor:"pointer"}}>Limpiar</button>}
-            <button onClick={()=>setSortByElo(v=>!v)} style={{padding:"6px 12px",borderRadius:8,background:sortByElo?"rgba(249,115,22,0.15)":"#1a1a1a",border:sortByElo?"1px solid #f97316":"1px solid #222",color:sortByElo?"#f97316":"#888",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontWeight:sortByElo?700:400}}>
+            <button onClick={()=>setShowFilters(!showFilters)} style={{padding:"5px 12px",borderRadius:2,background:showFilters?"#1a0f08":"#ffffff",border:showFilters?"1px solid #1a0f08":"1px solid #e5ddd4",color:showFilters?"#fff":"#9a8470",fontSize:11,cursor:"pointer",fontFamily:"'Outfit',sans-serif"}}>⚙ Filtros {af>0&&`(${af})`}</button>
+            {(filterCuisine||filterNeighborhood)&&<button onClick={()=>{setFilterCuisine("");setFilterNeighborhood("");}} style={{padding:"5px 12px",borderRadius:2,background:"transparent",border:"1px solid #c9862a",color:"#c9862a",fontSize:11,cursor:"pointer",fontFamily:"'Outfit',sans-serif"}}>Limpiar</button>}
+            <button onClick={()=>setSortByElo(v=>!v)} style={{padding:"5px 12px",borderRadius:2,background:sortByElo?"rgba(201,134,42,0.08)":"#ffffff",border:sortByElo?"1px solid #c9862a":"1px solid #e5ddd4",color:sortByElo?"#c9862a":"#9a8470",fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontWeight:sortByElo?600:400,fontFamily:"'Outfit',sans-serif"}}>
               {sortByElo?"▼":"↕"} ELO
             </button>
           </div>
@@ -1273,6 +1323,7 @@
               {(sortByElo?[...filtered].sort((a,b)=>(b.eloScore||5)-(a.eloScore||5)):filtered).map((r,i)=>(
                 <div key={r.id} className="fade-up" style={{animationDelay:`${Math.min(i,8)*0.07}s`}}>
                   <RestaurantCard restaurant={r}
+                    index={i}
                     onOpenDetail={onOpenDetail}
                     onLongPressStart={()=>{timer.current=setTimeout(()=>setDeletingId(r.id),600);}}
                     onLongPressEnd={()=>clearTimeout(timer.current)}
@@ -2365,17 +2416,17 @@
   function NavTab({icon,label,active,onClick,badge}){
     return(
       <button onClick={onClick} style={{background:"none",border:"none",display:"flex",flexDirection:"column",alignItems:"center",gap:3,cursor:"pointer",padding:"5px 8px",position:"relative",flex:1,minWidth:0}}>
-        <div style={{width:42,height:28,borderRadius:14,background:active?"rgba(249,115,22,0.14)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"background 0.22s ease",position:"relative"}}>
-          {badge>0&&<span style={{position:"absolute",top:-2,right:2,minWidth:16,height:16,borderRadius:8,background:"#ef4444",color:"#fff",fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px",border:"2px solid #070707",lineHeight:1}}>{badge>9?"9+":badge}</span>}
-          <span style={{fontSize:17,lineHeight:1,opacity:active?1:0.35,transition:"opacity 0.2s",filter:active?"none":"saturate(0.2)"}}>{icon}</span>
+        <div className={active?"nav-pill-on":"nav-pill-off"} style={{width:42,height:28,borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"background 0.22s ease",position:"relative"}}>
+          {badge>0&&<span style={{position:"absolute",top:-2,right:2,minWidth:16,height:16,borderRadius:8,background:"#ef4444",color:"#fff",fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px",border:"2px solid #f7f3ee",lineHeight:1}}>{badge>9?"9+":badge}</span>}
+          <span style={{fontSize:17,lineHeight:1,opacity:active?1:0.45,transition:"opacity 0.2s"}}>{icon}</span>
         </div>
-        <span style={{fontSize:9,fontWeight:active?700:400,color:active?"#f97316":"#3a3a3a",letterSpacing:"0.07em",transition:"color 0.2s",whiteSpace:"nowrap"}}>{label.toUpperCase()}</span>
+        <span className={active?"nav-tab-lbl-on":"nav-tab-lbl-off"}>{label.toUpperCase()}</span>
       </button>
     );
   }
   function BottomNav({active,onChange,commentBadge}){
     return(
-      <div style={{position:"fixed",bottom:0,left:0,right:0,height:72,background:"rgba(7,7,7,0.9)",backdropFilter:"blur(22px)",WebkitBackdropFilter:"blur(22px)",borderTop:"1px solid rgba(255,255,255,0.05)",display:"flex",alignItems:"center",justifyContent:"space-around",zIndex:50,paddingBottom:4}}>
+      <div className="bottom-nav-espresso" style={{position:"fixed",bottom:0,left:0,right:0,height:72,display:"flex",alignItems:"center",justifyContent:"space-around",zIndex:50,paddingBottom:4}}>
         <NavTab icon="📓" label="Bitácora" active={active==="bitacora"} onClick={()=>onChange("bitacora")}/>
         <NavTab icon="🗺️" label="Mapa" active={active==="map"} onClick={()=>onChange("map")}/>
         <NavTab icon="✨" label="Feed" active={active==="feed"} onClick={()=>onChange("feed")}/>
@@ -2654,23 +2705,23 @@
     const detailRestaurant=detailId!=null?restaurants.find(r=>r.id===detailId):null;
 
     if(appLoading)return(
-      <div className="phone-outer" style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#050505",fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"}}>
+      <div className="phone-outer loading-espresso" style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",fontFamily:"'Outfit',sans-serif"}}>
         <div style={{textAlign:"center"}}>
           <div style={{fontSize:64,marginBottom:12}}>🍽️</div>
-          <p style={{fontSize:20,fontWeight:900,color:"#fff",letterSpacing:"-1px",margin:0}}>sabor<span style={{color:"#f97316"}}>.</span></p>
-          <p style={{fontSize:12,color:"#444",marginTop:8}}>Cargando tu bitácora…</p>
+          <p style={{fontSize:20,fontWeight:700,color:"#0f0a06",letterSpacing:"-1px",margin:0,fontFamily:"'Libre Baskerville',Georgia,serif"}}>sabor<span style={{color:"#c9862a"}}>.</span></p>
+          <p style={{fontSize:12,color:"#9a8470",marginTop:8,letterSpacing:"0.08em"}}>Cargando tu bitácora…</p>
         </div>
       </div>
     );
 
     return(
       <div className="phone-outer" style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#050505",fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"}}>
-        <div className="phone-frame" style={{width:390,height:844,background:"#0f0f0f",borderRadius:48,position:"relative",overflow:"hidden",boxShadow:"0 0 0 1px #333, 0 0 0 3px #111, 0 0 80px rgba(249,115,22,0.08), 0 40px 120px rgba(0,0,0,0.8)",border:"1px solid #2a2a2a"}}>
+        <div className="phone-frame" style={{width:390,height:844,borderRadius:48,position:"relative",overflow:"hidden",boxShadow:"0 0 0 1px #2a1f14, 0 0 0 3px #1a0f08, 0 0 80px rgba(201,134,42,0.08), 0 40px 120px rgba(0,0,0,0.6)",border:"1px solid #3a2a1a"}}>
           {/* Status bar */}
-          <div style={{height:48,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px",flexShrink:0}}>
-            <span style={{fontSize:13,fontWeight:600,color:"#fff"}}>9:41</span>
-            <div style={{width:126,height:32,background:"#111",borderRadius:18,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{width:11,height:11,borderRadius:"50%",background:"#1a1a1a"}}/></div>
-            <span style={{fontSize:10,color:"#fff"}}>●●● ▲ ⬛</span>
+          <div style={{height:48,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px",flexShrink:0,background:"#1a0f08"}}>
+            <span style={{fontSize:13,fontWeight:600,color:"#f5ede4"}}>9:41</span>
+            <div style={{width:126,height:32,background:"#0f0804",borderRadius:18,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{width:11,height:11,borderRadius:"50%",background:"#1a0f08"}}/></div>
+            <span style={{fontSize:10,color:"#f5ede4"}}>●●● ▲ ⬛</span>
           </div>
 
           {/* Onboarding */}
