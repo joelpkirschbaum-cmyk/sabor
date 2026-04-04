@@ -15,7 +15,8 @@
       "Bash(curl -s http://localhost:8080/sw.js)",
       "Bash(curl -s -o /dev/null -w \"%{http_code} %{size_download}\" http://localhost:8080/icon-192.png)",
       "Bash(netstat -ano)",
-      "Bash(curl -s http://localhost:8080/)"
+      "Bash(curl -s http://localhost:8080/)",
+      "Bash(npx --version)"
     ]
   }
 }
