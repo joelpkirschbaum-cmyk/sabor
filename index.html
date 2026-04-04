@@ -104,7 +104,7 @@
     [class*="card"]:hover,[class*="Card"]:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(232,98,26,0.1);}
     [class*="card"],[class*="Card"],[class*="item"],[class*="Item"]{transition:transform 0.2s ease,box-shadow 0.2s ease;}
     [class*="star"],[class*="Star"]{color:var(--star-color) !important;}
-    [class*="restaurantCard"],[class*="hallazgo"],[class*="RestaurantCard"]{border-left:2px solid var(--accent) !important;}
+    [class*="restaurantCard"],[class*="lugar"],[class*="RestaurantCard"]{border-left:2px solid var(--accent) !important;}
     [class*="nav"],[class*="Nav"],[class*="bottom"]{font-family:var(--font-body);}
     [class*="chip"],[class*="Chip"],[class*="tag"],[class*="Tag"],[class*="badge"],[class*="Badge"]{font-family:var(--font-body);font-size:0.75rem;font-weight:500;}
     .leaflet-container{background:var(--bg-elevated) !important;}
@@ -846,7 +846,7 @@
                   <button onClick={()=>setConfirmDelete(true)} style={{width:"100%",padding:"11px",borderRadius:10,background:"transparent",border:"1px solid #2a2a2a",color:"#555",fontSize:13,cursor:"pointer",transition:"all 0.2s"}}
                     onMouseEnter={e=>{e.currentTarget.style.borderColor="#ef4444";e.currentTarget.style.color="#ef4444";}}
                     onMouseLeave={e=>{e.currentTarget.style.borderColor="#2a2a2a";e.currentTarget.style.color="#555";}}>
-                    Eliminar hallazgo
+                    Eliminar lugar
                   </button>
                 ):(
                   <div style={{background:"#ef444411",border:"1px solid #ef444433",borderRadius:10,padding:"14px 16px"}}>
@@ -1189,7 +1189,7 @@
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
             <div>
               <h1 style={{fontSize:"28px",fontWeight:800,color:"#fff",margin:0,letterSpacing:"-0.5px"}}>sabor<span style={{color:"#f97316"}}>.</span></h1>
-              <p style={{fontSize:"12px",color:"#555",margin:"2px 0 0"}}>Bitácora · {restaurants.length} {restaurants.length===1?"hallazgo":"hallazgos"}</p>
+              <p style={{fontSize:"12px",color:"#555",margin:"2px 0 0"}}>Bitácora · {restaurants.length} {restaurants.length===1?"lugar":"lugares"}</p>
             </div>
             <button onClick={onAddOpen} style={{width:44,height:44,borderRadius:"50%",background:"#f97316",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,color:"#fff",boxShadow:"0 4px 20px #f9731640",flexShrink:0,transition:"transform 0.12s ease"}} onMouseDown={e=>e.currentTarget.style.transform="scale(0.88)"} onMouseUp={e=>e.currentTarget.style.transform="scale(1)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"} onTouchStart={e=>e.currentTarget.style.transform="scale(0.88)"} onTouchEnd={e=>e.currentTarget.style.transform="scale(1)"}>+</button>
           </div>
@@ -1256,14 +1256,14 @@
           {restaurants.length===0?(
             <div style={{textAlign:"center",padding:"48px 16px",display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
               <div style={{fontSize:72,lineHeight:1}}>📓</div>
-              <h2 style={{fontSize:20,fontWeight:800,color:"#fff",margin:0,lineHeight:1.35}}>Tu bitácora está esperando<br/>su primer hallazgo</h2>
+              <h2 style={{fontSize:20,fontWeight:800,color:"#fff",margin:0,lineHeight:1.35}}>Tu bitácora está esperando<br/>su primer lugar</h2>
               <p style={{fontSize:13,color:"#555",lineHeight:1.75,maxWidth:260,margin:0}}>Lima tiene sabores únicos esperando ser descubiertos. Empieza a cartografiar tu territorio gastronómico.</p>
-              <button onClick={onAddOpen} style={{marginTop:8,padding:"13px 28px",borderRadius:14,background:"#f97316",border:"none",color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px rgba(249,115,22,0.4)"}}>+ Registrar primer hallazgo</button>
+              <button onClick={onAddOpen} style={{marginTop:8,padding:"13px 28px",borderRadius:14,background:"#f97316",border:"none",color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px rgba(249,115,22,0.4)"}}>+ Registrar primer lugar</button>
             </div>
           ):filtered.length===0?(
             <div style={{textAlign:"center",padding:"60px 20px",color:"#444"}}>
               <div style={{fontSize:40,marginBottom:12}}>🔍</div>
-              <p style={{fontSize:15}}>No hay hallazgos {activeList!=="all"?`en "${activeListData?.name}"`:""} para esa búsqueda.</p>
+              <p style={{fontSize:15}}>No hay lugares {activeList!=="all"?`en "${activeListData?.name}"`:""} para esa búsqueda.</p>
             </div>
           ):(
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
@@ -1516,7 +1516,7 @@
           {/* Filter chips */}
           <div style={{display:"flex",gap:6,marginTop:10,overflowX:"auto",paddingBottom:4,scrollbarWidth:"none",msOverflowStyle:"none"}}>
             <button onClick={resetFilters} style={chipStyle(noFilters,"#f97316")}>Todos</button>
-            <button onClick={()=>{setFilterSource(filterSource==="mine"?"all":"mine");setFilterSubtype("");setFilterNeighborhood("");}} style={chipStyle(filterSource==="mine"&&!filterSubtype,"#f97316")}>⭐ Mis hallazgos</button>
+            <button onClick={()=>{setFilterSource(filterSource==="mine"?"all":"mine");setFilterSubtype("");setFilterNeighborhood("");}} style={chipStyle(filterSource==="mine"&&!filterSubtype,"#f97316")}>⭐ Mis lugares</button>
             <button onClick={()=>{setFilterSource(filterSource==="google"?"all":"google");setFilterSubtype("");}} style={chipStyle(filterSource==="google"&&!filterSubtype,"#3b82f6")}>🔍 Google</button>
             <button onClick={()=>setFilterNearby(v=>!v)} style={chipStyle(filterNearby,"#f97316")}>📍 Cercanos</button>
             {/* Cuisine chips (personales) */}
@@ -1858,10 +1858,10 @@
 
                 {/* Their public restaurants */}
                 <div>
-                  <p style={{fontSize:10,fontWeight:700,color:"#444",letterSpacing:"0.1em",marginBottom:10}}>SUS HALLAZGOS · {fRests.length}</p>
+                  <p style={{fontSize:10,fontWeight:700,color:"#444",letterSpacing:"0.1em",marginBottom:10}}>SUS LUGARES · {fRests.length}</p>
                   {fRests.length===0?(
                     <div style={{textAlign:"center",padding:"24px",background:"#1a1a1a",borderRadius:12,border:"1px dashed #2a2a2a"}}>
-                      <p style={{fontSize:13,color:"#444"}}>Aún no comparte sus hallazgos</p>
+                      <p style={{fontSize:13,color:"#444"}}>Aún no comparte sus lugares</p>
                     </div>
                   ):(
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
@@ -1993,7 +1993,7 @@
 
         {/* Stats */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:1,background:"#222",borderRadius:16,overflow:"hidden",marginBottom:14}}>
-          {[{l:"Hallazgos",v:rCount},{l:"Amigos",v:friends.length}].map(s=>(
+          {[{l:"Lugares",v:rCount},{l:"Amigos",v:friends.length}].map(s=>(
             <div key={s.l} style={{background:"#1a1a1a",padding:"16px 0",textAlign:"center"}}>
               <div style={{fontSize:24,fontWeight:800,color:"#fff"}}>{s.v}</div>
               <div style={{fontSize:11,color:"#555",marginTop:2,letterSpacing:"0.05em"}}>{s.l.toUpperCase()}</div>
@@ -2071,7 +2071,7 @@
             <p style={clbl}>NIVEL EXPLORADOR</p>
             <div style={{display:"flex",alignItems:"center",gap:12,marginTop:8}}>
               <span style={{fontSize:34,lineHeight:1}}>{level.icon}</span>
-              <div style={{flex:1}}><p style={{margin:0,fontSize:18,fontWeight:800,color:"#fff"}}>{level.name}</p><p style={{margin:"3px 0 0",fontSize:11,color:"#555"}}>{rCount} hallazgo{rCount!==1?"s":""} registrado{rCount!==1?"s":""}</p></div>
+              <div style={{flex:1}}><p style={{margin:0,fontSize:18,fontWeight:800,color:"#fff"}}>{level.name}</p><p style={{margin:"3px 0 0",fontSize:11,color:"#555"}}>{rCount} lugar{rCount!==1?"es":""} registrado{rCount!==1?"s":""}</p></div>
               <span style={{fontSize:11,fontWeight:700,padding:"4px 12px",borderRadius:"999px",background:"#f9731622",color:"#f97316",border:"1px solid #f9731633",whiteSpace:"nowrap"}}>{level.name}</span>
             </div>
           </div>
@@ -2175,7 +2175,7 @@
       </div>
     );
     if(step===1){
-      const features=[{icon:"📖",color:"#f97316",title:"Registra cada hallazgo",desc:"Anota cada restaurante que visitas — calificación, notas de campo y fotos."},{icon:"📸",color:"#ec4899",title:"Documenta cada plato",desc:"Dentro de cada restaurante, un feed de momentos: fotos de platos con tus comentarios."},{icon:"🗺️",color:"#3b82f6",title:"Cartografía tu Lima",desc:"Todos tus descubrimientos como pines en el mapa. Tu territorio a la vista."}];
+      const features=[{icon:"📖",color:"#f97316",title:"Registra cada lugar",desc:"Anota cada restaurante que visitas — calificación, notas de campo y fotos."},{icon:"📸",color:"#ec4899",title:"Documenta cada plato",desc:"Dentro de cada restaurante, un feed de momentos: fotos de platos con tus comentarios."},{icon:"🗺️",color:"#3b82f6",title:"Cartografía tu Lima",desc:"Todos tus descubrimientos como pines en el mapa. Tu territorio a la vista."}];
       return(
         <div style={{height:"100%",background:"#0a0a0a",display:"flex",flexDirection:"column",padding:"48px 24px 50px"}}>
           <div className="fade-up" style={{textAlign:"center",marginBottom:32}}><p style={{fontSize:11,fontWeight:700,color:"#f97316",letterSpacing:"0.15em",marginBottom:10}}>TU KIT DE CAMPO</p><h2 style={{fontSize:26,fontWeight:800,color:"#fff",lineHeight:1.2}}>Las herramientas<br/>del investigador</h2></div>
@@ -2284,7 +2284,7 @@
       <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
         <div style={{padding:"20px 20px 10px",flexShrink:0}}>
           <h1 style={{fontSize:"24px",fontWeight:800,color:"#fff",margin:0,letterSpacing:"-0.5px"}}>Feed <span style={{color:"#f97316"}}>✨</span></h1>
-          <p style={{fontSize:"12px",color:"#555",margin:"2px 0 0"}}>Hallazgos de tus amigos</p>
+          <p style={{fontSize:"12px",color:"#555",margin:"2px 0 0"}}>Lugares de tus amigos</p>
         </div>
         {loading?(
           <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -2294,14 +2294,14 @@
           <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 32px",textAlign:"center"}}>
             <div style={{fontSize:64,marginBottom:16}}>👥</div>
             <h2 style={{fontSize:20,fontWeight:800,color:"#fff",margin:"0 0 8px"}}>Sin amigos aún</h2>
-            <p style={{fontSize:13,color:"#555",lineHeight:1.7,marginBottom:24,maxWidth:240}}>Agrega amigos para ver sus hallazgos gastronómicos aquí.</p>
+            <p style={{fontSize:13,color:"#555",lineHeight:1.7,marginBottom:24,maxWidth:240}}>Agrega amigos para ver sus lugares gastronómicos aquí.</p>
             <button onClick={onGoToProfile} style={{padding:"12px 24px",borderRadius:14,background:"#f97316",border:"none",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px rgba(249,115,22,0.4)"}}>Buscar amigos →</button>
           </div>
         ):posts.length===0?(
           <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 32px",textAlign:"center"}}>
             <div style={{fontSize:56,marginBottom:16}}>🌮</div>
             <h3 style={{fontSize:17,fontWeight:800,color:"#fff",margin:"0 0 8px",letterSpacing:"-0.3px"}}>¡El feed está en blanco!</h3>
-            <p style={{fontSize:13,color:"#555",lineHeight:1.7,maxWidth:240,margin:0}}>Tus amigos aún no han registrado hallazgos. Comparte Sabor con ellos para descubrir sus rincones favoritos.</p>
+            <p style={{fontSize:13,color:"#555",lineHeight:1.7,maxWidth:240,margin:0}}>Tus amigos aún no han registrado lugares. Comparte Sabor con ellos para descubrir sus rincones favoritos.</p>
           </div>
         ):(
           <div style={{flex:1,overflowY:"auto",padding:"4px 16px 24px"}}>
@@ -2600,14 +2600,14 @@
       }
       if(r.lists)saveListsData(isNew?(newId||r.id):r.id,r.lists);
       setModal(null);
-      showToast(isNew?"✓ Hallazgo guardado":"✓ Hallazgo actualizado");
+      showToast(isNew?"✓ Lugar guardado":"✓ Lugar actualizado");
       if(isNew&&(newId||r.id))setEloCompareFor(newId||r.id);
     };
 
     const handleDelete=async(id)=>{
       if(user){const{error}=await sb.from("restaurants").delete().eq("id",id);if(error){showToast("Error al eliminar","error");return;}}
       setRestaurants(p=>p.filter(r=>r.id!==id));
-      showToast("Hallazgo eliminado");
+      showToast("Lugar eliminado");
     };
 
     const handleAddDish=async(rid,dish)=>{
