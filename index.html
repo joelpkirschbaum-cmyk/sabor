@@ -375,11 +375,12 @@
     const[name,setName]=useState("");
     const[rating,setRating]=useState("bueno");
     const[notes,setNotes]=useState("");
+    const[photo,setPhoto]=useState(null);
     const[err,setErr]=useState("");
     useEffect(()=>{const h=e=>{if(e.key==="Escape")onClose();};document.addEventListener("keydown",h);return()=>document.removeEventListener("keydown",h);},[]);
     const inp={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"14px",outline:"none",boxSizing:"border-box"};
     const lbl={display:"block",fontSize:"10px",fontWeight:700,color:"#555",letterSpacing:"0.08em",marginBottom:"6px"};
-    const save=()=>{if(!name.trim()){setErr("Escribe el nombre del plato.");return;}onSave({id:Date.now(),name:name.trim(),rating,notes:notes.trim(),createdAt:new Date().toISOString()});};
+    const save=()=>{if(!name.trim()){setErr("Escribe el nombre del plato.");return;}onSave({id:Date.now(),name:name.trim(),rating,notes:notes.trim(),photo:photo||null,createdAt:new Date().toISOString()});};
     const RATINGS=[{id:"bueno",icon:"👍",label:"Bueno"},{id:"destacado",icon:"⭐",label:"Destacado"},{id:"imperdible",icon:"🏆",label:"Imperdible"}];
     return(
       <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.82)",display:"flex",flexDirection:"column",justifyContent:"flex-end",zIndex:9999,backdropFilter:"blur(6px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
@@ -405,6 +406,7 @@
               </div>
             </div>
             <div><label style={lbl}>NOTAS <span style={{color:"#333",fontWeight:400,letterSpacing:0}}>(máx. 100 caracteres)</span></label><input value={notes} onChange={e=>setNotes(e.target.value.slice(0,100))} placeholder="¿Qué lo hace especial?" style={inp}/><p style={{margin:"4px 0 0",fontSize:"10px",color:"#444",textAlign:"right"}}>{notes.length}/100</p></div>
+            <div><label style={lbl}>FOTO <span style={{color:"#333",fontWeight:400,letterSpacing:0}}>(opcional)</span></label><PhotoPicker value={photo} onChange={setPhoto} height={110}/></div>
           </div>
         </div>
       </div>
@@ -538,6 +540,7 @@
                       </div>
                     ):(
                       <>
+                        {dish.photo&&<img src={dish.photo} style={{width:"100%",height:80,objectFit:"cover",borderRadius:8,marginBottom:6}}/>}
                         <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:4}}>
                           <span style={{fontSize:16}}>{DISH_RATING_ICONS[dish.rating]||"👍"}</span>
                           <span style={{fontSize:12,fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{dish.name}</span>
