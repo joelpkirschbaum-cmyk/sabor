@@ -871,7 +871,7 @@
     const[emoji,setEmoji]=useState("📍");
     const[err,setErr]=useState("");
     useEffect(()=>{const h=e=>{if(e.key==="Escape")onClose();};document.addEventListener("keydown",h);return()=>document.removeEventListener("keydown",h);},[]);
-    const LIST_EMOJIS=["📍","⭐","🎯","💫","🔖","❤️"];
+    const LIST_EMOJIS=["🔥","⭐","🥩","🍣","🍕","🍦","🍷","🌮","🍜"];
     const inp={width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"10px",padding:"10px 12px",color:"#fff",fontSize:"14px",outline:"none",boxSizing:"border-box"};
     const lbl={display:"block",fontSize:"10px",fontWeight:700,color:"#555",letterSpacing:"0.08em",marginBottom:"6px"};
     const save=()=>{if(!name.trim()){setErr("Escribe un nombre.");return;}onSave({id:Date.now().toString(),name:name.trim(),emoji,color:"#f97316",createdAt:new Date().toISOString()});};
