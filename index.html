@@ -177,6 +177,10 @@
     .bitacora-tab-active{color:rgba(245,237,228,0.9)!important;font-weight:500!important;border-bottom-color:#c9862a!important;}
     .bitacora-tab-inactive{color:rgba(245,237,228,0.28)!important;font-weight:400!important;}
 
+    /* ── Bitácora filter select + list gap ── */
+    .bitacora-filter-select{width:100%;background:#f7f3ee;border:1px solid #c9862a;border-radius:4px;padding:7px 10px;color:#0f0a06;font-size:12px;font-family:'Outfit',sans-serif;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23c9862a'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+    .bitacora-list-gap{margin-top:8px!important;}
+
     /* ── Restaurant cards — espresso list style ── */
     .restaurant-card-espresso{background:#ffffff!important;border:none!important;border-top:1px solid #e5ddd4!important;border-radius:0!important;box-shadow:none!important;}
     .restaurant-card-espresso:hover{background:#fdfaf7!important;transform:none!important;box-shadow:none!important;}
@@ -1275,13 +1279,12 @@
             })}
             <button onClick={()=>setShowCreateList(true)} style={{padding:"5px 13px",borderRadius:"2px",background:"#ffffff",border:"1px solid #c9862a",color:"#c9862a",fontSize:16,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,fontWeight:700,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center"}}>＋</button>
           </div>
-          {/* District chips */}
-          <div style={{display:"flex",gap:6,marginTop:10,overflowX:"auto",paddingBottom:2,scrollbarWidth:"none",msOverflowStyle:"none",WebkitOverflowScrolling:"touch"}}>
-            <button onClick={()=>setFilterDistrict("")} style={{padding:"5px 12px",borderRadius:"2px",background:!filterDistrict?"#1a0f08":"#ffffff",border:`1px solid ${!filterDistrict?"#1a0f08":"#e5ddd4"}`,color:!filterDistrict?"#ffffff":"#9a8470",fontSize:11,fontWeight:!filterDistrict?600:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"all 0.15s",fontFamily:"'Outfit',sans-serif"}}>Todos</button>
-            {LIMA_DISTRICTS.map(d=>{
-              const active=filterDistrict===d;
-              return(<button key={d} onClick={()=>setFilterDistrict(active?"":d)} style={{padding:"5px 12px",borderRadius:"2px",background:active?"rgba(201,134,42,0.08)":"#ffffff",border:`1px solid ${active?"#c9862a":"#e5ddd4"}`,color:active?"#c9862a":"#9a8470",fontSize:11,fontWeight:active?600:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"all 0.15s",fontFamily:"'Outfit',sans-serif"}}>{d}</button>);
-            })}
+          {/* District select */}
+          <div style={{marginTop:10}}>
+            <select className="bitacora-filter-select" value={filterDistrict} onChange={e=>setFilterDistrict(e.target.value)}>
+              <option value="">Todos los distritos</option>
+              {LIMA_DISTRICTS.map(d=><option key={d} value={d}>{d}</option>)}
+            </select>
           </div>
           <div style={{position:"relative",marginTop:10}}>
             <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:13,color:"#555"}}>🔍</span>
@@ -1305,7 +1308,7 @@
         {bitacoraMode==="explore"?(
           <ExplorarLimaSection restaurants={restaurants} onOpenDetail={onOpenDetail} onPrefillAdd={onEdit}/>
         ):(
-        <div style={{flex:1,overflowY:"auto",padding:"12px 20px 20px"}}>
+        <div className="bitacora-list-gap" style={{flex:1,overflowY:"auto",padding:"12px 20px 20px"}}>
           {restaurants.length===0?(
             <div style={{textAlign:"center",padding:"48px 16px",display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
               <div style={{fontSize:72,lineHeight:1}}>📓</div>
